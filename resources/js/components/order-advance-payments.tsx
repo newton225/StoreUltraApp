@@ -1,4 +1,5 @@
 import { router } from '@inertiajs/react';
+import { Calculator } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { store } from '@/actions/App/Http/Controllers/OrderAdvancePaymentController';
@@ -6,6 +7,7 @@ import CollapsiblePanel from '@/components/collapsible-panel';
 import ConfirmAction from '@/components/confirm-action';
 import { FieldLabel } from '@/components/field-label';
 import SelectField from '@/components/select-field';
+import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -143,6 +145,21 @@ export default function OrderAdvancePayments({
         Object.keys(edits).length > 0;
     useLeaveGuard(dirty, t('common.form.leave'));
 
+    // Each line takes what is left to pay on its order: the common amount and the amounts typed are dropped.
+    const fillOutstanding = (): void => {
+        setDefaultAmount('');
+        setEdits((current) =>
+            Object.fromEntries(
+                Object.entries(current).map(([id, row]) => {
+                    const { amount, ...rest } = row;
+                    void amount;
+
+                    return [id, rest];
+                }),
+            ),
+        );
+    };
+
     const reset = (): void => {
         setEdits({});
         setDefaultMethod('');
@@ -180,8 +197,8 @@ export default function OrderAdvancePayments({
                     </p>
                 ) : (
                     <>
-                        <div className="grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-6">
-                            <div className="grid gap-2 lg:col-span-3">
+                        <div className="grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-12">
+                            <div className="grid gap-2 lg:col-span-6">
                                 <Label htmlFor="collect-zone">
                                     {t('orders.collect.zone')}
                                 </Label>
@@ -205,7 +222,7 @@ export default function OrderAdvancePayments({
                                     ]}
                                 />
                             </div>
-                            <div className="grid gap-2 lg:col-span-3">
+                            <div className="grid gap-2 lg:col-span-6">
                                 <FieldLabel
                                     htmlFor="collect-method"
                                     help={t('orders.collect.defaults_help')}
@@ -220,30 +237,40 @@ export default function OrderAdvancePayments({
                                     options={methodOptions}
                                 />
                             </div>
-                            <div className="grid gap-2 lg:col-span-2">
+                            <div className="grid gap-2 lg:col-span-5">
                                 <FieldLabel
                                     htmlFor="collect-amount"
                                     help={t('orders.collect.amount_all_help')}
                                 >
                                     {t('orders.collect.amount_all')}
                                 </FieldLabel>
-                                <Input
-                                    id="collect-amount"
-                                    type="number"
-                                    min={1}
-                                    step={1}
-                                    inputMode="numeric"
-                                    className="tabular-nums"
-                                    placeholder={t(
-                                        'orders.collect.amount_all_placeholder',
-                                    )}
-                                    value={defaultAmount}
-                                    onChange={(event) =>
-                                        setDefaultAmount(event.target.value)
-                                    }
-                                />
+                                <div className="flex gap-2">
+                                    <Input
+                                        id="collect-amount"
+                                        type="number"
+                                        min={1}
+                                        step={1}
+                                        inputMode="numeric"
+                                        className="min-w-0 flex-1 tabular-nums"
+                                        placeholder={t(
+                                            'orders.collect.amount_all_placeholder',
+                                        )}
+                                        value={defaultAmount}
+                                        onChange={(event) =>
+                                            setDefaultAmount(event.target.value)
+                                        }
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="infoOutline"
+                                        onClick={fillOutstanding}
+                                    >
+                                        <Calculator aria-hidden />
+                                        {t('orders.collect.fill_outstanding')}
+                                    </Button>
+                                </div>
                             </div>
-                            <div className="grid gap-2 lg:col-span-2">
+                            <div className="grid gap-2 lg:col-span-3">
                                 <FieldLabel
                                     htmlFor="collect-date"
                                     help={t('orders.collect.defaults_help')}
@@ -260,7 +287,7 @@ export default function OrderAdvancePayments({
                                     }
                                 />
                             </div>
-                            <div className="grid gap-2 sm:col-span-2 lg:col-span-2">
+                            <div className="grid gap-2 sm:col-span-2 lg:col-span-4">
                                 <FieldLabel
                                     htmlFor="collect-collector"
                                     help={t('orders.collect.defaults_help')}
