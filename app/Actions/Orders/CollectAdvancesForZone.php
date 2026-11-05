@@ -10,7 +10,7 @@ use App\Models\Order;
 use App\Models\PaymentMethod;
 use App\Models\User;
 use App\Models\Zone;
-use Carbon\CarbonInterface;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 
 /**
@@ -70,11 +70,11 @@ class CollectAdvancesForZone
     }
 
     /**
-     * @param  list<array{order_id: int, amount: int, reference: string|null, payer_name: string|null, payer_phone: string|null}>  $rows  one per picked order
+     * @param  list<array{order_id: int, amount: int, paid_on: string, collected_by: int|null, reference: string|null, payer_name: string|null, payer_phone: string|null}>  $rows  one per picked order
      * @param  string  $batchKey  sent again with the same rows, it records nothing twice
      * @return array{recorded: int, failed: int, total: int}
      */
-    public function handle(int $zoneId, PaymentMethod $method, CarbonInterface $paidOn, array $rows, string $batchKey, User $user, ?int $collectedBy = null): array
+    public function handle(int $zoneId, PaymentMethod $method, array $rows, string $batchKey, User $user): array
     {
         $recorded = 0;
         $failed = 0;
@@ -98,12 +98,12 @@ class CollectAdvancesForZone
                     amount: $row['amount'],
                     method: $method,
                     reference: $row['reference'],
-                    paidOn: $paidOn,
+                    paidOn: CarbonImmutable::parse($row['paid_on']),
                     user: $user,
                     idempotencyKey: substr(hash('sha256', $batchKey.'|'.$order->id), 0, 40),
                     payerName: $row['payer_name'],
                     payerPhone: $row['payer_phone'],
-                    collectedBy: $collectedBy,
+                    collectedBy: $row['collected_by'],
                 );
                 $recorded++;
                 $total += $row['amount'];

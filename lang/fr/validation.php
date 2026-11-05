@@ -251,6 +251,8 @@ return [
         'payments.*.payer_name' => 'payé par',
         'payments.*.payer_phone' => 'téléphone du payeur',
         'collected_by' => 'encaissé par',
+        'payments.*.paid_on' => 'date du paiement',
+        'payments.*.collected_by' => 'encaissé par',
         'amount' => 'montant',
         'kind' => 'type',
         'reference' => 'référence',

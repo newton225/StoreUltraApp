@@ -294,6 +294,8 @@ return [
         'payments.*.payer_name' => 'paid by',
         'payments.*.payer_phone' => 'payer phone',
         'collected_by' => 'collected by',
+        'payments.*.paid_on' => 'payment date',
+        'payments.*.collected_by' => 'collected by',
         'payment_method_id' => 'payment method',
         'amount' => 'amount',
         'kind' => 'kind',

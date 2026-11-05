@@ -18,6 +18,7 @@ return [
         'method' => 'Payment method',
         'choose_method' => 'Choose a payment method',
         'paid_on' => 'Payment date',
+        'defaults_help' => 'The date and who collects apply to every line; change them on a line that is an exception.',
         'none_available' => 'No order is waiting for an advance.',
         'too_many' => 'Tick :max orders at most at a time (each payment takes a moment to record).',
         'select_all' => 'Tick all',

@@ -18,6 +18,7 @@ return [
         'method' => 'Mode de paiement',
         'choose_method' => 'Choisir un mode de paiement',
         'paid_on' => 'Date du paiement',
+        'defaults_help' => 'La date et la personne qui encaisse s\'appliquent à toutes les lignes ; changez-les sur une ligne si elle fait exception.',
         'none_available' => 'Aucune commande n\'attend d\'avance.',
         'too_many' => 'Cochez :max commandes au plus à la fois (chaque paiement prend un moment à enregistrer).',
         'select_all' => 'Tout cocher',

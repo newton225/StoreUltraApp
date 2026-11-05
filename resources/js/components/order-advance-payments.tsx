@@ -1,4 +1,5 @@
 import { router } from '@inertiajs/react';
+import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { store } from '@/actions/App/Http/Controllers/OrderAdvancePaymentController';
 import CollapsiblePanel from '@/components/collapsible-panel';
@@ -25,6 +26,8 @@ type Collector = { id: number; name: string };
 type Row = {
     on: boolean;
     amount: string;
+    paidOn: string;
+    collector: string;
     reference: string;
     payer: string;
     phone: string;
@@ -33,12 +36,43 @@ type Row = {
 const MAX_PAYMENTS = 60;
 const today = (): string => new Date().toLocaleDateString('en-CA');
 
+/** A field with its small visible label above it. */
+function Cell({
+    label,
+    htmlFor,
+    required = false,
+    children,
+}: {
+    label: string;
+    htmlFor: string;
+    required?: boolean;
+    children: ReactNode;
+}) {
+    return (
+        <div className="grid min-w-0 gap-1">
+            <Label
+                htmlFor={htmlFor}
+                className="text-xs font-normal text-muted-foreground"
+            >
+                {label}
+                {required && (
+                    <span className="text-destructive" aria-hidden>
+                        {' '}
+                        *
+                    </span>
+                )}
+            </Label>
+            {children}
+        </div>
+    );
+}
+
 /**
  * Records the advance payment of the small businesses of a zone (sub-prefecture) in one go, with the same information
- * as the payment form of one order: the method, the date and who collected the money are common to the group; for each
- * payment, the amount, who paid (the client by default), their phone, and the transaction reference when the method asks
- * for one (playbook UI-115 for the group action, UI-123 for the modifications detected and the key that stops a replay
- * from taking the money twice).
+ * as the payment form of one order. The zone and the method are chosen once; the date and who collects are defaults
+ * that every line follows until it is changed on that line; each line keeps its own amount, payer, phone and, when the
+ * method asks for one, transaction reference (playbook UI-115 for the group action, UI-123 for the modifications
+ * detected and the key that stops a replay from taking the money twice).
  */
 export default function OrderAdvancePayments({
     zones,
@@ -53,20 +87,24 @@ export default function OrderAdvancePayments({
 }) {
     const { t } = useTranslation();
     const { money } = useFormat();
+    const me = String(currentUserId);
     const [zone, setZone] = useState('');
     const [method, setMethod] = useState('');
-    const [collector, setCollector] = useState(String(currentUserId));
-    const [paidOn, setPaidOn] = useState(today);
+    const [defaultDate, setDefaultDate] = useState(today);
+    const [defaultCollector, setDefaultCollector] = useState(me);
     const [edits, setEdits] = useState<Record<number, Partial<Row>>>({});
     const [key, setKey] = useState(() => crypto.randomUUID());
 
     const orders = zones.find((item) => String(item.id) === zone)?.orders ?? [];
-    const chosenMethod = methods.find((item) => String(item.id) === method);
-    const needsReference = chosenMethod?.requires_reference === true;
+    const needsReference =
+        methods.find((item) => String(item.id) === method)
+            ?.requires_reference === true;
 
     const rowOf = (order: WaitingOrder): Row => ({
         on: true,
         amount: String(order.outstanding),
+        paidOn: defaultDate,
+        collector: defaultCollector,
         reference: '',
         payer: order.client,
         phone: '',
@@ -88,26 +126,38 @@ export default function OrderAdvancePayments({
         picked.length > 0 &&
         !tooMany &&
         picked.every(
-            ({ row }) => !needsReference || row.reference.trim() !== '',
+            ({ row }) =>
+                row.paidOn !== '' &&
+                (!needsReference || row.reference.trim() !== ''),
         );
 
     const dirty =
         method !== '' ||
-        collector !== String(currentUserId) ||
+        defaultCollector !== me ||
+        defaultDate !== today() ||
         Object.keys(edits).length > 0;
     useLeaveGuard(dirty, t('common.form.leave'));
 
     const reset = (): void => {
         setEdits({});
         setMethod('');
-        setCollector(String(currentUserId));
+        setDefaultCollector(me);
+        setDefaultDate(today());
         setKey(crypto.randomUUID());
     };
 
+    const collectorOptions = collectors.map((user) => ({
+        value: String(user.id),
+        label:
+            user.id === currentUserId
+                ? `${user.name} (${t('payments.panel.you')})`
+                : user.name,
+    }));
+
     return (
         <CollapsiblePanel title={t('orders.collect.open')} defaultOpen={false}>
-            <div className="max-w-4xl space-y-4">
-                <p className="text-sm text-muted-foreground">
+            <div className="max-w-5xl space-y-5">
+                <p className="max-w-3xl text-sm text-muted-foreground">
                     {t('orders.collect.description')}
                 </p>
 
@@ -166,45 +216,42 @@ export default function OrderAdvancePayments({
                                 />
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="collect-date">
+                                <FieldLabel
+                                    htmlFor="collect-date"
+                                    help={t('orders.collect.defaults_help')}
+                                >
                                     {t('orders.collect.paid_on')}
-                                </Label>
+                                </FieldLabel>
                                 <Input
                                     id="collect-date"
                                     type="date"
                                     max={today()}
-                                    value={paidOn}
+                                    value={defaultDate}
                                     onChange={(event) =>
-                                        setPaidOn(event.target.value)
+                                        setDefaultDate(event.target.value)
                                     }
                                 />
                             </div>
                             <div className="grid gap-2">
                                 <FieldLabel
                                     htmlFor="collect-collector"
-                                    help={t('payments.panel.collector_help')}
+                                    help={t('orders.collect.defaults_help')}
                                 >
                                     {t('payments.panel.collector')}
                                 </FieldLabel>
                                 <SelectField
                                     id="collect-collector"
                                     name="collected_by"
-                                    defaultValue={String(currentUserId)}
-                                    onChange={setCollector}
-                                    options={collectors.map((user) => ({
-                                        value: String(user.id),
-                                        label:
-                                            user.id === currentUserId
-                                                ? `${user.name} (${t('payments.panel.you')})`
-                                                : user.name,
-                                    }))}
+                                    defaultValue={me}
+                                    onChange={setDefaultCollector}
+                                    options={collectorOptions}
                                 />
                             </div>
                         </div>
 
                         {orders.length > 0 && (
                             <div className="space-y-2 fade-in">
-                                <div className="flex items-center justify-between text-sm">
+                                <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
                                     <button
                                         type="button"
                                         className="text-info-text underline-offset-4 hover:underline"
@@ -226,21 +273,23 @@ export default function OrderAdvancePayments({
                                     >
                                         {t('orders.collect.select_all')}
                                     </button>
-                                    <span className="text-muted-foreground">
+                                    <span className="text-muted-foreground tabular-nums">
                                         {t('orders.collect.selected', {
                                             count: picked.length,
                                             total: money(total),
                                         })}
                                     </span>
                                 </div>
+
                                 <ul className="divide-y divide-border rounded-lg border border-border text-sm">
                                     {orders.map((order) => {
                                         const row = rowOf(order);
+                                        const id = `collect-${order.id}`;
 
                                         return (
                                             <li
                                                 key={order.id}
-                                                className="grid gap-x-4 gap-y-2 px-4 py-3 sm:grid-cols-[auto_minmax(10rem,1fr)_8rem_minmax(0,1fr)] sm:items-center"
+                                                className={`grid gap-x-4 gap-y-3 px-4 py-4 md:grid-cols-[1.25rem_minmax(0,1fr)_8rem_10rem_13rem] md:items-end ${row.on ? '' : 'opacity-60'}`}
                                             >
                                                 <Checkbox
                                                     checked={row.on}
@@ -254,12 +303,13 @@ export default function OrderAdvancePayments({
                                                         })
                                                     }
                                                     aria-label={order.client}
+                                                    className="md:mb-2.5"
                                                 />
-                                                <div>
+                                                <div className="md:pb-1.5">
                                                     <div className="font-medium">
                                                         {order.client}
                                                     </div>
-                                                    <div className="text-xs text-muted-foreground">
+                                                    <div className="text-xs text-muted-foreground tabular-nums">
                                                         {t(
                                                             'orders.collect.outstanding',
                                                             {
@@ -273,69 +323,90 @@ export default function OrderAdvancePayments({
                                                         )}
                                                     </div>
                                                 </div>
-                                                <Input
-                                                    type="number"
-                                                    min={1}
-                                                    step={1}
-                                                    inputMode="numeric"
-                                                    className="text-right tabular-nums"
-                                                    value={row.amount}
-                                                    disabled={!row.on}
-                                                    aria-label={t(
-                                                        'orders.collect.amount_for',
-                                                        {
-                                                            client: order.client,
-                                                        },
+                                                <Cell
+                                                    label={t(
+                                                        'orders.collect.amount',
                                                     )}
-                                                    onChange={(event) =>
-                                                        patch(order.id, {
-                                                            amount: event.target
-                                                                .value,
-                                                        })
-                                                    }
-                                                />
-                                                {needsReference ? (
+                                                    htmlFor={`${id}-amount`}
+                                                >
                                                     <Input
-                                                        value={row.reference}
+                                                        id={`${id}-amount`}
+                                                        type="number"
+                                                        min={1}
+                                                        step={1}
+                                                        inputMode="numeric"
+                                                        className="text-right tabular-nums"
+                                                        value={row.amount}
                                                         disabled={!row.on}
-                                                        placeholder={t(
-                                                            'orders.collect.reference',
-                                                        )}
-                                                        aria-label={t(
-                                                            'orders.collect.reference_for',
-                                                            {
-                                                                client: order.client,
-                                                            },
-                                                        )}
                                                         onChange={(event) =>
                                                             patch(order.id, {
-                                                                reference:
-                                                                    event.target
-                                                                        .value,
+                                                                amount: event
+                                                                    .target
+                                                                    .value,
                                                             })
                                                         }
                                                     />
-                                                ) : (
-                                                    <span />
-                                                )}
-                                                <span className="hidden sm:block" />
-                                                <div className="grid gap-2 sm:col-span-3 sm:grid-cols-2">
-                                                    <label className="grid gap-1">
-                                                        <span className="text-xs text-muted-foreground">
-                                                            {t(
-                                                                'payments.panel.payer',
-                                                            )}
-                                                        </span>
+                                                </Cell>
+                                                <Cell
+                                                    label={t(
+                                                        'orders.collect.paid_on',
+                                                    )}
+                                                    htmlFor={`${id}-date`}
+                                                >
+                                                    <Input
+                                                        id={`${id}-date`}
+                                                        type="date"
+                                                        max={today()}
+                                                        value={row.paidOn}
+                                                        disabled={!row.on}
+                                                        onChange={(event) =>
+                                                            patch(order.id, {
+                                                                paidOn: event
+                                                                    .target
+                                                                    .value,
+                                                            })
+                                                        }
+                                                    />
+                                                </Cell>
+                                                <Cell
+                                                    label={t(
+                                                        'payments.panel.collector',
+                                                    )}
+                                                    htmlFor={`${id}-collector`}
+                                                >
+                                                    <SelectField
+                                                        id={`${id}-collector`}
+                                                        name={`collector-${order.id}`}
+                                                        key={row.collector}
+                                                        defaultValue={
+                                                            row.collector
+                                                        }
+                                                        onChange={(value) =>
+                                                            patch(order.id, {
+                                                                collector:
+                                                                    value,
+                                                            })
+                                                        }
+                                                        options={
+                                                            collectorOptions
+                                                        }
+                                                    />
+                                                </Cell>
+
+                                                <div
+                                                    className={`grid gap-x-4 gap-y-3 md:col-span-4 md:col-start-2 ${needsReference ? 'md:grid-cols-[minmax(0,1fr)_10rem_13rem]' : 'md:grid-cols-[minmax(0,1fr)_10rem]'}`}
+                                                >
+                                                    <Cell
+                                                        label={t(
+                                                            'payments.panel.payer',
+                                                        )}
+                                                        htmlFor={`${id}-payer`}
+                                                    >
                                                         <Input
+                                                            id={`${id}-payer`}
                                                             maxLength={120}
                                                             value={row.payer}
                                                             disabled={!row.on}
-                                                            aria-label={t(
-                                                                'orders.collect.payer_for',
-                                                                {
-                                                                    client: order.client,
-                                                                },
-                                                            )}
                                                             onChange={(event) =>
                                                                 patch(
                                                                     order.id,
@@ -347,24 +418,19 @@ export default function OrderAdvancePayments({
                                                                 )
                                                             }
                                                         />
-                                                    </label>
-                                                    <label className="grid gap-1">
-                                                        <span className="text-xs text-muted-foreground">
-                                                            {t(
-                                                                'payments.panel.payer_phone',
-                                                            )}
-                                                        </span>
+                                                    </Cell>
+                                                    <Cell
+                                                        label={t(
+                                                            'payments.panel.payer_phone',
+                                                        )}
+                                                        htmlFor={`${id}-phone`}
+                                                    >
                                                         <Input
+                                                            id={`${id}-phone`}
                                                             type="tel"
                                                             maxLength={30}
                                                             value={row.phone}
                                                             disabled={!row.on}
-                                                            aria-label={t(
-                                                                'orders.collect.phone_for',
-                                                                {
-                                                                    client: order.client,
-                                                                },
-                                                            )}
                                                             onChange={(event) =>
                                                                 patch(
                                                                     order.id,
@@ -376,7 +442,40 @@ export default function OrderAdvancePayments({
                                                                 )
                                                             }
                                                         />
-                                                    </label>
+                                                    </Cell>
+                                                    {needsReference && (
+                                                        <Cell
+                                                            label={t(
+                                                                'orders.collect.reference',
+                                                            )}
+                                                            htmlFor={`${id}-reference`}
+                                                            required
+                                                        >
+                                                            <Input
+                                                                id={`${id}-reference`}
+                                                                value={
+                                                                    row.reference
+                                                                }
+                                                                disabled={
+                                                                    !row.on
+                                                                }
+                                                                aria-required
+                                                                onChange={(
+                                                                    event,
+                                                                ) =>
+                                                                    patch(
+                                                                        order.id,
+                                                                        {
+                                                                            reference:
+                                                                                event
+                                                                                    .target
+                                                                                    .value,
+                                                                        },
+                                                                    )
+                                                                }
+                                                            />
+                                                        </Cell>
+                                                    )}
                                                 </div>
                                             </li>
                                         );
@@ -403,20 +502,20 @@ export default function OrderAdvancePayments({
                                 count: picked.length,
                                 total: money(total),
                             })}
-                            disabled={!complete || paidOn === ''}
+                            disabled={!complete}
                             onConfirm={() =>
                                 router.post(
                                     store.url(),
                                     {
                                         zone_id: zone,
                                         payment_method_id: method,
-                                        paid_on: paidOn,
-                                        collected_by: collector,
                                         idempotency_key: key,
                                         payments: picked.map(
                                             ({ order, row }) => ({
                                                 order_id: order.id,
                                                 amount: Number(row.amount),
+                                                paid_on: row.paidOn,
+                                                collected_by: row.collector,
                                                 reference: needsReference
                                                     ? row.reference.trim()
                                                     : null,

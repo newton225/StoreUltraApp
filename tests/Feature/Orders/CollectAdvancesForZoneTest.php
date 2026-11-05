@@ -26,12 +26,15 @@ function waitingOrder(string $zone, int $due = 40000, string $status = 'proforma
 
 function advancePayload(Order $zoneOrder, array $rows, array $extra = []): array
 {
+    $paidOn = $extra['paid_on'] ?? today()->toDateString();
+    $collector = $extra['collected_by'] ?? null;
+    unset($extra['paid_on'], $extra['collected_by']);
+
     return [
         'zone_id' => $zoneOrder->client->zone_id,
         'payment_method_id' => test()->method->id,
-        'paid_on' => today()->toDateString(),
         'idempotency_key' => 'batch-key-1',
-        'payments' => $rows,
+        'payments' => array_map(fn (array $row): array => ['paid_on' => $paidOn, 'collected_by' => $collector, ...$row], $rows),
         ...$extra,
     ];
 }
@@ -137,7 +140,7 @@ test('only the office records advances in a group, and the request must be compl
     $this->actingAs(User::factory()->agent()->create())->post(route('orders.advance-payments.store'), $payload)->assertForbidden();
 
     $this->actingAs($this->owner)->post(route('orders.advance-payments.store'), [...$payload, 'payments' => []])->assertSessionHasErrors('payments');
-    $this->post(route('orders.advance-payments.store'), [...$payload, 'paid_on' => today()->addDay()->toDateString()])->assertSessionHasErrors('paid_on');
+    $this->post(route('orders.advance-payments.store'), advancePayload($order, [['order_id' => $order->id, 'amount' => 40000]], ['paid_on' => today()->addDay()->toDateString()]))->assertSessionHasErrors('payments.0.paid_on');
 });
 
 test('each payment keeps who paid and their phone, and the group says who collected the money', function () {
@@ -170,5 +173,26 @@ test('the collector defaults to the user and must be an active account', functio
     $inactive = User::factory()->inactive()->create();
 
     $this->post(route('orders.advance-payments.store'), advancePayload($order, [['order_id' => $order->id, 'amount' => 20000]], ['collected_by' => $inactive->id, 'idempotency_key' => 'other']))
-        ->assertSessionHasErrors('collected_by');
+        ->assertSessionHasErrors('payments.0.collected_by');
+});
+
+test('the date and the collector can differ from one line to the next', function () {
+    $a = waitingOrder('Fronan');
+    $b = waitingOrder('Fronan');
+    $colleague = User::factory()->create();
+
+    $this->actingAs($this->owner)
+        ->post(route('orders.advance-payments.store'), advancePayload($a, [
+            ['order_id' => $a->id, 'amount' => 40000, 'paid_on' => today()->subDays(2)->toDateString(), 'collected_by' => $colleague->id],
+            ['order_id' => $b->id, 'amount' => 40000, 'paid_on' => today()->toDateString(), 'collected_by' => null],
+        ]))
+        ->assertRedirect();
+
+    $first = Payment::query()->where('order_id', $a->id)->sole();
+    $second = Payment::query()->where('order_id', $b->id)->sole();
+
+    expect($first->paid_on->toDateString())->toBe(today()->subDays(2)->toDateString())
+        ->and($first->collected_by)->toBe($colleague->id)
+        ->and($second->paid_on->toDateString())->toBe(today()->toDateString())
+        ->and($second->collected_by)->toBe($this->owner->id);
 });
