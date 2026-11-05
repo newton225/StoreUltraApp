@@ -126,10 +126,15 @@ export default function OrderAdvancePayments({
         .map((order) => ({ order, row: rowOf(order) }))
         .filter(({ row }) => row.on && Number(row.amount) > 0);
     const total = picked.reduce((sum, { row }) => sum + Number(row.amount), 0);
+    const due = picked.reduce((sum, { order }) => sum + order.outstanding, 0);
+    const overCount = picked.filter(
+        ({ order, row }) => Number(row.amount) > order.outstanding,
+    ).length;
     const tooMany = picked.length > MAX_PAYMENTS;
     const complete =
         picked.length > 0 &&
         !tooMany &&
+        overCount === 0 &&
         picked.every(
             ({ row }) =>
                 row.method !== '' &&
@@ -332,6 +337,7 @@ export default function OrderAdvancePayments({
                                         {t('orders.collect.selected', {
                                             count: picked.length,
                                             total: money(total),
+                                            due: money(due),
                                         })}
                                     </span>
                                 </div>
@@ -340,6 +346,10 @@ export default function OrderAdvancePayments({
                                     {orders.map((order) => {
                                         const row = rowOf(order);
                                         const id = `collect-${order.id}`;
+                                        const over =
+                                            row.on &&
+                                            Number(row.amount) >
+                                                order.outstanding;
                                         const wantsReference = asksReference(
                                             row.method,
                                         );
@@ -400,6 +410,14 @@ export default function OrderAdvancePayments({
                                                         step={1}
                                                         inputMode="numeric"
                                                         className="text-right tabular-nums"
+                                                        aria-invalid={
+                                                            over || undefined
+                                                        }
+                                                        aria-describedby={
+                                                            over
+                                                                ? `${id}-over`
+                                                                : undefined
+                                                        }
                                                         value={row.amount}
                                                         disabled={!row.on}
                                                         onChange={(event) =>
@@ -410,6 +428,21 @@ export default function OrderAdvancePayments({
                                                             })
                                                         }
                                                     />
+                                                    {over && (
+                                                        <p
+                                                            id={`${id}-over`}
+                                                            className="text-xs text-destructive-text"
+                                                        >
+                                                            {t(
+                                                                'orders.collect.over',
+                                                                {
+                                                                    max: money(
+                                                                        order.outstanding,
+                                                                    ),
+                                                                },
+                                                            )}
+                                                        </p>
+                                                    )}
                                                 </Cell>
                                                 <Cell
                                                     label={t(
@@ -575,6 +608,17 @@ export default function OrderAdvancePayments({
                                     })}
                                 </ul>
                             </div>
+                        )}
+
+                        {overCount > 0 && (
+                            <p
+                                role="alert"
+                                className="text-sm text-destructive-text"
+                            >
+                                {t('orders.collect.over_summary', {
+                                    count: overCount,
+                                })}
+                            </p>
                         )}
 
                         {tooMany && (

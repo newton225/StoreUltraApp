@@ -204,7 +204,9 @@ immuables) : à utiliser dans une base réservée aux démonstrations.
   demandée ligne par ligne). Un clic enregistre tous les paiements, chacun avec son numéro de reçu et sa ligne d'audit, comme le ferait le
   formulaire de la commande ; une commande dont l'avance est couverte passe d'elle-même à « Avance reçue ». Un paiement en échec (montant
   au-dessus du prix) n'arrête pas les autres et est compté ; renvoyer le même lot ne prend jamais l'argent deux fois ; 60 paiements au plus
-  à la fois. Réservé au bureau.
+  à la fois. Un montant ne peut pas dépasser le **reste à encaisser** de l'avance de sa ligne : le champ est marqué en rouge avec le maximum
+  autorisé, un message le rappelle et le bouton reste inactif tant qu'un montant dépasse ; le serveur refuse aussi ce cas (un montant plus
+  élevé s'enregistre depuis la page de la commande). Réservé au bureau.
 Les **factures restent générées individuellement**.
 - Total, avance due, avances reçues, relicat dû : toujours visibles.
 

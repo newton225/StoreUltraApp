@@ -18,7 +18,8 @@ use Illuminate\Support\Collection;
  * payment form of the order page does one by one: each payment gets its own receipt number, its audit line, and the
  * order moves to "advance received" as soon as its advance is covered. An order that fails does not stop the others.
  *
- * The office picks the orders among those offered and may change each amount (a client who pays part of the advance);
+ * The office picks the orders among those offered and may change each amount (a client who pays part of the advance,
+ * never more than what is still due on that advance: an overpayment is taken from the order page);
  * the method and the date are common to the group, the transaction reference is per payment.
  */
 class CollectAdvancesForZone
@@ -87,7 +88,7 @@ class CollectAdvancesForZone
             $order = $orders->get($row['order_id']);
             $method = $methods->get($row['payment_method_id']);
 
-            if ($order === null || $method === null) {
+            if ($order === null || $method === null || $row['amount'] > $order->advance_due - $order->netPaid()) {
                 $failed++;
 
                 continue;

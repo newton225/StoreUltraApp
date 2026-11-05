@@ -220,3 +220,18 @@ test('the payment method can differ from one line to the next, and each method a
     expect(Payment::query()->where('order_id', $a->id)->sole()->payment_method_id)->toBe($cash->id)
         ->and(Payment::query()->where('order_id', $b->id)->sole()->payment_method_id)->toBe($mobile->id);
 });
+
+test('an amount above what is still due on the advance is refused, even when the order costs more', function () {
+    $order = waitingOrder('Fronan', 40000);
+    Payment::factory()->for($order)->create(['kind' => 'advance', 'amount' => 15000]);
+
+    $this->actingAs($this->owner)
+        ->post(route('orders.advance-payments.store'), advancePayload($order, [['order_id' => $order->id, 'amount' => 30000]]))
+        ->assertRedirect();
+
+    expect(Payment::query()->where('order_id', $order->id)->count())->toBe(1)->and(session(SessionKey::FLASH_DATA)['toast']['type'])->toBe('warning');
+
+    $this->post(route('orders.advance-payments.store'), advancePayload($order, [['order_id' => $order->id, 'amount' => 25000]], ['idempotency_key' => 'second']))->assertRedirect();
+
+    expect($order->refresh()->status->value)->toBe('advance_received')->and($order->netPaid())->toBe(40000);
+});
