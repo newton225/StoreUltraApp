@@ -83,6 +83,8 @@ class OrderController extends Controller
             'proformaZones' => $user->can('manage-orders') ? $proformas->zones($user) : [],
             'archiveZones' => $archive->zones($user),
             'collectZones' => $user->can('manage-orders') ? $collect->zones($user) : [],
+            'collectors' => $user->can('manage-orders') ? User::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']) : [],
+            'currentUserId' => $user->id,
             'paymentMethods' => $user->can('manage-orders')
                 ? PaymentMethod::query()->where('active', true)->orderBy('label_fr')->get()
                     ->map(fn (PaymentMethod $method): array => ['id' => $method->id, 'name' => $method->name, 'requires_reference' => $method->requires_reference])

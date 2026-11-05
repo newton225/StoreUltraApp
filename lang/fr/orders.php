@@ -25,6 +25,8 @@ return [
         'outstanding' => 'reste :amount sur :due',
         'amount_for' => 'Montant reçu de :client',
         'reference_for' => 'Référence de la transaction de :client',
+        'payer_for' => 'Payé par, pour la commande de :client',
+        'phone_for' => 'Téléphone du payeur, pour la commande de :client',
         'reference' => 'Référence',
         'amount' => 'Montant',
         'confirm' => 'Enregistrer les paiements',

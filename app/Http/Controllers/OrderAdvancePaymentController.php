@@ -25,9 +25,12 @@ class OrderAdvancePaymentController extends Controller
                 'order_id' => (int) $row['order_id'],
                 'amount' => (int) $row['amount'],
                 'reference' => $row['reference'] ?? null,
+                'payer_name' => $row['payer_name'] ?? null,
+                'payer_phone' => $row['payer_phone'] ?? null,
             ], $request->validated('payments'))),
             $request->validated('idempotency_key'),
             $request->user(),
+            $request->filled('collected_by') ? $request->integer('collected_by') : null,
         );
 
         Inertia::flash('toast', $result['recorded'] === 0

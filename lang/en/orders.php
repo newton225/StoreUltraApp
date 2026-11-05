@@ -25,6 +25,8 @@ return [
         'outstanding' => ':amount left of :due',
         'amount_for' => 'Amount received from :client',
         'reference_for' => 'Transaction reference of :client',
+        'payer_for' => 'Paid by, for the order of :client',
+        'phone_for' => 'Payer phone, for the order of :client',
         'reference' => 'Reference',
         'amount' => 'Amount',
         'confirm' => 'Record the payments',

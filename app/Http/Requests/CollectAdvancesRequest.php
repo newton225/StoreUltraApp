@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\PaymentMethod;
+use App\Models\User;
 use App\Models\Zone;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -28,9 +29,12 @@ class CollectAdvancesRequest extends FormRequest
             'payment_method_id' => ['required', 'integer', Rule::exists(PaymentMethod::class, 'id')->where('active', true)],
             'paid_on' => ['required', 'date', 'before_or_equal:today'],
             'idempotency_key' => ['required', 'string', 'max:64'],
+            'collected_by' => ['nullable', 'integer', Rule::exists(User::class, 'id')->where('is_active', true)],
             'payments' => ['required', 'array', 'min:1', 'max:60'],
             'payments.*.order_id' => ['required', 'integer'],
             'payments.*.amount' => ['required', 'integer', 'min:1'],
+            'payments.*.payer_name' => ['nullable', 'string', 'max:120'],
+            'payments.*.payer_phone' => ['nullable', 'string', 'max:30'],
             'payments.*.reference' => [
                 Rule::requiredIf(fn (): bool => (bool) PaymentMethod::find($this->integer('payment_method_id'))?->requires_reference),
                 'nullable',

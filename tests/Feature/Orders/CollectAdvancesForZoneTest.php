@@ -139,3 +139,36 @@ test('only the office records advances in a group, and the request must be compl
     $this->actingAs($this->owner)->post(route('orders.advance-payments.store'), [...$payload, 'payments' => []])->assertSessionHasErrors('payments');
     $this->post(route('orders.advance-payments.store'), [...$payload, 'paid_on' => today()->addDay()->toDateString()])->assertSessionHasErrors('paid_on');
 });
+
+test('each payment keeps who paid and their phone, and the group says who collected the money', function () {
+    $order = waitingOrder('Fronan');
+    $colleague = User::factory()->create(['name' => 'Awa Traore']);
+
+    $this->actingAs($this->owner)
+        ->post(route('orders.advance-payments.store'), advancePayload($order, [
+            ['order_id' => $order->id, 'amount' => 40000, 'payer_name' => 'Le chauffeur', 'payer_phone' => '0707070707'],
+        ], ['collected_by' => $colleague->id]))
+        ->assertRedirect();
+
+    $payment = Payment::query()->sole();
+
+    expect($payment->payer_name)->toBe('Le chauffeur')
+        ->and($payment->payer_phone)->toBe('0707070707')
+        ->and($payment->collected_by)->toBe($colleague->id)
+        ->and($payment->recorded_by)->toBe($this->owner->id);
+});
+
+test('the collector defaults to the user and must be an active account', function () {
+    $order = waitingOrder('Fronan');
+
+    $this->actingAs($this->owner)
+        ->post(route('orders.advance-payments.store'), advancePayload($order, [['order_id' => $order->id, 'amount' => 20000]]))
+        ->assertRedirect();
+
+    expect(Payment::query()->sole()->collected_by)->toBe($this->owner->id);
+
+    $inactive = User::factory()->inactive()->create();
+
+    $this->post(route('orders.advance-payments.store'), advancePayload($order, [['order_id' => $order->id, 'amount' => 20000]], ['collected_by' => $inactive->id, 'idempotency_key' => 'other']))
+        ->assertSessionHasErrors('collected_by');
+});

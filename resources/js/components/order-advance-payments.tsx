@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { store } from '@/actions/App/Http/Controllers/OrderAdvancePaymentController';
 import CollapsiblePanel from '@/components/collapsible-panel';
 import ConfirmAction from '@/components/confirm-action';
+import { FieldLabel } from '@/components/field-label';
 import SelectField from '@/components/select-field';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -20,28 +21,41 @@ type WaitingOrder = {
 };
 type Zone = { id: number; name: string; orders: WaitingOrder[] };
 type Method = { id: number; name: string; requires_reference: boolean };
-type Row = { on: boolean; amount: string; reference: string };
+type Collector = { id: number; name: string };
+type Row = {
+    on: boolean;
+    amount: string;
+    reference: string;
+    payer: string;
+    phone: string;
+};
 
 const MAX_PAYMENTS = 60;
 const today = (): string => new Date().toLocaleDateString('en-CA');
 
 /**
- * Records the advance payment of the small businesses of a zone (sub-prefecture) in one go: every waiting order is
- * offered with what is left to collect (ticked, amount to correct), the method and the date are common, the transaction
- * reference is per payment when the method asks for one (playbook UI-115 for the group action, UI-123 for the
- * modifications detected and the key that stops a replay from taking the money twice).
+ * Records the advance payment of the small businesses of a zone (sub-prefecture) in one go, with the same information
+ * as the payment form of one order: the method, the date and who collected the money are common to the group; for each
+ * payment, the amount, who paid (the client by default), their phone, and the transaction reference when the method asks
+ * for one (playbook UI-115 for the group action, UI-123 for the modifications detected and the key that stops a replay
+ * from taking the money twice).
  */
 export default function OrderAdvancePayments({
     zones,
     methods,
+    collectors,
+    currentUserId,
 }: {
     zones: Zone[];
     methods: Method[];
+    collectors: Collector[];
+    currentUserId: number;
 }) {
     const { t } = useTranslation();
     const { money } = useFormat();
     const [zone, setZone] = useState('');
     const [method, setMethod] = useState('');
+    const [collector, setCollector] = useState(String(currentUserId));
     const [paidOn, setPaidOn] = useState(today);
     const [edits, setEdits] = useState<Record<number, Partial<Row>>>({});
     const [key, setKey] = useState(() => crypto.randomUUID());
@@ -54,6 +68,8 @@ export default function OrderAdvancePayments({
         on: true,
         amount: String(order.outstanding),
         reference: '',
+        payer: order.client,
+        phone: '',
         ...edits[order.id],
     });
     const patch = (id: number, change: Partial<Row>): void =>
@@ -75,18 +91,22 @@ export default function OrderAdvancePayments({
             ({ row }) => !needsReference || row.reference.trim() !== '',
         );
 
-    const dirty = method !== '' || Object.keys(edits).length > 0;
+    const dirty =
+        method !== '' ||
+        collector !== String(currentUserId) ||
+        Object.keys(edits).length > 0;
     useLeaveGuard(dirty, t('common.form.leave'));
 
     const reset = (): void => {
         setEdits({});
         setMethod('');
+        setCollector(String(currentUserId));
         setKey(crypto.randomUUID());
     };
 
     return (
         <CollapsiblePanel title={t('orders.collect.open')} defaultOpen={false}>
-            <div className="max-w-3xl space-y-4">
+            <div className="max-w-4xl space-y-4">
                 <p className="text-sm text-muted-foreground">
                     {t('orders.collect.description')}
                 </p>
@@ -97,7 +117,7 @@ export default function OrderAdvancePayments({
                     </p>
                 ) : (
                     <>
-                        <div className="grid gap-4 sm:grid-cols-3">
+                        <div className="grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-4">
                             <div className="grid gap-2">
                                 <Label htmlFor="collect-zone">
                                     {t('orders.collect.zone')}
@@ -159,6 +179,27 @@ export default function OrderAdvancePayments({
                                     }
                                 />
                             </div>
+                            <div className="grid gap-2">
+                                <FieldLabel
+                                    htmlFor="collect-collector"
+                                    help={t('payments.panel.collector_help')}
+                                >
+                                    {t('payments.panel.collector')}
+                                </FieldLabel>
+                                <SelectField
+                                    id="collect-collector"
+                                    name="collected_by"
+                                    defaultValue={String(currentUserId)}
+                                    onChange={setCollector}
+                                    options={collectors.map((user) => ({
+                                        value: String(user.id),
+                                        label:
+                                            user.id === currentUserId
+                                                ? `${user.name} (${t('payments.panel.you')})`
+                                                : user.name,
+                                    }))}
+                                />
+                            </div>
                         </div>
 
                         {orders.length > 0 && (
@@ -199,7 +240,7 @@ export default function OrderAdvancePayments({
                                         return (
                                             <li
                                                 key={order.id}
-                                                className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2"
+                                                className="grid gap-x-4 gap-y-2 px-4 py-3 sm:grid-cols-[auto_minmax(10rem,1fr)_8rem_minmax(0,1fr)] sm:items-center"
                                             >
                                                 <Checkbox
                                                     checked={row.on}
@@ -214,7 +255,7 @@ export default function OrderAdvancePayments({
                                                     }
                                                     aria-label={order.client}
                                                 />
-                                                <div className="min-w-40 flex-1">
+                                                <div>
                                                     <div className="font-medium">
                                                         {order.client}
                                                     </div>
@@ -237,7 +278,7 @@ export default function OrderAdvancePayments({
                                                     min={1}
                                                     step={1}
                                                     inputMode="numeric"
-                                                    className="w-32 text-right tabular-nums"
+                                                    className="text-right tabular-nums"
                                                     value={row.amount}
                                                     disabled={!row.on}
                                                     aria-label={t(
@@ -253,9 +294,8 @@ export default function OrderAdvancePayments({
                                                         })
                                                     }
                                                 />
-                                                {needsReference && (
+                                                {needsReference ? (
                                                     <Input
-                                                        className="w-44"
                                                         value={row.reference}
                                                         disabled={!row.on}
                                                         placeholder={t(
@@ -275,7 +315,69 @@ export default function OrderAdvancePayments({
                                                             })
                                                         }
                                                     />
+                                                ) : (
+                                                    <span />
                                                 )}
+                                                <span className="hidden sm:block" />
+                                                <div className="grid gap-2 sm:col-span-3 sm:grid-cols-2">
+                                                    <label className="grid gap-1">
+                                                        <span className="text-xs text-muted-foreground">
+                                                            {t(
+                                                                'payments.panel.payer',
+                                                            )}
+                                                        </span>
+                                                        <Input
+                                                            maxLength={120}
+                                                            value={row.payer}
+                                                            disabled={!row.on}
+                                                            aria-label={t(
+                                                                'orders.collect.payer_for',
+                                                                {
+                                                                    client: order.client,
+                                                                },
+                                                            )}
+                                                            onChange={(event) =>
+                                                                patch(
+                                                                    order.id,
+                                                                    {
+                                                                        payer: event
+                                                                            .target
+                                                                            .value,
+                                                                    },
+                                                                )
+                                                            }
+                                                        />
+                                                    </label>
+                                                    <label className="grid gap-1">
+                                                        <span className="text-xs text-muted-foreground">
+                                                            {t(
+                                                                'payments.panel.payer_phone',
+                                                            )}
+                                                        </span>
+                                                        <Input
+                                                            type="tel"
+                                                            maxLength={30}
+                                                            value={row.phone}
+                                                            disabled={!row.on}
+                                                            aria-label={t(
+                                                                'orders.collect.phone_for',
+                                                                {
+                                                                    client: order.client,
+                                                                },
+                                                            )}
+                                                            onChange={(event) =>
+                                                                patch(
+                                                                    order.id,
+                                                                    {
+                                                                        phone: event
+                                                                            .target
+                                                                            .value,
+                                                                    },
+                                                                )
+                                                            }
+                                                        />
+                                                    </label>
+                                                </div>
                                             </li>
                                         );
                                     })}
@@ -309,6 +411,7 @@ export default function OrderAdvancePayments({
                                         zone_id: zone,
                                         payment_method_id: method,
                                         paid_on: paidOn,
+                                        collected_by: collector,
                                         idempotency_key: key,
                                         payments: picked.map(
                                             ({ order, row }) => ({
@@ -317,6 +420,10 @@ export default function OrderAdvancePayments({
                                                 reference: needsReference
                                                     ? row.reference.trim()
                                                     : null,
+                                                payer_name:
+                                                    row.payer.trim() || null,
+                                                payer_phone:
+                                                    row.phone.trim() || null,
                                             }),
                                         ),
                                     },

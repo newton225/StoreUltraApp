@@ -70,11 +70,11 @@ class CollectAdvancesForZone
     }
 
     /**
-     * @param  list<array{order_id: int, amount: int, reference: string|null}>  $rows  one per picked order
+     * @param  list<array{order_id: int, amount: int, reference: string|null, payer_name: string|null, payer_phone: string|null}>  $rows  one per picked order
      * @param  string  $batchKey  sent again with the same rows, it records nothing twice
      * @return array{recorded: int, failed: int, total: int}
      */
-    public function handle(int $zoneId, PaymentMethod $method, CarbonInterface $paidOn, array $rows, string $batchKey, User $user): array
+    public function handle(int $zoneId, PaymentMethod $method, CarbonInterface $paidOn, array $rows, string $batchKey, User $user, ?int $collectedBy = null): array
     {
         $recorded = 0;
         $failed = 0;
@@ -101,6 +101,9 @@ class CollectAdvancesForZone
                     paidOn: $paidOn,
                     user: $user,
                     idempotencyKey: substr(hash('sha256', $batchKey.'|'.$order->id), 0, 40),
+                    payerName: $row['payer_name'],
+                    payerPhone: $row['payer_phone'],
+                    collectedBy: $collectedBy,
                 );
                 $recorded++;
                 $total += $row['amount'];

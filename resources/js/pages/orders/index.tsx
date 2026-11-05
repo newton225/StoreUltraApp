@@ -74,6 +74,8 @@ type Props = {
         name: string;
         requires_reference: boolean;
     }[];
+    collectors: { id: number; name: string }[];
+    currentUserId: number;
 };
 
 const ORDERS_TOUR: TourStep[] = [
@@ -108,6 +110,8 @@ export default function OrdersIndex({
     archiveZones,
     collectZones,
     paymentMethods,
+    collectors,
+    currentUserId,
 }: Props) {
     const { t } = useTranslation();
     const { money, date } = useFormat();
@@ -187,6 +191,8 @@ export default function OrdersIndex({
                             <OrderAdvancePayments
                                 zones={collectZones}
                                 methods={paymentMethods}
+                                collectors={collectors}
+                                currentUserId={currentUserId}
                             />
                         </div>
                     )}
