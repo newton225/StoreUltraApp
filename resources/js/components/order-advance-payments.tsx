@@ -428,21 +428,6 @@ export default function OrderAdvancePayments({
                                                             })
                                                         }
                                                     />
-                                                    {over && (
-                                                        <p
-                                                            id={`${id}-over`}
-                                                            className="text-xs text-destructive-text"
-                                                        >
-                                                            {t(
-                                                                'orders.collect.over',
-                                                                {
-                                                                    max: money(
-                                                                        order.outstanding,
-                                                                    ),
-                                                                },
-                                                            )}
-                                                        </p>
-                                                    )}
                                                 </Cell>
                                                 <Cell
                                                     label={t(
@@ -489,6 +474,23 @@ export default function OrderAdvancePayments({
                                                         }
                                                     />
                                                 </Cell>
+
+                                                {over && (
+                                                    <p
+                                                        id={`${id}-over`}
+
+                                                        className="text-xs text-destructive-text md:col-span-4 md:col-start-2 md:-mt-1 md:text-right"
+                                                    >
+                                                        {t(
+                                                            'orders.collect.over',
+                                                            {
+                                                                max: money(
+                                                                    order.outstanding,
+                                                                ),
+                                                            },
+                                                        )}
+                                                    </p>
+                                                )}
 
                                                 <div
                                                     className={`grid gap-x-4 gap-y-3 md:col-span-4 md:col-start-2 ${anyReference ? 'md:grid-cols-[minmax(0,1fr)_8.5rem_10rem_11rem]' : 'md:grid-cols-[minmax(0,1fr)_10rem_13rem]'}`}

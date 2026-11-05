@@ -27,7 +27,7 @@ return [
         'too_many' => 'Tick :max orders at most at a time (each payment takes a moment to record).',
         'select_all' => 'Tick all',
         'selected' => ':count selected · :total entered of :due to collect',
-        'over' => 'Maximum :max',
+        'over' => 'Amount too high: maximum :max.',
         'over_summary' => ':count amount(s) are above what is left to collect: correct them, or click "Left to collect". A higher amount is recorded from the order page.',
         'outstanding' => ':amount left of :due',
         'amount_for' => 'Amount received from :client',

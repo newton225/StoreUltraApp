@@ -27,7 +27,7 @@ return [
         'too_many' => 'Cochez :max commandes au plus à la fois (chaque paiement prend un moment à enregistrer).',
         'select_all' => 'Tout cocher',
         'selected' => ':count sélectionnée(s) · :total saisis sur :due à encaisser',
-        'over' => 'Maximum :max',
+        'over' => 'Montant trop élevé : maximum :max.',
         'over_summary' => ':count montant(s) dépassent le reste à encaisser : corrigez-les, ou cliquez sur « Reste à encaisser ». Un montant plus élevé s\'enregistre depuis la page de la commande.',
         'outstanding' => 'reste :amount sur :due',
         'amount_for' => 'Montant reçu de :client',
