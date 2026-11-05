@@ -559,6 +559,11 @@ Chaque vue prévoit ses états, tous :
   et sombre, UI-61) pour qu'on ne saisisse pas dans le mauvais bloc ; le fond **ne remplace pas** la séparation par un trait ni le nom
   de la fiche en tête de bloc (UI-52), et il reste discret pour que le texte garde son contraste (UI-51). Un bloc décoché ou inactif
   est atténué, jamais masqué. À vérifier en clair et en sombre.
+- **UI-127.** **Le contour d'un champ se voit, sur tous les fonds, en clair et en sombre.** Le bord d'un champ de saisie, d'une liste, d'une
+  case à cocher et d'un bouton à contour a **au moins 3:1 de contraste** avec le fond qui l'entoure (WCAG 1.4.11), **y compris sur un
+  fond teinté** (lignes alternées, UI-126, cartes, bandeaux). Il vient d'**un seul jeton** (`--input`) à deux valeurs, jamais d'une
+  teinte écrite à la main ni du même gris que les séparateurs et les fonds : un champ dont le bord se confond avec le fond ne dit
+  pas où l'on saisit. Se vérifie à l'œil, en clair et en sombre, sur un formulaire ordinaire **et** sur une ligne à fond teinté.
 - **UI-113.** **Dans tous les formulaires, un champ obligatoire porte un astérisque rouge (`*`) après son
   libellé**, toujours, sans exception d'écran. Le marquage est produit **une seule fois** par le composant
   `Label`, qui lit l'attribut `required` du champ qu'il désigne (`htmlFor` = `id` du champ) : on ne l'écrit donc
