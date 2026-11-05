@@ -1,0 +1,118 @@
+<?php
+
+return [
+
+    'currency' => 'FCFA',
+    'none' => 'None',
+
+    'zones' => [
+        'head' => 'Sub-prefectures',
+        'title' => 'Sub-prefectures',
+        'description' => 'The areas where clients are located. Field agents are assigned to them.',
+        'new' => 'New sub-prefecture',
+        'edit' => 'Edit',
+        'empty' => 'No sub-prefecture yet',
+        'created' => 'Sub-prefecture created.',
+        'updated' => 'Sub-prefecture updated.',
+        'create_title' => 'New sub-prefecture',
+        'edit_title' => 'Edit sub-prefecture',
+        'columns' => ['name' => 'Name', 'code' => 'Code', 'status' => 'Status'],
+        'form' => [
+            'name' => 'Name',
+            'code' => 'Code',
+            'active' => 'Active',
+            'submit' => 'Save',
+        ],
+    ],
+
+    'shops' => [
+        'head' => 'Shops',
+        'title' => 'Shops',
+        'description' => 'The suppliers the products are bought from',
+        'new' => 'New shop',
+        'edit' => 'Edit',
+        'empty' => 'No shop yet',
+        'created' => 'Shop created.',
+        'updated' => 'Shop updated.',
+        'create_title' => 'New shop',
+        'edit_title' => 'Edit shop',
+        'columns' => [
+            'name' => 'Name',
+            'contact' => 'Contact',
+            'phone' => 'Phone',
+            'products' => 'Products',
+            'status' => 'Status',
+        ],
+        'form' => [
+            'name' => 'Name',
+            'contact' => 'Contact person',
+            'phone' => 'Phone',
+            'address' => 'Address',
+            'payment_terms' => 'Payment terms',
+            'active' => 'Active',
+            'submit' => 'Save',
+        ],
+    ],
+
+    'status' => [
+        'active' => 'Active',
+        'inactive' => 'Inactive',
+        'archived' => 'Archived',
+    ],
+
+    'products' => [
+        'search' => 'Search a product or a shop',
+        'search_apply' => 'Search',
+        'head' => 'Products',
+        'title' => 'Products',
+        'description' => 'The catalog with the current price of each product',
+        'new' => 'New product',
+        'edit' => 'Open',
+        'empty' => 'No product yet',
+        'created' => 'Product created.',
+        'updated' => 'Product updated.',
+        'show_archived' => 'Show archived products',
+        'archive' => 'Archive',
+        'restore' => 'Restore',
+        'no_price' => 'No price in effect',
+        'create_title' => 'New product',
+        'create_description' => 'The first price is recorded in the price history',
+        'edit_title' => 'Product',
+        'columns' => [
+            'name' => 'Product',
+            'unit' => 'Unit',
+            'shop' => 'Shop',
+            'purchase_price' => 'Purchase price',
+            'sale_price' => 'Sale price',
+            'margin' => 'Margin',
+        ],
+        'form' => [
+            'name' => 'Name',
+            'unit' => 'Unit',
+            'shop' => 'Usual shop',
+            'purchase_price' => 'Purchase price (FCFA)',
+            'sale_price' => 'Unit sale price (FCFA, optional)',
+            'sale_price_help' => 'Leave empty when the product is only sold inside kits',
+            'effective_from' => 'These prices apply from',
+            'effective_from_help' => 'The day these prices start applying to new orders. Later, if a price changes, you add a new price with its date: orders already made keep the old one. Usually: today.',
+            'submit' => 'Save',
+            'create_submit' => 'Create product',
+        ],
+    ],
+
+    'prices' => [
+        'created' => 'Price added.',
+        'history_title' => 'Price history',
+        'history_description' => 'A price is never edited: a change is a new line, and past orders keep the price they were made with.',
+        'history_empty' => 'No price recorded',
+        'add_title' => 'Add a price',
+        'add_submit' => 'Add price',
+        'current' => 'Current',
+        'columns' => [
+            'effective_from' => 'From',
+            'purchase_price' => 'Purchase',
+            'sale_price' => 'Sale',
+        ],
+    ],
+
+];

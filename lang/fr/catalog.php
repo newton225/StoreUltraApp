@@ -1,0 +1,118 @@
+<?php
+
+return [
+
+    'currency' => 'FCFA',
+    'none' => 'Aucune',
+
+    'zones' => [
+        'head' => 'Sous-préfectures',
+        'title' => 'Sous-préfectures',
+        'description' => 'Les zones où se trouvent les clients. Les agents de terrain leur sont affectés.',
+        'new' => 'Nouvelle sous-préfecture',
+        'edit' => 'Modifier',
+        'empty' => 'Aucune sous-préfecture',
+        'created' => 'Sous-préfecture créée.',
+        'updated' => 'Sous-préfecture mise à jour.',
+        'create_title' => 'Nouvelle sous-préfecture',
+        'edit_title' => 'Modifier la sous-préfecture',
+        'columns' => ['name' => 'Nom', 'code' => 'Code', 'status' => 'Statut'],
+        'form' => [
+            'name' => 'Nom',
+            'code' => 'Code',
+            'active' => 'Active',
+            'submit' => 'Enregistrer',
+        ],
+    ],
+
+    'shops' => [
+        'head' => 'Boutiques',
+        'title' => 'Boutiques',
+        'description' => 'Les fournisseurs auprès desquels les produits sont achetés',
+        'new' => 'Nouvelle boutique',
+        'edit' => 'Modifier',
+        'empty' => 'Aucune boutique',
+        'created' => 'Boutique créée.',
+        'updated' => 'Boutique mise à jour.',
+        'create_title' => 'Nouvelle boutique',
+        'edit_title' => 'Modifier la boutique',
+        'columns' => [
+            'name' => 'Nom',
+            'contact' => 'Contact',
+            'phone' => 'Téléphone',
+            'products' => 'Produits',
+            'status' => 'Statut',
+        ],
+        'form' => [
+            'name' => 'Nom',
+            'contact' => 'Personne à contacter',
+            'phone' => 'Téléphone',
+            'address' => 'Adresse',
+            'payment_terms' => 'Conditions de paiement',
+            'active' => 'Active',
+            'submit' => 'Enregistrer',
+        ],
+    ],
+
+    'status' => [
+        'active' => 'Active',
+        'inactive' => 'Inactive',
+        'archived' => 'Archivé',
+    ],
+
+    'products' => [
+        'search' => 'Rechercher un produit ou une boutique',
+        'search_apply' => 'Rechercher',
+        'head' => 'Produits',
+        'title' => 'Produits',
+        'description' => 'Le catalogue avec le prix actuel de chaque produit',
+        'new' => 'Nouveau produit',
+        'edit' => 'Ouvrir',
+        'empty' => 'Aucun produit',
+        'created' => 'Produit créé.',
+        'updated' => 'Produit mis à jour.',
+        'show_archived' => 'Afficher les produits archivés',
+        'archive' => 'Archiver',
+        'restore' => 'Restaurer',
+        'no_price' => 'Aucun prix en vigueur',
+        'create_title' => 'Nouveau produit',
+        'create_description' => 'Le premier prix est enregistré dans l\'historique des prix',
+        'edit_title' => 'Produit',
+        'columns' => [
+            'name' => 'Produit',
+            'unit' => 'Unité',
+            'shop' => 'Boutique',
+            'purchase_price' => 'Prix d\'achat',
+            'sale_price' => 'Prix de vente',
+            'margin' => 'Marge',
+        ],
+        'form' => [
+            'name' => 'Nom',
+            'unit' => 'Unité',
+            'shop' => 'Boutique habituelle',
+            'purchase_price' => 'Prix d\'achat (FCFA)',
+            'sale_price' => 'Prix de vente unitaire (FCFA, facultatif)',
+            'sale_price_help' => 'Laissez vide si le produit n\'est vendu que dans des kits',
+            'effective_from' => 'Ces prix valent à partir du',
+            'effective_from_help' => 'Le jour où ces prix commencent à s’appliquer aux nouvelles commandes. Plus tard, si un prix change, vous ajouterez un nouveau prix avec sa date : les commandes déjà faites gardent l’ancien. En général : aujourd’hui.',
+            'submit' => 'Enregistrer',
+            'create_submit' => 'Créer le produit',
+        ],
+    ],
+
+    'prices' => [
+        'created' => 'Prix ajouté.',
+        'history_title' => 'Historique des prix',
+        'history_description' => 'Un prix n\'est jamais modifié : un changement est une nouvelle ligne, et les commandes passées gardent le prix avec lequel elles ont été faites.',
+        'history_empty' => 'Aucun prix enregistré',
+        'add_title' => 'Ajouter un prix',
+        'add_submit' => 'Ajouter le prix',
+        'current' => 'Actuel',
+        'columns' => [
+            'effective_from' => 'À partir du',
+            'purchase_price' => 'Achat',
+            'sale_price' => 'Vente',
+        ],
+    ],
+
+];
