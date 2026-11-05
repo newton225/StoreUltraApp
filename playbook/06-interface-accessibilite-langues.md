@@ -515,6 +515,16 @@ Chaque vue prévoit ses états, tous :
   l'émission (les anciennes dettes sont celles du jour) et se vérifie en **ouvrant un PDF produit avec de vraies données**, jamais
   seulement en lisant le gabarit. Un document sans montants (bon de livraison) garde le même en-tête, les mêmes identités et les
   mêmes signatures, et remplace les blocs de prix par des quantités.
+- **UI-123.** **Tout envoi grise son bouton, et tout formulaire détecte ses modifications.** (1) De la confirmation jusqu'à la **réponse
+  du serveur**, le bouton qui envoie est **inactif et dit qu'il travaille** (« Enregistrement… »), pour que rien ne parte deux fois :
+  bouton d'un formulaire (la barre d'enregistrement, UI-14), bouton de **confirmation** (UI-22) **et** bouton d'action isolé (annuler,
+  archiver, mettre en pause). C'est le **composant ou le crochet commun** qui le fait, jamais chaque écran à sa façon : un bouton qui
+  envoie une requête sans passer par eux est un défaut. Le travail de fond (page préchargée au survol, rafraîchissement automatique)
+  ne grise rien. (2) **Tout formulaire qui reçoit une saisie** (création, modification, **traitement en lot**, même hors de la barre
+  d'enregistrement) **détecte s'il a été modifié** depuis son affichage ou son dernier enregistrement : l'état alimente l'aspect du
+  bouton (UI-14) et **l'avertissement avant de quitter** (UI-15). Un choix qui ne fait que déplacer une liste (portée, semaine
+  affichée) n'est pas une saisie. (3) Vérification : ralentir la requête dans un navigateur réel, constater le bouton grisé et **une
+  seule** requête envoyée, puis la page de destination.
 - **UI-124.** **Une liste de fiches qui ont des documents émis permet de les télécharger sans ouvrir chaque fiche.** (1) **Par ligne** :
   un bouton par document **valide** (nom du type, icône, nom accessible qui dit de quel client ou de quelle fiche il s'agit) ; rien
   n'est affiché quand le document n'existe pas ou est annulé, et le téléchargement **n'émet jamais** un document manquant. (2) **Par
@@ -544,16 +554,11 @@ Chaque vue prévoit ses états, tous :
   icône colorée, libellé d'action : « PDF proforma », pas le nom de l'état) ne prennent pas le même ton ni le même nom, sinon on prend l'un
   pour l'autre. (6) **Chaque composant construit se regarde** dans le navigateur, en clair et en sombre, à largeur d'ordinateur et de
   téléphone, avant d'être rendu.
-- **UI-123.** **Tout envoi grise son bouton, et tout formulaire détecte ses modifications.** (1) De la confirmation jusqu'à la **réponse
-  du serveur**, le bouton qui envoie est **inactif et dit qu'il travaille** (« Enregistrement… »), pour que rien ne parte deux fois :
-  bouton d'un formulaire (la barre d'enregistrement, UI-14), bouton de **confirmation** (UI-22) **et** bouton d'action isolé (annuler,
-  archiver, mettre en pause). C'est le **composant ou le crochet commun** qui le fait, jamais chaque écran à sa façon : un bouton qui
-  envoie une requête sans passer par eux est un défaut. Le travail de fond (page préchargée au survol, rafraîchissement automatique)
-  ne grise rien. (2) **Tout formulaire qui reçoit une saisie** (création, modification, **traitement en lot**, même hors de la barre
-  d'enregistrement) **détecte s'il a été modifié** depuis son affichage ou son dernier enregistrement : l'état alimente l'aspect du
-  bouton (UI-14) et **l'avertissement avant de quitter** (UI-15). Un choix qui ne fait que déplacer une liste (portée, semaine
-  affichée) n'est pas une saisie. (3) Vérification : ralentir la requête dans un navigateur réel, constater le bouton grisé et **une
-  seule** requête envoyée, puis la page de destination.
+- **UI-126.** **Une liste de blocs à saisir alterne les fonds.** Quand chaque ligne d'une liste est un **bloc de plusieurs champs** (une
+  carte par fiche : montant, date, payeur…) et qu'on y saisit, **un bloc sur deux** a un fond légèrement teinté (jeton du thème, clair
+  et sombre, UI-61) pour qu'on ne saisisse pas dans le mauvais bloc ; le fond **ne remplace pas** la séparation par un trait ni le nom
+  de la fiche en tête de bloc (UI-52), et il reste discret pour que le texte garde son contraste (UI-51). Un bloc décoché ou inactif
+  est atténué, jamais masqué. À vérifier en clair et en sombre.
 - **UI-113.** **Dans tous les formulaires, un champ obligatoire porte un astérisque rouge (`*`) après son
   libellé**, toujours, sans exception d'écran. Le marquage est produit **une seule fois** par le composant
   `Label`, qui lit l'attribut `required` du champ qu'il désigne (`htmlFor` = `id` du champ) : on ne l'écrit donc

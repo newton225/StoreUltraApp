@@ -309,7 +309,7 @@ export default function OrderAdvancePayments({
                                     </span>
                                 </div>
 
-                                <ul className="divide-y divide-border rounded-lg border border-border text-sm">
+                                <ul className="divide-y divide-border overflow-hidden rounded-lg border border-border text-sm">
                                     {orders.map((order) => {
                                         const row = rowOf(order);
                                         const id = `collect-${order.id}`;
@@ -326,7 +326,7 @@ export default function OrderAdvancePayments({
                                         return (
                                             <li
                                                 key={order.id}
-                                                className={`grid gap-x-4 gap-y-3 px-4 py-4 md:grid-cols-[1.25rem_minmax(0,1fr)_8rem_10rem_13rem] md:items-end ${row.on ? '' : 'opacity-60'}`}
+                                                className={`grid gap-x-4 gap-y-3 px-4 py-4 even:bg-muted/60 md:grid-cols-[1.25rem_minmax(0,1fr)_8rem_10rem_13rem] md:items-end ${row.on ? '' : 'opacity-60'}`}
                                             >
                                                 <Checkbox
                                                     checked={row.on}
