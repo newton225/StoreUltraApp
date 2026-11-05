@@ -183,23 +183,26 @@ immuables) : à utiliser dans une base réservée aux démonstrations.
   *jamais* (jusqu'à ce que le bureau l'arrête), *à une date* ou *après un nombre fixé de livraisons*. Les erreurs s'affichent
   sous le champ concerné, en français ou en anglais.
 - Modifier la livraison automatique ne change que les **commandes à venir**.
-- **Création en lot par localité** (écran « Nouvelle commande », onglet **Toute une localité**) : on choisit la localité (le nombre de
+- **Création en lot par sous-préfecture** (écran « Nouvelle commande », onglet **Toute une sous-préfecture**) : on choisit la sous-préfecture (le nombre de
   TPE actifs est indiqué), le kit, le nombre de kits, la semaine de livraison et l'avance, comme pour une commande seule. L'écran liste
-  les **TPE actifs** de la localité, tous cochés ; ceux qui ont déjà une commande cette semaine-là sont affichés, grisés, non cochables.
+  les **TPE actifs** de la sous-préfecture, tous cochés ; ceux qui ont déjà une commande cette semaine-là sont affichés, grisés, non cochables.
   Une case **« Émettre aussi les proformas »** (cochée par défaut) fait passer chaque commande à « Proforma émis » avec son document.
   Une phrase résume ce qui va se passer, la confirmation annonce le nombre, et le message final ne nomme que ce qui n'est pas zéro
   (« 4 commandes créées · 4 proformas émises »). Chaque commande est créée avec les prix du jour figés, comme une commande seule, et tracée
-  (une ligne d'audit par commande, avec la localité et la taille du groupe). Relancer ne crée rien de plus (une commande non annulée
+  (une ligne d'audit par commande, avec la sous-préfecture et la taille du groupe (la localité, ou village, reste un simple champ de la fiche client, non utilisé pour grouper)). Relancer ne crée rien de plus (une commande non annulée
   de la semaine suffit à ignorer le TPE) ; une erreur sur un TPE n'arrête pas les autres ; 60 TPE au plus à la fois. Seuls les clients
-  actifs que l'utilisateur a le droit de voir sont concernés, et le serveur revérifie chacun. Le panneau « Proformas par localité » de la
+  actifs que l'utilisateur a le droit de voir sont concernés, et le serveur revérifie chacun. Le panneau « Proformas par sous-préfecture » de la
   page Commandes reste utile pour émettre plus tard les proformas de brouillons déjà créés.
-- **Proformas par localité** (page Commandes, panneau replié) : en un clic, émet la proforma de toutes les commandes
-  en attente (brouillon) des clients d'une localité et les passe à « Proforma émis », avec confirmation qui annonce
+- **Proformas par sous-préfecture** (page Commandes, panneau replié) : en un clic, émet la proforma de toutes les commandes
+  en attente (brouillon) des clients d'une sous-préfecture et les passe à « Proforma émis », avec confirmation qui annonce
   le nombre. Une commande en échec n'arrête pas les autres ; relancer n'émet jamais une seconde proforma.
-- **Avances soldées par localité** (même page, panneau replié) : après avoir choisi une localité, l'application ne
-  propose que les commandes « Proforma émis » dont l'avance est **entièrement payée** (net des remboursements),
-  toutes cochées ; on décoche celles à laisser, et un clic enregistre l'étape « Avance reçue » des autres. Les
-  paiements restent saisis un par un ; les **factures restent générées individuellement**.
+- **Encaisser des avances par sous-préfecture** (même page, panneau replié) : on choisit la sous-préfecture, le **mode de paiement** et la
+  **date** (communs au groupe) ; toutes les commandes qui attendent leur avance sont proposées, cochées, avec le **reste à encaisser** comme
+  montant à corriger (un client peut ne payer qu'une partie) et, si le mode l'exige, la **référence de la transaction** de chaque paiement.
+  Un clic enregistre tous les paiements, chacun avec son numéro de reçu et sa ligne d'audit, comme le ferait le formulaire de la commande ;
+  une commande dont l'avance est couverte passe d'elle-même à « Avance reçue ». Un paiement en échec (montant au-dessus du prix) n'arrête pas
+  les autres et est compté ; renvoyer le même lot ne prend jamais l'argent deux fois ; 60 paiements au plus à la fois. Réservé au bureau.
+Les **factures restent générées individuellement**.
 - Total, avance due, avances reçues, relicat dû : toujours visibles.
 
 ### 5.6 Paiements et encaissements
@@ -391,12 +394,35 @@ est choisie à la génération (`playbook/06`, I18N-14). Il porte l'identité de
 
 | Document | Émetteur vers destinataire | Contenu principal | Signature |
 | --- | --- | --- | --- |
-| **Proforma** | Entreprise vers client | Kit, quantités, prix de vente, avance demandée, relicat, validité | Non |
+| **Proforma** | Entreprise vers client | Même feuille que la facture : produits ligne par ligne, avance à verser, reste à payer à la livraison, somme en lettres, rapprochement avec l'ancienne dette, validité | Caissier, magasinier et responsable TPE |
 | **Reçu** | Entreprise vers client | Montant encaissé, motif (avance ou relicat), mode, solde restant | Agent |
 | **Bon de commande** | Entreprise vers boutique | Produits et quantités à fournir, semaine, conditions | Responsable |
 | **Bon de livraison** | Entreprise vers client | Kits remis, quantités, relicat encaissé | Client et agent |
-| **Facture** | Entreprise vers client | Kits livrés, prix de vente, avances et relicat réglés, numéro de facture normalisée si applicable | Non |
+| **Facture** | Entreprise vers client | Produits livrés ligne par ligne (unité, quantité, prix unitaire, montant), net à payer, avance, reste à payer, somme en lettres, rapprochement avec l'ancienne dette, contrôle avant sortie, numéro de facture normalisée si applicable | Caissier, magasinier et responsable TPE (cases à la main) |
 | **Bordereau** | Entreprise (interne, comptable) | Liste des **factures d'une période** : numéro, date, client, montant, réglé, reste ; totaux | Responsable |
+
+**Présentation de la facture et de la proforma** (une seule feuille, modèle fourni par le responsable). De haut en bas : le titre du projet et la liste des
+sous-préfectures (réglages « Titre du projet (factures et proformas) » et sous-préfectures actives), le bandeau « Facture » avec la catégorie des
+articles (« Catégorie des articles (factures et proformas) »), puis le fournisseur (l'entreprise), le client, son lieu de livraison (adresse de
+livraison, à défaut la localité), sa sous-préfecture, le numéro de la facture, les téléphones et les dates de commande et de
+livraison. Le tableau liste chaque produit de la commande avec son unité, sa quantité, son prix unitaire (le montant de la ligne
+divisé par la quantité, arrondi) et son montant ; viennent ensuite **NET À PAYER**, **AVANCE** (les avances encaissées, nettes
+des remboursements), le **relicat réglé** s'il y en a un, et **RESTE À PAYER**. La somme du net à payer est écrite **en toutes
+lettres**. Le **rapprochement avant nouvelle commande** reprend, pour le même client, ses **anciennes dettes** (le solde impayé de
+chacune de ses commandes précédentes déjà livrées, avec leur référence et « Non payé » ou « Payé en partie »), son **reliquat**
+(ce qu'il a payé en trop sur une commande précédente), le montant de la nouvelle facture, l'avance reçue, le solde de la nouvelle
+commande et le **total du reste à payer** (anciennes dettes + solde de la nouvelle commande − reliquat). Suivent la case à cocher
+« Contrôle avant sortie » (à remplir à la main) et les signatures du caissier (qui a émis la facture), du magasinier et du
+responsable TPE (la personne à contacter de la fiche client, à défaut le client). Le pied de page rappelle l'entreprise, le numéro
+et les sous-préfectures. La proforma suit la même feuille : elle indique l'**avance à verser** et le **reste à payer à la livraison**, la date de livraison prévue et sa durée de validité, et n'a pas la liste de contrôle avant sortie. Le **bon de livraison** suit la même feuille (même en-tête, mêmes identités), sans prix ni rapprochement : le tableau donne, produit par produit, la **quantité commandée** et la **quantité livrée** (quantité par kit × kits livrés), puis le total des kits livrés, les remarques éventuelles et les signatures du magasinier, du livreur et de la personne qui a reçu (avec sa signature dessinée). La facture, la proforma et le bon de livraison restent en thème clair et existent en français et en anglais.
+
+**Télécharger les proformas et les factures sans ouvrir les commandes.** Dans la liste des commandes, chaque ligne qui a une proforma ou
+une facture valide (non annulée) montre un bouton **Proforma** et/ou **Facture** qui ouvre le PDF. On peut aussi **cocher des lignes** (ou
+tout cocher sur la page) : une barre apparaît, avec « Proformas en zip (n) » et « Factures en zip (n) », n étant le nombre de documents
+qui existent vraiment parmi les lignes cochées. Enfin le bloc replié **« Télécharger par sous-préfecture »** donne, d'un coup, le zip des
+proformas ou des factures de toutes les commandes d'une sous-préfecture pour une semaine de livraison. Rien n'est jamais émis par ce
+téléchargement ; les documents annulés n'y sont pas ; un utilisateur limité à certaines zones ne reçoit que celles-ci ; un zip contient
+200 documents au plus ; chaque document remis est inscrit au journal d'audit. Les fichiers du zip sont nommés « numéro-client.pdf ».
 
 Le **bordereau** liste les factures émises sur une période donnée, **mensuelle par défaut** (période
 paramétrable), avec un filtre possible par sous-préfecture ou par client.

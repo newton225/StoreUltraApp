@@ -261,7 +261,7 @@ export function DashboardCharts({
             <h2 className="text-base font-semibold">
                 {t('dashboard.charts.title')}
             </h2>
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="cascade grid gap-4 lg:grid-cols-2">
                 <div className="lg:col-span-2">
                     <ChartCard
                         title={t('dashboard.charts.sales_title')}

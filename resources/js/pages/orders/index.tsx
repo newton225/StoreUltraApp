@@ -1,18 +1,23 @@
 import { Head, Link, router, setLayoutProps } from '@inertiajs/react';
+import { FileText } from 'lucide-react';
 import { useState } from 'react';
 import {
     create,
     index,
     show,
 } from '@/actions/App/Http/Controllers/OrderController';
+import { download } from '@/actions/App/Http/Controllers/DocumentController';
+import { show as archive } from '@/actions/App/Http/Controllers/OrderDocumentArchiveController';
 import GuidedTour, { type TourStep } from '@/components/guided-tour';
 import Heading from '@/components/heading';
 import ExportMenu from '@/components/export-menu';
-import OrderAdvanceBatch from '@/components/order-advance-batch';
+import OrderAdvancePayments from '@/components/order-advance-payments';
+import OrderDocumentsZip from '@/components/order-documents-zip';
 import OrderProformaBatch from '@/components/order-proforma-batch';
 import Pagination from '@/components/pagination';
 import SelectField from '@/components/select-field';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import SortHeader, { sortQuery } from '@/components/sort-header';
 import { useFormat } from '@/hooks/use-format';
@@ -27,6 +32,8 @@ type ListedOrder = {
     status: string;
     kits_count: number;
     total_sale: number;
+    proforma_document: number | null;
+    invoice_document: number | null;
 };
 
 type Paginated = {
@@ -49,10 +56,23 @@ type Props = {
     };
     statuses: string[];
     canCreate: boolean;
-    proformaLocalities: { name: string; count: number }[];
-    advanceLocalities: {
+    proformaZones: { id: number; name: string; count: number }[];
+    archiveZones: { id: number; name: string }[];
+    collectZones: {
+        id: number;
         name: string;
-        orders: { id: number; client: string; due: number; paid: number }[];
+        orders: {
+            id: number;
+            client: string;
+            due: number;
+            paid: number;
+            outstanding: number;
+        }[];
+    }[];
+    paymentMethods: {
+        id: number;
+        name: string;
+        requires_reference: boolean;
     }[];
 };
 
@@ -84,13 +104,28 @@ export default function OrdersIndex({
     filters,
     statuses,
     canCreate,
-    proformaLocalities,
-    advanceLocalities,
+    proformaZones,
+    archiveZones,
+    collectZones,
+    paymentMethods,
 }: Props) {
     const { t } = useTranslation();
     const { money, date } = useFormat();
     const [search, setSearch] = useState(filters.search);
     const [week, setWeek] = useState(filters.week ?? '');
+    const [selected, setSelected] = useState<number[]>([]);
+
+    // Only the orders shown on this page count: a page change leaves the others out of the download.
+    const chosen = orders.data.filter((order) => selected.includes(order.id));
+    const withProforma = chosen.filter((order) => order.proforma_document);
+    const withInvoice = chosen.filter((order) => order.invoice_document);
+    const allChosen =
+        orders.data.length > 0 && chosen.length === orders.data.length;
+
+    const toggle = (id: number, on: boolean): void =>
+        setSelected((current) =>
+            on ? [...current, id] : current.filter((item) => item !== id),
+        );
 
     setLayoutProps({
         breadcrumbs: [{ title: t('orders.title'), href: index() }],
@@ -126,26 +161,28 @@ export default function OrdersIndex({
                     <div className="flex shrink-0 flex-wrap items-center gap-2">
                         <ExportMenu view="orders" query={filters} />
                         {canCreate && (
-                            <Button asChild data-tour="new">
+                            <Button variant="info" asChild data-tour="new">
                                 <Link href={create()}>{t('orders.new')}</Link>
                             </Button>
                         )}
                     </div>
                 </div>
 
-                {(proformaLocalities.length > 0 ||
-                    advanceLocalities.length > 0) && (
+                {(proformaZones.length > 0 || collectZones.length > 0) && (
                     <div className="space-y-3" data-tour="batches">
-                        {proformaLocalities.length > 0 && (
-                            <OrderProformaBatch
-                                localities={proformaLocalities}
-                            />
+                        {proformaZones.length > 0 && (
+                            <OrderProformaBatch zones={proformaZones} />
                         )}
-                        {advanceLocalities.length > 0 && (
-                            <OrderAdvanceBatch localities={advanceLocalities} />
+                        {collectZones.length > 0 && (
+                            <OrderAdvancePayments
+                                zones={collectZones}
+                                methods={paymentMethods}
+                            />
                         )}
                     </div>
                 )}
+
+                <OrderDocumentsZip zones={archiveZones} week={filters.week} />
 
                 <form
                     data-tour="filters"
@@ -199,6 +236,68 @@ export default function OrdersIndex({
                     />
                 </form>
 
+                {chosen.length > 0 && (
+                    <div
+                        role="region"
+                        aria-label={t('orders.archive.selected', {
+                            count: chosen.length,
+                        })}
+                        className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm fade-in"
+                    >
+                        <span className="font-medium">
+                            {t('orders.archive.selected', {
+                                count: chosen.length,
+                            })}
+                        </span>
+                        <div className="flex flex-wrap items-center gap-2">
+                            {(
+                                [
+                                    ['proforma', withProforma],
+                                    ['invoice', withInvoice],
+                                ] as const
+                            ).map(([type, list]) =>
+                                list.length > 0 ? (
+                                    <Button
+                                        key={type}
+                                        asChild
+                                        size="sm"
+                                        variant="info"
+                                    >
+                                        <a
+                                            href={archive.url({
+                                                query: {
+                                                    type,
+                                                    orders: list.map(
+                                                        (order) => order.id,
+                                                    ),
+                                                },
+                                            })}
+                                        >
+                                            {t(
+                                                `orders.archive.download_${type}s`,
+                                                { count: list.length },
+                                            )}
+                                        </a>
+                                    </Button>
+                                ) : null,
+                            )}
+                            {withProforma.length === 0 &&
+                                withInvoice.length === 0 && (
+                                    <span className="text-muted-foreground">
+                                        {t('orders.archive.nothing')}
+                                    </span>
+                                )}
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => setSelected([])}
+                            >
+                                {t('orders.archive.clear')}
+                            </Button>
+                        </div>
+                    </div>
+                )}
+
                 {orders.data.length === 0 ? (
                     <p className="text-sm text-muted-foreground">
                         {t('orders.empty')}
@@ -211,6 +310,24 @@ export default function OrdersIndex({
                         <table className="w-full text-left text-sm">
                             <thead className="bg-muted/50 text-muted-foreground">
                                 <tr>
+                                    <th className="w-10 px-4 py-2">
+                                        <Checkbox
+                                            checked={allChosen}
+                                            onCheckedChange={(checked) =>
+                                                setSelected(
+                                                    checked === true
+                                                        ? orders.data.map(
+                                                              (order) =>
+                                                                  order.id,
+                                                          )
+                                                        : [],
+                                                )
+                                            }
+                                            aria-label={t(
+                                                'orders.archive.select_all',
+                                            )}
+                                        />
+                                    </th>
                                     <SortHeader
                                         column="reference"
                                         state={filters}
@@ -220,7 +337,11 @@ export default function OrdersIndex({
                                     <SortHeader column="client" state={filters}>
                                         {t('orders.columns.client')}
                                     </SortHeader>
-                                    <SortHeader column="week" state={filters}>
+                                    <SortHeader
+                                        column="week"
+                                        state={filters}
+                                        className="whitespace-nowrap"
+                                    >
                                         {t('orders.columns.week')}
                                     </SortHeader>
                                     <SortHeader
@@ -242,6 +363,9 @@ export default function OrdersIndex({
                                     <SortHeader column="status" state={filters}>
                                         {t('orders.columns.status')}
                                     </SortHeader>
+                                    <th className="px-4 py-2">
+                                        {t('orders.archive.column')}
+                                    </th>
                                     <th className="px-4 py-2" />
                                 </tr>
                             </thead>
@@ -252,26 +376,97 @@ export default function OrdersIndex({
                                         className="border-t border-border"
                                     >
                                         <td className="px-4 py-2">
+                                            <Checkbox
+                                                checked={selected.includes(
+                                                    order.id,
+                                                )}
+                                                onCheckedChange={(checked) =>
+                                                    toggle(
+                                                        order.id,
+                                                        checked === true,
+                                                    )
+                                                }
+                                                aria-label={t(
+                                                    'orders.archive.select_row',
+                                                    {
+                                                        reference:
+                                                            order.reference ??
+                                                            '',
+                                                    },
+                                                )}
+                                            />
+                                        </td>
+                                        <td className="px-4 py-2 whitespace-nowrap">
                                             {order.reference}
                                         </td>
                                         <td className="px-4 py-2 font-medium">
                                             {order.client?.name}
                                         </td>
-                                        <td className="px-4 py-2">
+                                        <td className="px-4 py-2 whitespace-nowrap">
                                             {date(order.delivery_week)}
                                         </td>
                                         <td className="px-4 py-2 text-right">
                                             {order.kits_count}
                                         </td>
-                                        <td className="px-4 py-2 text-right">
+                                        <td className="px-4 py-2 text-right whitespace-nowrap">
                                             {money(order.total_sale)}
                                         </td>
                                         <td className="px-4 py-2">
                                             <StatusBadge
                                                 group="orders"
                                                 status={order.status}
-                                                variant="outline"
                                             />
+                                        </td>
+                                        <td className="px-4 py-2">
+                                            <div className="flex flex-wrap gap-1">
+                                                {(
+                                                    [
+                                                        [
+                                                            'proforma',
+                                                            order.proforma_document,
+                                                        ],
+                                                        [
+                                                            'invoice',
+                                                            order.invoice_document,
+                                                        ],
+                                                    ] as const
+                                                ).map(([type, id]) =>
+                                                    id === null ? null : (
+                                                        <Button
+                                                            key={type}
+                                                            asChild
+                                                            variant="outline"
+                                                            size="sm"
+                                                        >
+                                                            <a
+                                                                href={download.url(
+                                                                    id,
+                                                                )}
+                                                                target="_blank"
+                                                                rel="noreferrer"
+                                                                aria-label={t(
+                                                                    `orders.archive.open_${type}`,
+                                                                    {
+                                                                        client:
+                                                                            order
+                                                                                .client
+                                                                                ?.name ??
+                                                                            '',
+                                                                    },
+                                                                )}
+                                                            >
+                                                                <FileText
+                                                                    className="text-info-text"
+                                                                    aria-hidden
+                                                                />
+                                                                {t(
+                                                                    `orders.archive.pdf_${type}`,
+                                                                )}
+                                                            </a>
+                                                        </Button>
+                                                    ),
+                                                )}
+                                            </div>
                                         </td>
                                         <td className="px-4 py-2 text-right">
                                             <Button

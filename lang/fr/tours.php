@@ -34,11 +34,11 @@ return [
     'orders' => [
         'new' => [
             'title' => 'Créer des commandes',
-            'body' => 'Une commande pour un client, ou la même commande pour tous les TPE actifs d\'une localité en une seule fois.',
+            'body' => 'Une commande pour un client, ou la même commande pour tous les TPE actifs d\'une sous-préfecture en une seule fois.',
         ],
         'batches' => [
-            'title' => 'Une étape pour toute une localité',
-            'body' => 'Ces blocs n\'apparaissent que si des commandes d\'une localité attendent la même étape : émettre leurs proformas, ou enregistrer leurs avances, d\'un seul coup.',
+            'title' => 'Une étape pour toute une sous-préfecture',
+            'body' => 'Ces blocs n\'apparaissent que si des commandes d\'une sous-préfecture attendent la même étape : émettre leurs proformas, ou encaisser leurs avances, d\'un seul coup.',
         ],
         'filters' => [
             'title' => 'Retrouver une commande',
@@ -52,16 +52,16 @@ return [
 
     'order_create' => [
         'modes' => [
-            'title' => 'Un client ou toute une localité',
-            'body' => '« Un client » crée une commande. « Toute une localité » crée la même commande pour chaque TPE actif de la localité, que vous pouvez décocher un par un.',
+            'title' => 'Un client ou toute une sous-préfecture',
+            'body' => '« Un client » crée une commande. « Toute une sous-préfecture » crée la même commande pour chaque TPE actif de la sous-préfecture, que vous pouvez décocher un par un.',
         ],
         'form_single' => [
             'title' => 'La commande',
             'body' => 'Choisissez le client, le kit, le nombre de kits, la semaine de livraison et l\'avance demandée. Les prix du jour sont figés à la création : un changement de prix ultérieur ne touche pas cette commande.',
         ],
         'form_batch' => [
-            'title' => 'La commande de la localité',
-            'body' => 'Choisissez la localité, le kit, le nombre de kits par TPE, la semaine et l\'avance. La liste des TPE s\'affiche : un TPE qui a déjà une commande cette semaine-là est grisé et ne sera pas doublé.',
+            'title' => 'La commande de la sous-préfecture',
+            'body' => 'Choisissez la sous-préfecture, le kit, le nombre de kits par TPE, la semaine et l\'avance. La liste des TPE s\'affiche : un TPE qui a déjà une commande cette semaine-là est grisé et ne sera pas doublé.',
         ],
     ],
 

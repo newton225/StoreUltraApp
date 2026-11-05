@@ -91,7 +91,7 @@ export default function ClientsIndex({
                     />
                     <div className="flex shrink-0 items-center gap-2">
                         <ExportMenu view="clients" query={filters} />
-                        <Button asChild>
+                        <Button variant="info" asChild>
                             <Link href={create()}>{t('clients.new')}</Link>
                         </Button>
                     </div>
@@ -233,11 +233,6 @@ export default function ClientsIndex({
                                             <StatusBadge
                                                 group="clients"
                                                 status={client.status}
-                                                variant={
-                                                    client.status === 'active'
-                                                        ? 'secondary'
-                                                        : 'outline'
-                                                }
                                             />
                                         </td>
                                         <td className="px-4 py-2 text-right">

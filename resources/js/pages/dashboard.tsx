@@ -307,7 +307,7 @@ export default function Dashboard({
                     <h2 className="text-base font-semibold">
                         {t('dashboard.indicators.title')}
                     </h2>
-                    <div className="flex flex-wrap gap-3">
+                    <div className="cascade flex flex-wrap gap-3">
                         {figure(
                             t('dashboard.indicators.active_clients'),
                             indicators.active_clients,
@@ -381,7 +381,7 @@ export default function Dashboard({
                         <h2 className="text-base font-semibold">
                             {t('dashboard.profit.title')}
                         </h2>
-                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        <div className="cascade grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                             {(
                                 [
                                     'theoretical_margin',
@@ -503,7 +503,7 @@ export default function Dashboard({
                         {t('dashboard.exports.title')}
                     </h2>
                     <div className="flex flex-wrap gap-2">
-                        <Button asChild variant="outline" size="sm">
+                        <Button asChild variant="infoOutline" size="sm">
                             <a href={pdf.url({ query: query() })}>
                                 {t('dashboard.exports.pdf')}
                             </a>

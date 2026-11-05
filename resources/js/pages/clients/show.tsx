@@ -88,17 +88,9 @@ export default function ShowClient({
                             title={client.name}
                             description={client.reference ?? undefined}
                         />
-                        <StatusBadge
-                            group="clients"
-                            status={client.status}
-                            variant={
-                                client.status === 'active'
-                                    ? 'secondary'
-                                    : 'outline'
-                            }
-                        />
+                        <StatusBadge group="clients" status={client.status} />
                     </div>
-                    <Button asChild variant="outline">
+                    <Button asChild variant="infoOutline">
                         <Link href={edit(client.id)}>{t('clients.edit')}</Link>
                     </Button>
                 </div>

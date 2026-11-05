@@ -83,8 +83,9 @@ Chaque vue prévoit ses états, tous :
   | **Enregistrer, valider, émettre, envoyer** | **succès** (vert) | Enregistrer, Créer, Encaisser, Émettre |
   | **Annuler, retourner, fermer, abandonner** | **contour** neutre | Annuler, Retour, Fermer |
   | **Supprimer, retirer, annuler une opération** | **destructif** (rouge) | Supprimer, Retirer, Annuler la commande |
-  | **Aller ailleurs, ouvrir, créer un nouvel objet** | **principal** neutre | Nouveau client, Étape suivante |
-  | Action secondaire d'un écran | **secondaire** (gris) ou **fantôme** | Exporter, Filtrer |
+  | **Aller ailleurs, ouvrir, créer un nouvel objet, télécharger, exporter** | **information** (bleu) ; **contour bleu** pour les boutons répétés sur chaque ligne d'une liste | Nouveau client, Télécharger le zip, Exporter, Proforma |
+  | **Suspendre, mettre en pause, remplacer, archiver** (réversible mais lourd de conséquences) | **attention** (ambre) | Mettre en pause, Annuler et remplacer |
+  | Action secondaire d'un écran (chercher, filtrer, fermer une ligne) | **secondaire** (gris) ou **fantôme** | Rechercher, Filtrer, Ouvrir |
   Les couleurs viennent de **jetons** de design à deux valeurs, clair et sombre (UI-61), jamais d'une teinte écrite en
   dur ; le texte du bouton garde un contraste d'au moins 4,5:1 (UI-51). Deux gestes opposés (enregistrer et
   annuler) ne prennent **jamais** la même couleur, et la couleur ne porte jamais seule le sens : le texte le dit
@@ -412,6 +413,25 @@ Chaque vue prévoit ses états, tous :
   le statut), message d'erreur ou d'alerte qui apparaît (`InputError`, `Alert` et tout `role="alert"` portent
   `fade-in`), panneau qui s'ouvre. Un écran livré avec un saut sec est un défaut, au même titre qu'un
   alignement cassé.
+  (5) **Une page arrive par étapes, pas en un bloc.** Le cadre (menu, en-tête) ne bouge pas ; le contenu apparaît en
+  cascade : la page en fondu (0,2 s), ses sections qui montent l'une après l'autre (décalage de 40 ms, six au plus,
+  0,3 s chacune), puis les lignes de tableau en fondu (décalage de 20 ms, huit au plus). Le tout dure **0,6 s au
+  plus** (UI-74), n'anime que `opacity` et `transform` (UI-72), avec un remplissage `backwards` pour qu'aucune
+  transformation ne reste posée. La page quittée **s'estompe** (opacité réduite) quand le chargement de la
+  suivante dépasse 100 ms, **seulement** pour un vrai changement de page (pas un filtre, un tri, un formulaire ni
+  un préchargement) ; rien n'est bloqué. (6) **Le défaut est posé une fois, pour tous les composants** : tout
+  élément interactif (lien, bouton, champ, ligne de tableau, onglet, option de menu) change couleur, fond,
+  bordure et ombre en 150 ms, `ease-out`, par une règle de base de la feuille de style ; un composant de base ne
+  liste **jamais** une transition sans le fond et la bordure (cas courant : `transition-[color,box-shadow]`, où le
+  survol change le fond d'un coup), et aucune courbe linéaire. (7) Sous « réduire les animations », **tout** se
+  fait sans durée (animations et transitions), sauf l'indicateur de chargement qui continue de tourner.
+  (8) **Une grille ou une rangée de cartes (indicateurs, tuiles de chiffres) monte carte par carte** (classe
+  `cascade` posée sur le conteneur, écrite une fois dans la feuille de style) : 30 ms d'écart, huit au plus, juste
+  après sa section, 0,6 s au plus en tout. Un formulaire de filtres n'en fait pas partie. (9) **La sélection d'un
+  menu de rubriques est un repère unique qui glisse** d'une rubrique à l'autre (`transform` seulement, 0,3 s,
+  `ease-out`), comme un sélecteur : il part **au clic**, sans attendre le chargement de la page, revient à la
+  rubrique active si la navigation échoue, ne glisse pas à la première apparition, suit le redimensionnement et le
+  repli du menu, et se masque quand la page n'est pas dans le menu. Le survol garde sa pastille propre (UI-70).
 
 - **UI-116.** **Toute liste consultée par des utilisateurs s'exporte en CSV, Excel et PDF**, depuis un menu
   « Exporter » placé dans l'en-tête de la page (composant commun). Règles : (1) le fichier reprend **les filtres
@@ -440,8 +460,10 @@ Chaque vue prévoit ses états, tous :
   navigateur** : le formulaire est **sans validation native** mais garde l'attribut « obligatoire » pour que
   l'astérisque s'affiche (UI-113) ; (5) le bouton porte un verbe court (UI-92).
 - **UI-118.** **Créer en lot est un onglet de l'écran de création, pas un autre écran.** L'écran « Nouvelle commande » propose
-  « Un client » et « Toute une localité » (onglets, UI-101, le choix dans l'adresse). Le lot suit UI-115 : la **portée** se choisit
-  dans une liste qui dit **combien** d'éléments elle contient ; la liste des éléments concernés s'affiche, **tous cochés** ;
+  « Un client » et « Tout un groupe » (onglets, UI-101, le choix dans l'adresse). Le lot suit UI-115 : la **portée** se choisit
+  dans une liste qui dit **combien** d'éléments elle contient ; **le groupe est le découpage que le métier utilise déjà** (celui de
+  ses classeurs et de ses tournées, par exemple la zone géographique), choisi dans une **liste fermée identifiée par son numéro**,
+  jamais un texte libre saisi à la main (un nom de village écrit de plusieurs façons regroupe mal) ; la liste des éléments concernés s'affiche, **tous cochés** ;
   ceux qui ont **déjà** ce qu'on va créer sont montrés, **grisés, non cochables**, avec la raison (« a déjà une commande cette
   semaine »), jamais cachés ; **l'étape suivante** (émettre le document) est une case **cochée par défaut** qui s'explique ;
   une **phrase de résumé** dit ce qui va se passer (UI-117) et la confirmation annonce le nombre. Le **message final ne nomme que
@@ -459,6 +481,79 @@ Chaque vue prévoit ses états, tous :
   passée (enregistré en base par membre, UI-34), et se **rejoue** par un bouton d'aide **toujours au même endroit de l'en-tête**,
   visible seulement sur un écran qui a une visite. (6) Une étape dont l'élément est absent ou invisible est **sautée** ; un écran
   sans aucune étape visible ne démarre pas. (7) Mouvement réduit respecté (UI-112) ; vérifiée en clair, en sombre et sur téléphone.
+- **UI-120.** **Dans une liste de choix, l'invitation ne ressemble jamais à une donnée.** L'option vide d'une liste obligatoire
+  (« Choisir un kit ») est une **invitation**, pas une valeur : elle s'écrit **entre tirets** (« — Choisir un kit — »), en
+  **gris italique**, dans la liste ouverte comme dans le champ fermé, et le champ reste gris tant qu'aucune vraie valeur n'est choisie ;
+  dès qu'une valeur est choisie, le champ reprend le texte normal. C'est le **composant commun** qui le fait (une seule fois), avec
+  une propriété pour les listes facultatives dont l'option vide reste pourtant une invitation. Un filtre dont la première option est
+  un vrai choix (« Tous les statuts ») garde l'aspect d'une valeur. Vérifié dans les deux thèmes.
+- **UI-121.** **Une liste de choix qui peut devenir longue se filtre.** À partir de **huit choix**, la liste devient une **liste
+  recherchable** (champ « Rechercher… » en haut du panneau) au lieu d'une liste à faire défiler ; en dessous, la liste native reste
+  plus simple et plus rapide. C'est le **composant commun** (même propriétés, même comportement de formulaire) qui bascule, jamais
+  chaque écran : (1) un **vrai `<select>` invisible** reste dessous (valeur envoyée, validation native d'un champ obligatoire, `label
+  for` qui fonctionne) ; (2) le filtre **ignore les accents et la casse** (« ete » trouve « Été ») et n'impose aucun ordre ; (3) le
+  **clavier** suffit : flèches pour se déplacer, Entrée pour choisir, Échap pour fermer et rendre le focus au champ ; (4) le panneau
+  s'ouvre **sous** le champ, **au-dessus** s'il n'y a pas la place ; (5) l'invitation (UI-120) garde son aspect ; (6) « Aucun
+  résultat » s'affiche quand rien ne correspond ; (7) un clic ailleurs ferme le panneau ; (8) rôles `combobox` et `listbox`, nom
+  accessible repris du libellé du champ. Pas de nouvelle bibliothèque pour cela (PRI-09).
+- **UI-122.** **Les documents commerciaux partagent une seule feuille.** La facture, la proforma et le bon de livraison (et tout futur
+  devis ou bon commercial) sortent d'**une seule mise en page**, paramétrée par le type de document, jamais de deux copies qui divergent.
+  Le **modèle fourni par le propriétaire est la référence** : on le reprend tel quel, on ne recopie pas ses erreurs de calcul ou
+  d'orthographe (les chiffres viennent des données). De haut en bas : (1) le **titre du projet** et la **liste des zones**, puis un
+  **bandeau** portant le titre du document et la catégorie des articles (deux réglages de l'entreprise, rien d'imprimé s'ils sont
+  vides) ; (2) un **bloc d'identité sur deux colonnes** : fournisseur, client, lieu de livraison, zone, à gauche ; numéro,
+  téléphones, dates de commande et de livraison, à droite ; (3) le **tableau du détail**, une ligne par produit (numéro, désignation,
+  unité, quantité, prix unitaire, montant), le prix unitaire étant le montant de la ligne divisé par la quantité, arrondi, **le montant
+  de la ligne restant la valeur de référence** ; (4) les **lignes de totaux** : net à payer, avance, relicat réglé s'il y en a un,
+  reste à payer ; (5) le **montant en toutes lettres**, écrit par notre propre code (pas d'extension de PHP à exiger), avec les accords
+  (« deux cents », « quatre-vingts », « soixante et onze ») et dans la langue du document ; (6) le **rapprochement avant nouvelle
+  commande** : anciennes dettes du même client (une ligne par commande précédente livrée et impayée, avec sa référence et « non payé » ou
+  « payé en partie »), trop-perçu éventuel, montant du nouveau document, avance, solde après avance, **total du reste à payer** ;
+  (7) sur le document qui **laisse sortir la marchandise** (la facture), la **liste de contrôle avant sortie** à cocher à la main ;
+  puis les **signatures** (caissier, magasinier, responsable du client), le caissier étant la personne qui a émis ; (8) un **pied de page**
+  discret (entreprise, type, numéro, zones). Le document reste en **thème clair**, existe dans les **deux langues**, est **figé** à
+  l'émission (les anciennes dettes sont celles du jour) et se vérifie en **ouvrant un PDF produit avec de vraies données**, jamais
+  seulement en lisant le gabarit. Un document sans montants (bon de livraison) garde le même en-tête, les mêmes identités et les
+  mêmes signatures, et remplace les blocs de prix par des quantités.
+- **UI-124.** **Une liste de fiches qui ont des documents émis permet de les télécharger sans ouvrir chaque fiche.** (1) **Par ligne** :
+  un bouton par document **valide** (nom du type, icône, nom accessible qui dit de quel client ou de quelle fiche il s'agit) ; rien
+  n'est affiché quand le document n'existe pas ou est annulé, et le téléchargement **n'émet jamais** un document manquant. (2) **Par
+  sélection** : une case à cocher par ligne et une case « tout cocher » dans l'en-tête (cases nommées pour les lecteurs d'écran) ;
+  une **barre d'action** apparaît dès qu'une ligne est cochée, dit combien, propose un téléchargement **zippé par type de document**
+  avec le **nombre réellement téléchargeable** dans le libellé, et un bouton pour tout décocher. Seules les lignes de la page
+  affichée comptent. (3) **Par groupe** : un bloc replié (UI-114) où l'on choisit le type de document, le groupe du métier
+  (UI-118) et la période, sans cocher ligne par ligne. (4) Côté serveur : le téléchargement est une **requête de lecture** (lien
+  simple, pas de formulaire), **validée** par une classe de requête, **limitée en fréquence**, **bornée en nombre de fichiers**
+  (au-delà, message clair et rien n'est envoyé), réservée aux fiches que l'utilisateur a le droit de voir, n'embarque **que les
+  documents valides** (un document annulé n'y est jamais), donne aux fichiers un **nom lisible en lettres simples** (numéro et
+  client), envoie l'archive **sans cache** (SEC-24 : entête de réponse des routes sensibles) puis **supprime le fichier
+  temporaire**, et écrit **une ligne de journal par document remis** (SEC-161). Quand il n'y a rien à télécharger, on revient à
+  la page avec un message d'erreur, jamais un fichier vide.
+- **UI-125.** **Les badges et les boutons portent la couleur de leur sens, pas une teinte neutre par défaut.** Cinq tons, définis par des
+  **jetons à deux valeurs** (clair et sombre, UI-61), chacun avec sa variante de **texte** qui garde 4,5:1 sur le fond teinté (UI-51) :
+  **gris** (pas commencé, terminé, inactif, archivé), **bleu** (en cours, information, à venir), **ambre** (en attente de quelqu'un,
+  en pause, partiel, à surveiller), **vert** (fait, en vigueur, actif, payé), **rouge** (annulé, refusé, contre-passé, danger). (1) Un
+  **badge d'état** est **teinté** (fond léger, texte et bordure du ton), jamais plein ni gris par défaut ; le ton d'un état vient
+  d'**une seule table** du composant d'état (un état a la même couleur dans la liste, la fiche et le tableau de bord), et le
+  libellé est toujours écrit (UI-52). Un badge de **catégorie** sans état (type de document, droit) reste neutre. (2) Un **bouton**
+  prend la variante de sa nature (UI-16) : aucun bouton ne garde la variante « principal » neutre par habitude ; une page qui
+  n'aurait que des boutons gris et blancs est un défaut à reprendre. (3) Les **tons** servent à un seul sens chacun : pas de rouge
+  pour une simple mise en garde, pas de vert pour une information. (4) Vérification : parcourir les écrans en clair et en sombre et
+  constater qu'on lit l'état d'une ligne ou la nature d'un bouton avant d'en lire le texte. (5) **Un état et une action ne se
+  ressemblent jamais** : dans une même ligne, le badge d'état (teinté, sans bordure de bouton) et un bouton d'action (contour neutre,
+  icône colorée, libellé d'action : « PDF proforma », pas le nom de l'état) ne prennent pas le même ton ni le même nom, sinon on prend l'un
+  pour l'autre. (6) **Chaque composant construit se regarde** dans le navigateur, en clair et en sombre, à largeur d'ordinateur et de
+  téléphone, avant d'être rendu.
+- **UI-123.** **Tout envoi grise son bouton, et tout formulaire détecte ses modifications.** (1) De la confirmation jusqu'à la **réponse
+  du serveur**, le bouton qui envoie est **inactif et dit qu'il travaille** (« Enregistrement… »), pour que rien ne parte deux fois :
+  bouton d'un formulaire (la barre d'enregistrement, UI-14), bouton de **confirmation** (UI-22) **et** bouton d'action isolé (annuler,
+  archiver, mettre en pause). C'est le **composant ou le crochet commun** qui le fait, jamais chaque écran à sa façon : un bouton qui
+  envoie une requête sans passer par eux est un défaut. Le travail de fond (page préchargée au survol, rafraîchissement automatique)
+  ne grise rien. (2) **Tout formulaire qui reçoit une saisie** (création, modification, **traitement en lot**, même hors de la barre
+  d'enregistrement) **détecte s'il a été modifié** depuis son affichage ou son dernier enregistrement : l'état alimente l'aspect du
+  bouton (UI-14) et **l'avertissement avant de quitter** (UI-15). Un choix qui ne fait que déplacer une liste (portée, semaine
+  affichée) n'est pas une saisie. (3) Vérification : ralentir la requête dans un navigateur réel, constater le bouton grisé et **une
+  seule** requête envoyée, puis la page de destination.
 - **UI-113.** **Dans tous les formulaires, un champ obligatoire porte un astérisque rouge (`*`) après son
   libellé**, toujours, sans exception d'écran. Le marquage est produit **une seule fois** par le composant
   `Label`, qui lit l'attribut `required` du champ qu'il désigne (`htmlFor` = `id` du champ) : on ne l'écrit donc

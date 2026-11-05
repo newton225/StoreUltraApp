@@ -28,6 +28,7 @@ class SecurityHeaders
         'expenses.proof',
         'exports.show',
         'list-exports.show',
+        'orders.documents.zip',
     ];
 
     public function handle(Request $request, Closure $next): Response

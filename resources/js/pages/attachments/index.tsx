@@ -154,7 +154,10 @@ export default function AttachmentsIndex({
                             })}
                         </p>
                         {types.length > 0 && (
-                            <Button onClick={() => setOpen(true)}>
+                            <Button
+                                variant="info"
+                                onClick={() => setOpen(true)}
+                            >
                                 {t('attachments.form.open')}
                             </Button>
                         )}
@@ -433,7 +436,7 @@ export default function AttachmentsIndex({
                                     >
                                         {t('attachments.close')}
                                     </Button>
-                                    <Button asChild variant="success">
+                                    <Button asChild variant="info">
                                         <a
                                             href={file.url(viewing.id, {
                                                 query: { download: 1 },
@@ -526,6 +529,7 @@ export default function AttachmentsIndex({
                                                     <SelectField
                                                         id="owner_id"
                                                         name="owner_id"
+                                                        prompt
                                                         defaultValue={String(
                                                             preset.owner ?? '',
                                                         )}

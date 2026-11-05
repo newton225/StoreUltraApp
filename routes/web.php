@@ -18,9 +18,10 @@ use App\Http\Controllers\KitController;
 use App\Http\Controllers\KitVersionController;
 use App\Http\Controllers\ListExportController;
 use App\Http\Controllers\LocaleController;
-use App\Http\Controllers\OrderAdvanceController;
+use App\Http\Controllers\OrderAdvancePaymentController;
 use App\Http\Controllers\OrderBatchController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\OrderDocumentArchiveController;
 use App\Http\Controllers\OrderProformaController;
 use App\Http\Controllers\OrderTransitionController;
 use App\Http\Controllers\PaymentController;
@@ -54,6 +55,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('clients', ClientController::class)->except(['destroy']);
     Route::patch('clients/{client}/status', [ClientController::class, 'status'])->name('clients.status');
+    Route::get('order-documents/zip', [OrderDocumentArchiveController::class, 'show'])->middleware('throttle:archives')
+        ->name('orders.documents.zip');
     Route::resource('orders', OrderController::class)->only(['index', 'create', 'store', 'show']);
     Route::post('documents', [DocumentController::class, 'store'])->name('documents.store');
     Route::get('documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
@@ -65,7 +68,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('orders/{order}/transition', [OrderTransitionController::class, 'store'])->name('orders.transition');
 
     Route::middleware('can:manage-orders')->group(function () {
-        Route::post('orders/advances', [OrderAdvanceController::class, 'store'])->name('orders.advances.store');
+        Route::post('orders/advance-payments', [OrderAdvancePaymentController::class, 'store'])->name('orders.advance-payments.store');
         Route::post('orders/proformas', [OrderProformaController::class, 'store'])->name('orders.proformas.store');
         Route::post('orders/batch', [OrderBatchController::class, 'store'])->name('orders.batch.store');
         Route::get('documents', [DocumentController::class, 'index'])->name('documents.index');

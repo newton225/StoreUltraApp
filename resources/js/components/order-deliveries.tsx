@@ -270,6 +270,7 @@ export default function OrderDeliveries({
                                                 <SelectField
                                                     id="delivery-method"
                                                     name="payment_method_id"
+                                                    prompt
                                                     defaultValue=""
                                                     onChange={setMethodId}
                                                     options={[

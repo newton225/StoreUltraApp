@@ -1,5 +1,6 @@
+import { router } from '@inertiajs/react';
 import type { VariantProps } from 'class-variance-authority';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import {
     Dialog,
@@ -16,7 +17,9 @@ type ButtonSize = VariantProps<typeof buttonVariants>['size'];
 
 /**
  * A button that asks before doing something that is not easily undone (playbook UI-20 to UI-22). The window
- * names the consequence, puts the focus on "Cancel" and disables the action while it is being sent.
+ * names the consequence, puts the focus on "Cancel" and disables the action while it is being sent: from the
+ * confirmation until the server has answered, the button on the page is greyed and says it is working
+ * (playbook UI-123).
  *
  * Inside a form, leave `onConfirm` out: the button first checks the form (required fields), then sends it
  * once the user has confirmed. Outside a form, pass `onConfirm`.
@@ -48,6 +51,43 @@ export default function ConfirmAction({
     const { t } = useTranslation();
     const [open, setOpen] = useState(false);
     const form = useRef<HTMLFormElement | null>(null);
+    const [sending, setSending] = useState(false);
+    const stopWatching = useRef<(() => void) | null>(null);
+
+    useEffect(() => () => stopWatching.current?.(), []);
+
+    // Listening starts at the confirmation, before the request is made, so that its start is never missed.
+    const watchSending = (): void => {
+        stopWatching.current?.();
+        setSending(true);
+
+        let started = false;
+        const release = (): void => {
+            stopWatching.current?.();
+            stopWatching.current = null;
+            setSending(false);
+        };
+        const stopStart = router.on('start', () => {
+            started = true;
+        });
+        const stopFinish = router.on('finish', () => {
+            if (started) {
+                release();
+            }
+        });
+        // Nothing was sent (the action did not make a request): the button is free again.
+        const timer = window.setTimeout(() => {
+            if (!started) {
+                release();
+            }
+        }, 1500);
+
+        stopWatching.current = () => {
+            stopStart();
+            stopFinish();
+            window.clearTimeout(timer);
+        };
+    };
 
     return (
         <>
@@ -56,7 +96,7 @@ export default function ConfirmAction({
                 variant={variant}
                 size={size}
                 className={className}
-                disabled={disabled}
+                disabled={disabled || sending}
                 onClick={(event) => {
                     const parent = event.currentTarget.form;
 
@@ -68,7 +108,7 @@ export default function ConfirmAction({
                     setOpen(true);
                 }}
             >
-                {label}
+                {sending ? t('common.form.saving') : label}
             </Button>
 
             <Dialog open={open} onOpenChange={setOpen}>
@@ -91,6 +131,7 @@ export default function ConfirmAction({
                             variant={destructive ? 'destructive' : 'success'}
                             onClick={() => {
                                 setOpen(false);
+                                watchSending();
 
                                 if (onConfirm) {
                                     onConfirm();

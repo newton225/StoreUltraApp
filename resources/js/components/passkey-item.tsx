@@ -65,7 +65,7 @@ export default function PasskeyItem({ passkey, onDelete }: Props) {
             <Dialog>
                 <DialogTrigger asChild>
                     <Button
-                        variant="ghost"
+                        variant="ghostDanger"
                         size="sm"
                         className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                     >

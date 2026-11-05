@@ -98,6 +98,7 @@ export default function Login({ status, canResetPassword }: Props) {
                             </div>
 
                             <Button
+                                variant="success"
                                 type="submit"
                                 className="mt-4 w-full"
                                 tabIndex={4}

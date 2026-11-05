@@ -157,7 +157,7 @@ export default function CashIndex({
                 </div>
 
                 <div
-                    className="grid grid-cols-2 gap-3 lg:grid-cols-4"
+                    className="cascade grid grid-cols-2 gap-3 lg:grid-cols-4"
                     data-tour="tiles"
                 >
                     {tiles.map(([key, value, help, strong]) => (
@@ -443,7 +443,7 @@ export default function CashIndex({
                                             </span>
                                             <span>{row.label}</span>
                                             {row.from_expense && (
-                                                <Badge variant="outline">
+                                                <Badge variant="info">
                                                     {t('cash.linked')}
                                                     <HelpHint
                                                         label={t(
@@ -453,7 +453,7 @@ export default function CashIndex({
                                                 </Badge>
                                             )}
                                             {row.cancelled && (
-                                                <Badge variant="secondary">
+                                                <Badge variant="danger">
                                                     {t('cash.state_cancelled')}
                                                 </Badge>
                                             )}
@@ -480,7 +480,7 @@ export default function CashIndex({
                                         !row.from_expense &&
                                         cancelling !== row.id && (
                                             <Button
-                                                variant="ghost"
+                                                variant="ghostDanger"
                                                 size="sm"
                                                 className="shrink-0"
                                                 onClick={() =>

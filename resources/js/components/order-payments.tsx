@@ -33,6 +33,7 @@ export type OrderPaymentsData = {
     net_paid: number;
     balance_due: number;
     advance_outstanding: number;
+    advance_blocking: boolean;
     methods: { id: number; name: string; requires_reference: boolean }[];
     allowed_kinds: string[];
     client_name: string | null;
@@ -373,12 +374,20 @@ export default function OrderPayments({ orderId, payments, today }: Props) {
                             <div className="space-y-0.5">
                                 <div className="font-medium">
                                     {payment.receipt_number}{' '}
-                                    <Badge variant="outline">
+                                    <Badge
+                                        variant={
+                                            payment.kind === 'refund'
+                                                ? 'warning'
+                                                : payment.kind === 'balance'
+                                                  ? 'success'
+                                                  : 'info'
+                                        }
+                                    >
                                         {t(`payments.kinds.${payment.kind}`)}
                                     </Badge>
                                     {payment.reversed && (
                                         <Badge
-                                            variant="secondary"
+                                            variant="danger"
                                             className="ml-1"
                                         >
                                             {t('payments.panel.reversed')}

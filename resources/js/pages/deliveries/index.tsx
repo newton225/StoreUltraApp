@@ -161,7 +161,7 @@ export default function DeliveriesIndex({
                                                 <Button
                                                     asChild
                                                     size="sm"
-                                                    variant="outline"
+                                                    variant="infoOutline"
                                                 >
                                                     <Link
                                                         href={showOrder(row.id)}

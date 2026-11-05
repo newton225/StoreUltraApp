@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\Kit;
 use App\Models\Order;
+use App\Models\Zone;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -11,7 +12,7 @@ use Illuminate\Validation\Rule;
 class StoreOrderBatchRequest extends FormRequest
 {
     /**
-     * Whoever may create an order may create them for a locality.
+     * Whoever may create an order may create them for a zone.
      */
     public function authorize(): bool
     {
@@ -26,7 +27,9 @@ class StoreOrderBatchRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'locality.required' => __('orders.batch.errors.locality_required'),
+            'zone_id.required' => __('orders.batch.errors.zone_required'),
+            'zone_id.integer' => __('orders.batch.errors.zone_required'),
+            'zone_id.exists' => __('orders.batch.errors.zone_required'),
             'kit_id.required' => __('orders.plans.errors.kit_required'),
             'kit_id.integer' => __('orders.plans.errors.kit_required'),
             'kit_id.exists' => __('orders.plans.errors.kit_invalid'),
@@ -53,7 +56,7 @@ class StoreOrderBatchRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'locality' => ['required', 'string', 'max:160'],
+            'zone_id' => ['required', 'integer', Rule::exists(Zone::class, 'id')],
             'kit_id' => ['required', 'integer', Rule::exists(Kit::class, 'id')->where('active', true)],
             'kits_count' => ['required', 'integer', 'min:1', 'max:1000'],
             'delivery_week' => ['required', 'date'],

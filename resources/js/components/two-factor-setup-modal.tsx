@@ -98,7 +98,11 @@ function TwoFactorSetupStep({
                     </div>
 
                     <div className="flex w-full space-x-5">
-                        <Button className="w-full" onClick={onNextStep}>
+                        <Button
+                            variant="success"
+                            className="w-full"
+                            onClick={onNextStep}
+                        >
                             {buttonText}
                         </Button>
                     </div>
@@ -216,6 +220,7 @@ function TwoFactorVerificationStep({
                                 {t('common.actions.back')}
                             </Button>
                             <Button
+                                variant="success"
                                 type="submit"
                                 className="flex-1"
                                 disabled={

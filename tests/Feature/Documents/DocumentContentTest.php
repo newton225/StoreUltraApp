@@ -85,6 +85,28 @@ test('a delivery note shows who received the kits and the signature', function (
     expect($html)->toContain('Moussa Traore')->toContain('Aya Kone')->toContain('data:image/png;base64,');
 });
 
+test('the delivery note uses the same sheet, with the quantities ordered and delivered and no price', function () {
+    app(BusinessSettings::class)->set('document_project_title', 'Projet de latrines familiales');
+    $order = realOrder('delivered', 3, 5000);
+    $delivery = Delivery::factory()->for($order)->create(['kits_delivered' => 2, 'received_by' => 'Moussa Traore', 'signature_path' => null]);
+    $item = $order->items()->with('product')->first();
+
+    $html = htmlOf(DocumentType::DeliveryNote, $delivery);
+
+    expect($html)
+        ->toContain('Projet de latrines familiales')
+        ->toContain($order->reference)
+        ->toContain($order->client->zone->name)
+        ->toContain($item->product->name)
+        ->toContain('QTE commandée')
+        ->toContain('QTE livrée')
+        ->toContain('KITS LIVRÉS')
+        ->toContain((string) intdiv($item->quantity, 3) * 2)
+        ->toContain('Moussa Traore')
+        ->not->toContain('NET À PAYER')
+        ->not->toContain('Rapprochement avant nouvelle commande');
+});
+
 test('a delivery note without a signature has no image', function () {
     $delivery = Delivery::factory()->for(realOrder('delivered'))->create(['signature_path' => null]);
 
@@ -107,6 +129,93 @@ test('an invoice shows the fne number when there is one', function () {
 
     expect(htmlOf(DocumentType::Invoice, Invoice::sole()))->toContain('FNE-998877')->toContain('16 500 FCFA');
     expect($document->number)->not->toBeNull();
+});
+
+test('the invoice follows the model: header, goods line by line, totals, amount in words and signatures', function () {
+    $settings = app(BusinessSettings::class);
+    $settings->set('company_phone', '01 71 91 15 04');
+    $settings->set('document_project_title', 'Projet de latrines familiales');
+    $settings->set('document_subtitle', 'Matériaux de construction');
+
+    $order = realOrder('delivered');
+    Payment::factory()->for($order)->create(['kind' => 'advance', 'amount' => 5000]);
+    $order->client->forceFill(['contact_person' => 'Ouattara Sikahoua', 'delivery_address' => 'Kationon 2'])->save();
+
+    app(DocumentIssuer::class)->issue(DocumentType::Invoice, $order, 'fr', $this->user);
+    $invoice = Invoice::sole();
+    $item = $order->items()->with('product')->first();
+
+    expect(htmlOf(DocumentType::Invoice, $invoice))
+        ->toContain('Projet de latrines familiales')
+        ->toContain('Matériaux de construction')
+        ->toContain($order->client->zone->name)
+        ->toContain('01 71 91 15 04')
+        ->toContain('Kationon 2')
+        ->toContain($item->product->name)
+        ->toContain('NET À PAYER')
+        ->toContain('16 500 FCFA')
+        ->toContain('AVANCE')
+        ->toContain('5 000 FCFA')
+        ->toContain('RESTE À PAYER')
+        ->toContain('11 500 FCFA')
+        ->toContain('Seize mille cinq cents francs')
+        ->toContain('Ouattara Sikahoua')
+        ->toContain(e($this->user->name))
+        ->toContain('Contrôle avant sortie');
+});
+
+test('the invoice reconciles the previous debt of the client with the new order', function () {
+    $old = realOrder('delivered');
+    $order = realOrder('delivered');
+    $order->forceFill(['client_id' => $old->client_id])->save();
+    Payment::factory()->for($old)->create(['kind' => 'advance', 'amount' => 4000]);
+    Payment::factory()->for($order)->create(['kind' => 'advance', 'amount' => 5000]);
+
+    app(DocumentIssuer::class)->issue(DocumentType::Invoice, $order->refresh(), 'fr', $this->user);
+    $html = htmlOf(DocumentType::Invoice, Invoice::sole());
+
+    // The old order cost 16 500 and 4 000 were paid: 12 500 are still owed. The new one leaves 11 500 to pay.
+    expect($html)
+        ->toContain('Ancienne dette')
+        ->toContain($old->reference)
+        ->toContain('12 500')
+        ->toContain('Payé en partie')
+        ->toContain('24 000');
+});
+
+test('the proforma uses the same sheet as the invoice, with the advance still to be paid', function () {
+    $settings = app(BusinessSettings::class);
+    $settings->set('document_project_title', 'Projet de latrines familiales');
+    $settings->set('document_subtitle', 'Matériaux de construction');
+
+    $order = realOrder('proforma_issued', 3, 5000);
+    $item = $order->items()->with('product')->first();
+
+    $html = htmlOf(DocumentType::Proforma, $order, 'fr', ['issuer' => 'Awa Traoré']);
+
+    expect($html)
+        ->toContain('Projet de latrines familiales')
+        ->toContain('Matériaux de construction')
+        ->toContain($order->client->zone->name)
+        ->toContain($item->product->name)
+        ->toContain('NET À PAYER')
+        ->toContain('16 500 FCFA')
+        ->toContain('AVANCE À VERSER')
+        ->toContain('5 000 FCFA')
+        ->toContain('RESTE À PAYER À LA LIVRAISON')
+        ->toContain('11 500 FCFA')
+        ->toContain('Seize mille cinq cents francs')
+        ->toContain('Valable')
+        ->toContain('Rapprochement avant nouvelle commande')
+        ->toContain('À verser')
+        ->toContain('Awa Traoré')
+        ->not->toContain('Contrôle avant sortie');
+});
+
+test('an invoice without any previous debt says so', function () {
+    app(DocumentIssuer::class)->issue(DocumentType::Invoice, realOrder('delivered'), 'fr', $this->user);
+
+    expect(htmlOf(DocumentType::Invoice, Invoice::sole()))->toContain('Ancienne dette')->toContain('Aucune');
 });
 
 test('a statement lists each invoice of the period with the totals', function () {

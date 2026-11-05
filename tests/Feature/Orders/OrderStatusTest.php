@@ -3,7 +3,9 @@
 use App\Enums\OrderStatus;
 use App\Models\AuditLog;
 use App\Models\Order;
+use App\Models\Payment;
 use App\Models\User;
+use App\Support\BusinessSettings;
 
 test('an order moves one step at a time along its life', function () {
     $order = Order::factory()->create(['status' => 'draft']);
@@ -105,4 +107,23 @@ test('the statuses know which ones are final', function () {
     expect(OrderStatus::Closed->isFinal())->toBeTrue();
     expect(OrderStatus::Cancelled->isFinal())->toBeTrue();
     expect(OrderStatus::Draft->isFinal())->toBeFalse();
+});
+
+test('the order page says whether the advance still blocks the next step', function () {
+    $order = Order::factory()->create(['status' => 'proforma_issued', 'advance_due' => 40000]);
+    $user = User::factory()->owner()->create();
+
+    $this->actingAs($user)->get(route('orders.show', $order))
+        ->assertInertia(fn ($page) => $page->where('payments.advance_blocking', true)->where('payments.advance_outstanding', 40000));
+
+    Payment::factory()->for($order)->create(['kind' => 'advance', 'amount' => 40000]);
+
+    $this->get(route('orders.show', $order))
+        ->assertInertia(fn ($page) => $page->where('payments.advance_blocking', false));
+
+    app(BusinessSettings::class)->set('advance_required', false);
+    $unpaid = Order::factory()->create(['status' => 'proforma_issued', 'advance_due' => 40000]);
+
+    $this->get(route('orders.show', $unpaid))
+        ->assertInertia(fn ($page) => $page->where('payments.advance_blocking', false));
 });

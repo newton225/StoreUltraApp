@@ -28,7 +28,7 @@ export default function ZonesIndex({ zones }: { zones: Zone[] }) {
                         title={t('catalog.zones.title')}
                         description={t('catalog.zones.description')}
                     />
-                    <Button asChild>
+                    <Button variant="info" asChild>
                         <Link href={create()}>{t('catalog.zones.new')}</Link>
                     </Button>
                 </div>
@@ -70,8 +70,8 @@ export default function ZonesIndex({ zones }: { zones: Zone[] }) {
                                             <Badge
                                                 variant={
                                                     zone.active
-                                                        ? 'secondary'
-                                                        : 'outline'
+                                                        ? 'success'
+                                                        : 'neutral'
                                                 }
                                             >
                                                 {zone.active

@@ -281,6 +281,7 @@ export default function GuidedTour({
                             </Button>
                         )}
                         <Button
+                            variant="info"
                             ref={nextButton}
                             size="sm"
                             onClick={() =>

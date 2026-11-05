@@ -37,7 +37,7 @@ export default function OrderProfit({ profit }: { profit: OrderProfitData }) {
             <h2 className="text-base font-semibold">
                 {t('expenses.profit.order.title')}
             </h2>
-            <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <dl className="cascade grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {figures.map(([key, value]) => (
                     <div
                         key={key}
@@ -73,7 +73,7 @@ export default function OrderProfit({ profit }: { profit: OrderProfitData }) {
                             <span>
                                 {expense.type} · {date(expense.incurred_on)}
                                 {expense.cancelled && (
-                                    <Badge variant="secondary" className="ml-2">
+                                    <Badge variant="danger" className="ml-2">
                                         {t('expenses.state_cancelled')}
                                     </Badge>
                                 )}

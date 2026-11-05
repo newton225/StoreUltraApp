@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useTranslation } from '@/hooks/use-translation';
+import { useVisitBusy } from '@/hooks/use-visit-busy';
 
 type Doc = {
     id: number;
@@ -49,6 +50,7 @@ export default function DocumentsIndex({
     period,
 }: Props) {
     const { t, locale } = useTranslation();
+    const busy = useVisitBusy();
     const [search, setSearch] = useState(filters.search);
     const [cancelling, setCancelling] = useState<number | null>(null);
     const [reason, setReason] = useState('');
@@ -252,7 +254,7 @@ export default function DocumentsIndex({
                                                     )}
                                                 </Badge>{' '}
                                                 {doc.cancelled && (
-                                                    <Badge variant="secondary">
+                                                    <Badge variant="danger">
                                                         {t(
                                                             'documents.ui.state_cancelled',
                                                         )}
@@ -281,7 +283,7 @@ export default function DocumentsIndex({
                                             {!doc.cancelled &&
                                                 cancelling !== doc.id && (
                                                     <Button
-                                                        variant="ghost"
+                                                        variant="ghostDanger"
                                                         size="sm"
                                                         onClick={() =>
                                                             setCancelling(
@@ -320,6 +322,8 @@ export default function DocumentsIndex({
                                             />
                                             <div className="flex gap-2">
                                                 <Button
+                                                    variant="warning"
+                                                    disabled={busy}
                                                     size="sm"
                                                     onClick={() =>
                                                         cancelDocument(
@@ -333,6 +337,7 @@ export default function DocumentsIndex({
                                                     )}
                                                 </Button>
                                                 <Button
+                                                    disabled={busy}
                                                     size="sm"
                                                     variant="outline"
                                                     onClick={() =>

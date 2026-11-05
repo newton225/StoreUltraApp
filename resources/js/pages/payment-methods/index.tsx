@@ -31,7 +31,7 @@ export default function PaymentMethodsIndex({
                         title={t('payments.methods.title')}
                         description={t('payments.methods.description')}
                     />
-                    <Button asChild>
+                    <Button variant="info" asChild>
                         <Link href={create()}>{t('payments.methods.new')}</Link>
                     </Button>
                 </div>
@@ -79,8 +79,8 @@ export default function PaymentMethodsIndex({
                                             <Badge
                                                 variant={
                                                     method.active
-                                                        ? 'secondary'
-                                                        : 'outline'
+                                                        ? 'success'
+                                                        : 'neutral'
                                                 }
                                             >
                                                 {method.active

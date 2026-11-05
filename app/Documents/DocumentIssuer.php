@@ -15,7 +15,9 @@ use App\Models\Order;
 use App\Models\Payment;
 use App\Models\PurchaseOrder;
 use App\Models\User;
+use App\Support\AmountInWords;
 use App\Support\BusinessSettings;
+use App\Support\CommercialSheet;
 use App\Support\DocumentNumbers;
 use App\Support\MoneyFormatter;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -55,7 +57,7 @@ class DocumentIssuer
             }
 
             $number = $this->numberFor($type, $record);
-            $pdf = Pdf::loadHTML($this->render($type, $record, $locale, $number, $options))->setPaper('a4')->output();
+            $pdf = Pdf::loadHTML($this->render($type, $record, $locale, $number, [...$options, 'issuer' => $user?->name]))->setPaper('a4')->output();
             $path = "documents/{$type->value}/{$number}.pdf";
 
             Storage::disk('local')->put($path, $pdf);
@@ -278,6 +280,8 @@ class DocumentIssuer
                 'identifiers' => $this->companyIdentifiers($locale),
             ],
             'money' => fn (int $amount): string => MoneyFormatter::format($amount, $locale),
+            'plain' => fn (int $amount): string => $locale === 'en' ? number_format($amount, 0, '.', ',') : number_format($amount, 0, ',', ' '),
+            'inWords' => fn (int $amount): string => AmountInWords::format($amount, $locale),
             'date' => fn (CarbonInterface|string $date): string => Carbon::parse($date)->format('d/m/Y'),
         ];
     }
@@ -289,25 +293,32 @@ class DocumentIssuer
     private function data(DocumentType $type, ?Model $subject, string $locale, array $options): array
     {
         return match ($type) {
-            DocumentType::Proforma => $this->proformaData($subject),
+            DocumentType::Proforma => $this->proformaData($subject, $options),
             DocumentType::Receipt => $this->receiptData($subject),
             DocumentType::PurchaseOrder => $this->purchaseData($subject),
             DocumentType::DeliveryNote => $this->deliveryData($subject),
-            DocumentType::Invoice => $this->invoiceData($subject),
+            DocumentType::Invoice => $this->invoiceData($subject, $options),
             DocumentType::Statement => $this->statementData($options),
         };
     }
 
     /**
+     * @param  array<string, mixed>  $options
      * @return array<string, mixed>
      */
-    private function proformaData(?Model $subject): array
+    private function proformaData(?Model $subject, array $options): array
     {
         /** @var Order $order */
         $order = $subject;
         $order->load('client.zone', 'kitVersion.kit', 'items.product');
 
-        return ['order' => $order, 'validityDays' => $this->settings->get('proforma_validity_days')];
+        return [
+            'order' => $order,
+            'validityDays' => $this->settings->get('proforma_validity_days'),
+            'sheet' => CommercialSheet::forProforma($order, $options['issuer'] ?? null),
+            'projectTitle' => $this->settings->get('document_project_title'),
+            'subtitle' => $this->settings->get('document_subtitle'),
+        ];
     }
 
     /**
@@ -349,19 +360,31 @@ class DocumentIssuer
             $signature = 'data:image/png;base64,'.base64_encode(Storage::disk('local')->get($delivery->signature_path));
         }
 
-        return ['delivery' => $delivery, 'signature' => $signature];
+        return [
+            'delivery' => $delivery,
+            'signature' => $signature,
+            'sheet' => CommercialSheet::forDelivery($delivery),
+            'projectTitle' => $this->settings->get('document_project_title'),
+            'subtitle' => $this->settings->get('document_subtitle'),
+        ];
     }
 
     /**
+     * @param  array<string, mixed>  $options
      * @return array<string, mixed>
      */
-    private function invoiceData(?Model $subject): array
+    private function invoiceData(?Model $subject, array $options): array
     {
         /** @var Invoice $invoice */
         $invoice = $subject;
-        $invoice->load('client', 'order.kitVersion.kit');
+        $invoice->load('client.zone', 'order.kitVersion.kit');
 
-        return ['invoice' => $invoice];
+        return [
+            'invoice' => $invoice,
+            'sheet' => CommercialSheet::forInvoice($invoice, $options['issuer'] ?? null),
+            'projectTitle' => $this->settings->get('document_project_title'),
+            'subtitle' => $this->settings->get('document_subtitle'),
+        ];
     }
 
     /**

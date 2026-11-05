@@ -29,6 +29,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useFormat } from '@/hooks/use-format';
 import { useTranslation } from '@/hooks/use-translation';
+import { useVisitBusy } from '@/hooks/use-visit-busy';
 import { StatusBadge } from '@/components/status-badge';
 import TabLinks from '@/components/tab-links';
 
@@ -112,6 +113,7 @@ export default function ShowOrder({
     today: string;
 }) {
     const { t } = useTranslation();
+    const busy = useVisitBusy();
     const { money, date } = useFormat();
     const [cancelling, setCancelling] = useState(false);
     const [tab, setTab] = useState('lines');
@@ -152,6 +154,9 @@ export default function ShowOrder({
         (status) => status !== 'cancelled',
     );
     const canCancel = order.allowed_next.includes('cancelled');
+    // The advance has to be collected before the order can go on (setting "advance required").
+    const waitingAdvance =
+        nextStep === 'advance_received' && payments.advance_blocking;
 
     return (
         <>
@@ -186,11 +191,7 @@ export default function ShowOrder({
 
                 {order.status === 'cancelled' ? (
                     <p className="rounded-lg border border-border p-4 text-sm">
-                        <StatusBadge
-                            group="orders"
-                            status="cancelled"
-                            variant="outline"
-                        />{' '}
+                        <StatusBadge group="orders" status="cancelled" />{' '}
                         <span className="text-muted-foreground">
                             {t('orders.status_help.cancelled')}
                         </span>
@@ -248,29 +249,68 @@ export default function ShowOrder({
                                             <div className="text-sm font-semibold">
                                                 {t('orders.show.next_step')}
                                             </div>
-                                            <p className="text-sm text-muted-foreground">
-                                                {t(
-                                                    `orders.status_help.${nextStep}`,
-                                                )}
-                                            </p>
-                                        </div>
-                                        <Button
-                                            variant="success"
-                                            onClick={() =>
-                                                setConfirming(nextStep)
-                                            }
-                                        >
-                                            {t(
-                                                `orders.show.actions.${nextStep}`,
+                                            {waitingAdvance ? (
+                                                <p
+                                                    role="status"
+                                                    className="text-sm text-warning-text"
+                                                >
+                                                    {t(
+                                                        'orders.show.advance_waiting',
+                                                        {
+                                                            amount: money(
+                                                                payments.advance_outstanding,
+                                                            ),
+                                                        },
+                                                    )}
+                                                </p>
+                                            ) : (
+                                                <p className="text-sm text-muted-foreground">
+                                                    {t(
+                                                        `orders.status_help.${nextStep}`,
+                                                    )}
+                                                </p>
                                             )}
-                                        </Button>
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            {waitingAdvance && (
+                                                <Button
+                                                    variant="infoOutline"
+                                                    onClick={() => {
+                                                        setTab('payments');
+                                                        document
+                                                            .querySelector(
+                                                                '[data-tour="tabs"]',
+                                                            )
+                                                            ?.scrollIntoView({
+                                                                behavior:
+                                                                    'smooth',
+                                                            });
+                                                    }}
+                                                >
+                                                    {t(
+                                                        'orders.show.record_payment',
+                                                    )}
+                                                </Button>
+                                            )}
+                                            <Button
+                                                variant="success"
+                                                disabled={waitingAdvance}
+                                                onClick={() =>
+                                                    setConfirming(nextStep)
+                                                }
+                                            >
+                                                {t(
+                                                    `orders.show.actions.${nextStep}`,
+                                                )}
+                                            </Button>
+                                        </div>
                                     </div>
                                 )}
                                 <InputError message={errors.to} />
 
                                 {canCancel && !cancelling && (
                                     <Button
-                                        variant="ghost"
+                                        variant="ghostDanger"
                                         size="sm"
                                         className="text-destructive"
                                         onClick={() => setCancelling(true)}
@@ -294,6 +334,7 @@ export default function ShowOrder({
                                         <InputError message={errors.reason} />
                                         <div className="flex flex-wrap gap-2">
                                             <Button
+                                                disabled={busy}
                                                 variant="destructive"
                                                 onClick={() =>
                                                     move('cancelled', {
@@ -364,7 +405,7 @@ export default function ShowOrder({
                     </DialogContent>
                 </Dialog>
 
-                <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                <div className="cascade grid grid-cols-2 gap-3 lg:grid-cols-4">
                     {[
                         ['sale', money(order.total_sale)],
                         ['advance_due', money(order.advance_due)],

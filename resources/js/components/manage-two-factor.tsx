@@ -87,7 +87,10 @@ export default function ManageTwoFactor(props: Props) {
 
                     <div>
                         {hasSetupData ? (
-                            <Button onClick={() => setShowSetupModal(true)}>
+                            <Button
+                                variant="success"
+                                onClick={() => setShowSetupModal(true)}
+                            >
                                 <ShieldCheck />
                                 {t('account.two_factor.continue_setup')}
                             </Button>
@@ -97,7 +100,11 @@ export default function ManageTwoFactor(props: Props) {
                                 onSuccess={() => setShowSetupModal(true)}
                             >
                                 {({ processing }) => (
-                                    <Button type="submit" disabled={processing}>
+                                    <Button
+                                        variant="success"
+                                        type="submit"
+                                        disabled={processing}
+                                    >
                                         {t('account.two_factor.enable')}
                                     </Button>
                                 )}

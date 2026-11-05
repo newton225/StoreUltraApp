@@ -64,7 +64,7 @@ export default function ParametersEdit({ values, definitions }: Props) {
                     className="space-y-8"
                 >
                     {({ processing, isDirty, errors }) => {
-                        const field = (key: string) => {
+                        const fieldWith = (key: string, span: string) => {
                             const definition = definitions[key];
                             const value = values[key];
 
@@ -101,10 +101,7 @@ export default function ParametersEdit({ values, definitions }: Props) {
                             }
 
                             return (
-                                <div
-                                    key={key}
-                                    className="grid gap-2 md:col-span-2"
-                                >
+                                <div key={key} className={`grid gap-2 ${span}`}>
                                     <FieldLabel
                                         htmlFor={key}
                                         help={t(
@@ -150,6 +147,12 @@ export default function ParametersEdit({ values, definitions }: Props) {
                             );
                         };
 
+                        // Three fields per row, or two wide ones to fill a row of two.
+                        const field = (key: string) =>
+                            fieldWith(key, 'md:col-span-2');
+                        const wideField = (key: string) =>
+                            fieldWith(key, 'md:col-span-3');
+
                         return (
                             <>
                                 <section className={formGrid}>
@@ -186,6 +189,10 @@ export default function ParametersEdit({ values, definitions }: Props) {
                                         'company_address',
                                         'company_phone',
                                     ].map(field)}
+                                    {[
+                                        'document_project_title',
+                                        'document_subtitle',
+                                    ].map(wideField)}
                                 </section>
 
                                 <details

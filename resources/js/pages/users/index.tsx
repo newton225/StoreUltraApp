@@ -37,7 +37,7 @@ export default function UsersIndex({ users }: { users: ListedUser[] }) {
                     />
                     <div className="flex items-center gap-2">
                         <ExportMenu view="users" />
-                        <Button asChild>
+                        <Button variant="info" asChild>
                             <Link href={create()}>{t('users.new')}</Link>
                         </Button>
                     </div>
@@ -86,8 +86,8 @@ export default function UsersIndex({ users }: { users: ListedUser[] }) {
                                             <Badge
                                                 variant={
                                                     user.is_active
-                                                        ? 'secondary'
-                                                        : 'outline'
+                                                        ? 'success'
+                                                        : 'neutral'
                                                 }
                                             >
                                                 {user.is_active

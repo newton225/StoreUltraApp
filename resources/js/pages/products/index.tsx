@@ -18,6 +18,7 @@ import { useFormat } from '@/hooks/use-format';
 import SortHeader, { sortQuery } from '@/components/sort-header';
 import type { SortState } from '@/components/sort-header';
 import { useTranslation } from '@/hooks/use-translation';
+import { useVisitBusy } from '@/hooks/use-visit-busy';
 
 type Product = {
     id: number;
@@ -43,6 +44,7 @@ export default function ProductsIndex({
 }: Props) {
     const [search, setSearch] = useState(currentSearch);
     const { t } = useTranslation();
+    const busy = useVisitBusy();
     const { money } = useFormat();
 
     setLayoutProps({
@@ -79,7 +81,7 @@ export default function ProductsIndex({
                                 search: currentSearch,
                             }}
                         />
-                        <Button asChild>
+                        <Button variant="info" asChild>
                             <Link href={create()}>
                                 {t('catalog.products.new')}
                             </Link>
@@ -168,7 +170,7 @@ export default function ProductsIndex({
                                                 </span>
                                                 {product.archived_at && (
                                                     <Badge
-                                                        variant="outline"
+                                                        variant="neutral"
                                                         className="ml-2"
                                                     >
                                                         {t(
@@ -214,6 +216,7 @@ export default function ProductsIndex({
                                                     </Link>
                                                 </Button>
                                                 <Button
+                                                    disabled={busy}
                                                     variant="ghost"
                                                     size="sm"
                                                     onClick={() =>

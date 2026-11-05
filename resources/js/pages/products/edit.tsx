@@ -128,7 +128,7 @@ export default function EditProduct({ product, shops, prices, today }: Props) {
                                             </td>
                                             <td className="px-4 py-2 text-right">
                                                 {price.id === currentId && (
-                                                    <Badge variant="secondary">
+                                                    <Badge variant="success">
                                                         {t(
                                                             'catalog.prices.current',
                                                         )}

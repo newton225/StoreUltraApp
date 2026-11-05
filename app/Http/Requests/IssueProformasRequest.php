@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Zone;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class IssueProformasRequest extends FormRequest
 {
@@ -23,7 +25,7 @@ class IssueProformasRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'locality' => ['required', 'string', 'max:255'],
+            'zone_id' => ['required', 'integer', Rule::exists(Zone::class, 'id')],
         ];
     }
 }

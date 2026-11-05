@@ -54,6 +54,8 @@ return [
         'company_name' => ['type' => 'string', 'default' => null],
         'company_address' => ['type' => 'string', 'default' => null],
         'company_phone' => ['type' => 'string', 'default' => null],
+        'document_project_title' => ['type' => 'string', 'default' => null],
+        'document_subtitle' => ['type' => 'string', 'default' => null],
     ],
 
 ];

@@ -42,6 +42,14 @@
     --color-destructive-foreground: var(--destructive-foreground);
     --color-success: var(--success);
     --color-success-foreground: var(--success-foreground);
+    --color-warning: var(--warning);
+    --color-warning-foreground: var(--warning-foreground);
+    --color-info: var(--info);
+    --color-info-foreground: var(--info-foreground);
+    --color-success-text: var(--success-text);
+    --color-warning-text: var(--warning-text);
+    --color-info-text: var(--info-text);
+    --color-destructive-text: var(--destructive-text);
     --color-nav-dashboard: var(--nav-dashboard);
     --color-nav-sales: var(--nav-sales);
     --color-nav-supply: var(--nav-supply);
@@ -88,6 +96,14 @@
     --destructive-foreground: oklch(0.577 0.245 27.325);
     --success: oklch(0.527 0.154 150.069);
     --success-foreground: oklch(0.985 0 0);
+    --warning: oklch(0.769 0.165 70);
+    --warning-foreground: oklch(0.21 0.04 60);
+    --info: oklch(0.5 0.19 259);
+    --info-foreground: oklch(0.985 0 0);
+    --success-text: oklch(0.45 0.13 150);
+    --warning-text: oklch(0.48 0.12 65);
+    --info-text: oklch(0.46 0.19 259);
+    --destructive-text: oklch(0.5 0.2 27);
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
     --ring: oklch(0.87 0 0);
@@ -134,6 +150,14 @@
     --destructive-foreground: oklch(0.637 0.237 25.331);
     --success: oklch(0.527 0.154 150.069);
     --success-foreground: oklch(0.985 0 0);
+    --warning: oklch(0.769 0.165 70);
+    --warning-foreground: oklch(0.21 0.04 60);
+    --info: oklch(0.5 0.19 259);
+    --info-foreground: oklch(0.985 0 0);
+    --success-text: oklch(0.8 0.17 152);
+    --warning-text: oklch(0.84 0.14 80);
+    --info-text: oklch(0.78 0.12 255);
+    --destructive-text: oklch(0.75 0.17 25);
     --border: oklch(0.269 0 0);
     --input: oklch(0.269 0 0);
     --ring: oklch(0.439 0 0);
@@ -187,6 +211,19 @@
  * Motion. Everything here is progressive: without it (or with reduced motion
  * asked for) the content is simply there, readable and selectable.
  */
+/* Reduced motion: states still change, but at once. Only a loading spinner keeps turning (UI-74). */
+@media (prefers-reduced-motion: reduce) {
+    *:not(.animate-spin),
+    *:not(.animate-spin)::before,
+    *:not(.animate-spin)::after {
+        animation-duration: 0.01ms !important;
+        animation-delay: 0ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        transition-delay: 0ms !important;
+    }
+}
+
 @media (prefers-reduced-motion: no-preference) {
     html {
         scroll-behavior: smooth;
@@ -217,16 +254,165 @@
         }
     }
 
-    /* A new page slides in softly (see app-sidebar-layout.tsx); a new tab or panel only fades. */
+    /*
+     * Every interactive element changes colour, background, border and shadow smoothly by default
+     * (150 ms, ease-out), so no hover, focus or pressed state is ever a hard cut. A component that
+     * needs another property lists it itself with a `transition-*` utility, which wins over this base.
+     */
+    @layer base {
+        a,
+        button,
+        input,
+        select,
+        textarea,
+        summary,
+        label,
+        tbody tr,
+        [role='button'],
+        [role='tab'],
+        [role='menuitem'],
+        [role='option'],
+        [role='switch'],
+        [role='checkbox'] {
+            transition-property:
+                color, background-color, border-color, text-decoration-color,
+                box-shadow, opacity;
+            transition-duration: 150ms;
+            transition-timing-function: ease-out;
+        }
+    }
+
+    /*
+     * A new page arrives in steps, like the reference: the frame stays, the page fades in, its
+     * sections rise one after the other (40 ms apart, six at most) and table rows fade in behind
+     * them. Nothing lasts more than 0.6 s, and only opacity and transform move (UI-64, UI-72, UI-74).
+     * The fill is `backwards` so that nothing keeps a transform once it has arrived.
+     */
     .page-enter {
-        animation: page-enter 0.25s ease-out both;
+        animation: fade-in 0.2s ease-out backwards;
+    }
+
+    .page-enter > * > * {
+        animation: page-rise 0.3s cubic-bezier(0.22, 1, 0.36, 1) 240ms backwards;
+    }
+
+    .page-enter > * > :nth-child(1) {
+        animation-delay: 0ms;
+    }
+
+    .page-enter > * > :nth-child(2) {
+        animation-delay: 40ms;
+    }
+
+    .page-enter > * > :nth-child(3) {
+        animation-delay: 80ms;
+    }
+
+    .page-enter > * > :nth-child(4) {
+        animation-delay: 120ms;
+    }
+
+    .page-enter > * > :nth-child(5) {
+        animation-delay: 160ms;
+    }
+
+    .page-enter > * > :nth-child(6) {
+        animation-delay: 200ms;
+    }
+
+    /*
+     * A grid or row of cards (`cascade`) rises tile by tile, 30 ms apart, eight at most, starting
+     * just after its section: 60 + 7 x 30 + 300 = 570 ms, under the 0.6 s limit.
+     */
+    .cascade > * {
+        animation: page-rise 0.3s cubic-bezier(0.22, 1, 0.36, 1) 270ms backwards;
+    }
+
+    .cascade > :nth-child(1) {
+        animation-delay: 60ms;
+    }
+
+    .cascade > :nth-child(2) {
+        animation-delay: 90ms;
+    }
+
+    .cascade > :nth-child(3) {
+        animation-delay: 120ms;
+    }
+
+    .cascade > :nth-child(4) {
+        animation-delay: 150ms;
+    }
+
+    .cascade > :nth-child(5) {
+        animation-delay: 180ms;
+    }
+
+    .cascade > :nth-child(6) {
+        animation-delay: 210ms;
+    }
+
+    .cascade > :nth-child(7) {
+        animation-delay: 240ms;
+    }
+
+    .page-enter tbody tr {
+        animation: fade-in 0.25s ease-out 120ms backwards;
+    }
+
+    .page-enter tbody tr:nth-child(1) {
+        animation-delay: 60ms;
+    }
+
+    .page-enter tbody tr:nth-child(2) {
+        animation-delay: 80ms;
+    }
+
+    .page-enter tbody tr:nth-child(3) {
+        animation-delay: 100ms;
+    }
+
+    .page-enter tbody tr:nth-child(4) {
+        animation-delay: 120ms;
+    }
+
+    .page-enter tbody tr:nth-child(5) {
+        animation-delay: 140ms;
+    }
+
+    .page-enter tbody tr:nth-child(6) {
+        animation-delay: 160ms;
+    }
+
+    .page-enter tbody tr:nth-child(7) {
+        animation-delay: 180ms;
+    }
+
+    .page-enter tbody tr:nth-child(8) {
+        animation-delay: 200ms;
+    }
+
+    /*
+     * The page being left dims while the next one loads, but only when that takes longer than a
+     * moment (the 100 ms delay), so a fast navigation does not flicker. Nothing is blocked.
+     */
+    .page-leaving {
+        opacity: 0.55;
+        transition: opacity 0.15s ease-out 100ms;
+    }
+
+    /* The menu selection glides from one section to the next; it is placed without moving on first display. */
+    .nav-pill[data-ready='true'] {
+        transition:
+            transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+            opacity 0.2s ease-out;
     }
 
     .fade-in {
         animation: fade-in 0.2s ease-out both;
     }
 
-    @keyframes page-enter {
+    @keyframes page-rise {
         from {
             opacity: 0;
             transform: translateY(0.5rem);

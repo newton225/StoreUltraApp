@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Orders\CollectAdvancesForZone;
 use App\Actions\Orders\CreateOrder;
-use App\Actions\Orders\CreateOrdersForLocality;
-use App\Actions\Orders\IssueProformasForLocality;
-use App\Actions\Orders\ReceiveAdvancesForLocality;
+use App\Actions\Orders\CreateOrdersForZone;
+use App\Actions\Orders\IssueProformasForZone;
 use App\Enums\ClientStatus;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentKind;
@@ -23,6 +23,7 @@ use App\Models\PaymentMethod;
 use App\Models\User;
 use App\Support\BusinessSettings;
 use App\Support\ListSort;
+use App\Support\OrderDocumentArchive;
 use App\Support\OrderProfit;
 use App\Support\WeekCalendar;
 use Carbon\CarbonImmutable;
@@ -39,7 +40,7 @@ class OrderController extends Controller
     /**
      * List the orders the user may see, newest week first.
      */
-    public function index(Request $request, WeekCalendar $calendar, IssueProformasForLocality $proformas, ReceiveAdvancesForLocality $advances): Response
+    public function index(Request $request, WeekCalendar $calendar, IssueProformasForZone $proformas, OrderDocumentArchive $archive, CollectAdvancesForZone $collect): Response
     {
         $user = $request->user();
         $search = trim($request->string('search')->toString());
@@ -60,8 +61,14 @@ class OrderController extends Controller
             ->when($week !== null, fn ($query) => $query->whereDate('delivery_week', $calendar->startOf($week)))
             ->sortedBy($sort['sort'], $sort['direction'])
             ->paginate(self::PER_PAGE)
-            ->withQueryString()
-            ->through(fn (Order $order): array => $this->listed($order));
+            ->withQueryString();
+
+        $documents = $archive->idsByOrder($orders->getCollection()->pluck('id')->map(fn (mixed $id): int => (int) $id)->values()->all());
+        $orders->through(fn (Order $order): array => [
+            ...$this->listed($order),
+            'proforma_document' => $documents['proforma'][$order->id] ?? null,
+            'invoice_document' => $documents['invoice'][$order->id] ?? null,
+        ]);
 
         return Inertia::render('orders/index', [
             'orders' => $orders,
@@ -73,20 +80,26 @@ class OrderController extends Controller
             ],
             'statuses' => array_column(OrderStatus::cases(), 'value'),
             'canCreate' => $user->can('create', Order::class),
-            'proformaLocalities' => $user->can('manage-orders') ? $proformas->localities($user) : [],
-            'advanceLocalities' => $user->can('manage-orders') ? $advances->localities($user) : [],
+            'proformaZones' => $user->can('manage-orders') ? $proformas->zones($user) : [],
+            'archiveZones' => $archive->zones($user),
+            'collectZones' => $user->can('manage-orders') ? $collect->zones($user) : [],
+            'paymentMethods' => $user->can('manage-orders')
+                ? PaymentMethod::query()->where('active', true)->orderBy('label_fr')->get()
+                    ->map(fn (PaymentMethod $method): array => ['id' => $method->id, 'name' => $method->name, 'requires_reference' => $method->requires_reference])
+                    ->values()
+                : [],
         ]);
     }
 
     /**
      * Show the form creating an order by hand.
      */
-    public function create(Request $request, BusinessSettings $settings, CreateOrdersForLocality $batch): Response
+    public function create(Request $request, BusinessSettings $settings, CreateOrdersForZone $batch): Response
     {
         Gate::authorize('create', Order::class);
 
-        $mode = $request->query('mode') === 'locality' ? 'locality' : 'single';
-        $locality = trim($request->string('locality')->toString());
+        $mode = $request->query('mode') === 'zone' ? 'zone' : 'single';
+        $zoneId = $request->integer('zone');
         $batchWeek = $request->filled('batch_week') ? $request->date('batch_week') : null;
 
         return Inertia::render('orders/create', [
@@ -101,10 +114,10 @@ class OrderController extends Controller
                 'delivery_week' => today()->toDateString(),
             ],
             'mode' => $mode,
-            'localities' => $mode === 'locality' ? $batch->localities($request->user()) : [],
-            'locality' => $locality,
+            'zones' => $mode === 'zone' ? $batch->zones($request->user()) : [],
+            'zone' => $zoneId > 0 ? (string) $zoneId : '',
             'batchWeek' => $batchWeek?->toDateString(),
-            'candidates' => $mode === 'locality' && $locality !== '' ? $batch->candidates($locality, $batchWeek, $request->user()) : [],
+            'candidates' => $mode === 'zone' && $zoneId > 0 ? $batch->candidates($zoneId, $batchWeek, $request->user()) : [],
         ]);
     }
 
@@ -202,6 +215,7 @@ class OrderController extends Controller
                 'net_paid' => $netPaid,
                 'balance_due' => max(0, $order->total_sale - $netPaid),
                 'advance_outstanding' => max(0, $order->advance_due - $netPaid),
+                'advance_blocking' => (bool) $settings->get('advance_required') && $netPaid < $order->advance_due,
                 'methods' => PaymentMethod::query()->where('active', true)->orderBy('label_fr')->get()
                     ->map(fn (PaymentMethod $method): array => ['id' => $method->id, 'name' => $method->name, 'requires_reference' => $method->requires_reference])
                     ->values(),

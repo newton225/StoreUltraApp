@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Actions\Orders\CreateOrdersForLocality;
+use App\Actions\Orders\CreateOrdersForZone;
 use App\Exceptions\OrderPricesMissing;
 use App\Http\Requests\StoreOrderBatchRequest;
 use App\Models\Kit;
@@ -13,15 +13,15 @@ use Inertia\Inertia;
 class OrderBatchController extends Controller
 {
     /**
-     * Create the order of a week for the TPE of a locality, in one go, and issue their proformas when asked.
+     * Create the order of a week for the TPE of a zone (sub-prefecture), in one go, and issue their proformas when asked.
      */
-    public function store(StoreOrderBatchRequest $request, CreateOrdersForLocality $batch): RedirectResponse
+    public function store(StoreOrderBatchRequest $request, CreateOrdersForZone $batch): RedirectResponse
     {
         $week = CarbonImmutable::parse($request->validated('delivery_week'));
 
         try {
             $result = $batch->handle(
-                locality: $request->validated('locality'),
+                zoneId: (int) $request->validated('zone_id'),
                 kit: Kit::findOrFail($request->integer('kit_id')),
                 kitsCount: (int) $request->validated('kits_count'),
                 week: $week,

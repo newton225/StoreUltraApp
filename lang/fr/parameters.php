@@ -42,6 +42,8 @@ return [
         'company_name_help' => 'Nom de l’entreprise, imprimé en en-tête de tous les documents (proforma, facture, bon de livraison…).',
         'company_address_help' => 'Adresse imprimée en en-tête des documents.',
         'company_phone_help' => 'Téléphone imprimé en en-tête des documents.',
+        'document_project_title_help' => 'Titre du projet, imprimé en haut de la facture et de la proforma, avec la liste des sous-préfectures. Laissez vide pour ne rien imprimer.',
+        'document_subtitle_help' => 'Catégorie des articles, imprimée en grandes lettres dans le bandeau de la facture et de la proforma (par exemple : Matériaux de construction). Laissez vide pour ne rien imprimer.',
         'kits_per_client' => 'Kits par client et par cycle',
         'advance_amount' => 'Avance par cycle (FCFA)',
         'advance_frequency' => 'Rythme de l\'avance',
@@ -69,6 +71,8 @@ return [
         'company_name' => 'Nom de l\'entreprise',
         'company_address' => 'Adresse',
         'company_phone' => 'Téléphone',
+        'document_project_title' => 'Titre du projet (factures et proformas)',
+        'document_subtitle' => 'Catégorie des articles (factures et proformas)',
     ],
 
     'allocations' => [

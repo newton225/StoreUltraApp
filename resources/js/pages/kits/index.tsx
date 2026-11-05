@@ -54,7 +54,7 @@ export default function KitsIndex({
                     />
                     <div className="flex shrink-0 items-center gap-2">
                         <ExportMenu view="kits" />
-                        <Button asChild>
+                        <Button variant="info" asChild>
                             <Link href={create()}>{t('kits.new')}</Link>
                         </Button>
                     </div>
@@ -122,7 +122,7 @@ export default function KitsIndex({
                                             {kit.name}
                                             {!kit.active && (
                                                 <Badge
-                                                    variant="outline"
+                                                    variant="neutral"
                                                     className="ml-2"
                                                 >
                                                     {t(

@@ -7,6 +7,12 @@ return [
         'descending' => 'Sort descending',
     ],
 
+    'select' => [
+        'search' => 'Search…',
+        'search_label' => 'Search the list',
+        'no_results' => 'No result',
+    ],
+
     'pagination' => [
         'label' => 'Pagination',
         'page' => 'Page :current of :last',

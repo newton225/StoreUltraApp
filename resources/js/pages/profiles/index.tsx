@@ -44,7 +44,7 @@ export default function ProfilesIndex({ profiles, permissions }: Props) {
                         title={t('profiles.title')}
                         description={t('profiles.description')}
                     />
-                    <Button asChild>
+                    <Button variant="info" asChild>
                         <Link href={create()}>{t('profiles.new')}</Link>
                     </Button>
                 </div>
@@ -84,8 +84,8 @@ export default function ProfilesIndex({ profiles, permissions }: Props) {
                                                 <Badge
                                                     variant={
                                                         profile.is_system
-                                                            ? 'secondary'
-                                                            : 'outline'
+                                                            ? 'neutral'
+                                                            : 'info'
                                                     }
                                                 >
                                                     {t(
@@ -95,7 +95,7 @@ export default function ProfilesIndex({ profiles, permissions }: Props) {
                                                     )}
                                                 </Badge>
                                                 {profile.restricted_to_zones && (
-                                                    <Badge variant="outline">
+                                                    <Badge variant="warning">
                                                         {t(
                                                             'profiles.restricted_badge',
                                                         )}

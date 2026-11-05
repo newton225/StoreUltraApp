@@ -26,9 +26,9 @@ type Props = {
         advance_due: number;
         delivery_week: string;
     };
-    mode: 'single' | 'locality';
-    localities: { name: string; count: number }[];
-    locality: string;
+    mode: 'single' | 'zone';
+    zones: { id: number; name: string; count: number }[];
+    zone: string;
     batchWeek: string | null;
     candidates: Candidate[];
 };
@@ -56,8 +56,8 @@ export default function CreateOrder({
     kits,
     defaults,
     mode,
-    localities,
-    locality,
+    zones,
+    zone,
     batchWeek,
     candidates,
 }: Props) {
@@ -85,22 +85,20 @@ export default function CreateOrder({
                     <TabLinks
                         label={t('orders.batch.mode_label')}
                         current={mode}
-                        tabs={(['single', 'locality'] as const).map((key) => ({
+                        tabs={(['single', 'zone'] as const).map((key) => ({
                             key,
                             label: t(`orders.batch.modes.${key}`),
                             href: create.url(
-                                key === 'locality'
-                                    ? { query: { mode: key } }
-                                    : {},
+                                key === 'zone' ? { query: { mode: key } } : {},
                             ),
                         }))}
                     />
                 </div>
 
-                {mode === 'locality' ? (
+                {mode === 'zone' ? (
                     <OrderBatchForm
-                        localities={localities}
-                        locality={locality}
+                        zones={zones}
+                        zone={zone}
                         batchWeek={batchWeek}
                         candidates={candidates}
                         kits={kits}

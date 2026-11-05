@@ -189,12 +189,12 @@ export default function ShowKit({
                                     })}
                                 </span>
                                 {version.id === currentVersionId && (
-                                    <Badge variant="secondary">
+                                    <Badge variant="success">
                                         {t('kits.show.current')}
                                     </Badge>
                                 )}
                                 {version.valid_from.slice(0, 10) > today && (
-                                    <Badge variant="outline">
+                                    <Badge variant="info">
                                         {t('kits.show.upcoming')}
                                     </Badge>
                                 )}

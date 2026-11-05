@@ -9,6 +9,7 @@ import SelectField from '@/components/select-field';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { useFormat } from '@/hooks/use-format';
+import { useLeaveGuard } from '@/hooks/use-leave-guard';
 import { useTranslation } from '@/hooks/use-translation';
 import { formGrid, span } from '@/lib/form-layout';
 
@@ -20,8 +21,8 @@ export type Candidate = {
 };
 
 type Props = {
-    localities: { name: string; count: number }[];
-    locality: string;
+    zones: { id: number; name: string; count: number }[];
+    zone: string;
     batchWeek: string | null;
     candidates: Candidate[];
     kits: { id: number; name: string }[];
@@ -33,14 +34,14 @@ type Props = {
 };
 
 /**
- * Creates the order of a week for all the active TPE of a locality in one go (playbook UI-115): the scope is
+ * Creates the order of a week for all the active TPE of a zone (sub-prefecture) in one go (playbook UI-115): the scope is
  * chosen in a list that shows how many TPE it holds, the TPE are ticked by default, the ones that already have
  * an order that week are shown but cannot be ticked, a sentence says what will happen, and the confirmation
  * names the number. The proformas can be issued at the same time.
  */
 export default function OrderBatchForm({
-    localities,
-    locality,
+    zones,
+    zone,
     batchWeek,
     candidates,
     kits,
@@ -56,21 +57,21 @@ export default function OrderBatchForm({
     const [unticked, setUnticked] = useState<number[]>([]);
     const [errors, setErrors] = useState<Record<string, string>>({});
 
-    // A new locality or a new week gives a new list: everything that can be ticked is ticked again.
+    // A new zone or a new week gives a new list: everything that can be ticked is ticked again.
     useEffect(() => {
         setUnticked([]);
-    }, [locality, batchWeek]);
+    }, [zone, batchWeek]);
 
-    const load = (nextLocality: string, nextWeek: string): void => {
+    const load = (nextZone: string, nextWeek: string): void => {
         router.get(
             create.url(),
             {
-                mode: 'locality',
-                ...(nextLocality !== '' ? { locality: nextLocality } : {}),
+                mode: 'zone',
+                ...(nextZone !== '' ? { zone: nextZone } : {}),
                 ...(nextWeek !== '' ? { batch_week: nextWeek } : {}),
             },
             {
-                only: ['candidates', 'locality', 'batchWeek'],
+                only: ['candidates', 'zone', 'batchWeek'],
                 preserveState: true,
                 preserveScroll: true,
                 replace: true,
@@ -93,7 +94,7 @@ export default function OrderBatchForm({
         router.post(
             store.url(),
             {
-                locality,
+                zone_id: zone,
                 kit_id: kitId,
                 kits_count: kitsCount,
                 delivery_week: week,
@@ -110,11 +111,22 @@ export default function OrderBatchForm({
     };
 
     const ready =
-        locality !== '' &&
+        zone !== '' &&
         kitId !== '' &&
         picked.length > 0 &&
         Number(kitsCount) >= 1 &&
         week !== '';
+
+    // What was entered or changed since the form was shown (the choice of the zone and of the week only
+    // moves the list, it is not an entry). Leaving then asks first (playbook UI-15, UI-123).
+    const dirty =
+        kitId !== '' ||
+        unticked.length > 0 ||
+        kitsCount !== String(defaults.kits_count) ||
+        advance !== String(defaults.advance_due) ||
+        !issueProformas;
+
+    useLeaveGuard(dirty, t('common.form.leave'));
 
     const plural = (key: string, count: number): string =>
         t(`orders.batch.${key}_${count === 1 ? 'one' : 'other'}`, { count });
@@ -133,10 +145,10 @@ export default function OrderBatchForm({
         ),
     });
 
-    if (localities.length === 0) {
+    if (zones.length === 0) {
         return (
             <p className="text-sm text-muted-foreground">
-                {t('orders.batch.no_localities')}
+                {t('orders.batch.no_zones')}
             </p>
         );
     }
@@ -150,29 +162,29 @@ export default function OrderBatchForm({
             <div className={formGrid}>
                 <div className={`grid gap-2 ${span.half}`}>
                     <FieldLabel
-                        htmlFor="batch-locality"
-                        help={t('orders.batch.locality_help')}
+                        htmlFor="batch-zone"
+                        help={t('orders.batch.zone_help')}
                     >
-                        {t('orders.batch.locality')}
+                        {t('orders.batch.zone')}
                     </FieldLabel>
                     <SelectField
-                        id="batch-locality"
-                        name="locality"
+                        id="batch-zone"
+                        name="zone_id"
                         required
-                        defaultValue={locality}
+                        defaultValue={zone}
                         onChange={(value) => load(value, week)}
                         options={[
                             {
                                 value: '',
-                                label: t('orders.batch.choose_locality'),
+                                label: t('orders.batch.choose_zone'),
                             },
-                            ...localities.map((item) => ({
-                                value: item.name,
+                            ...zones.map((item) => ({
+                                value: String(item.id),
                                 label: `${item.name} (${item.count})`,
                             })),
                         ]}
                     />
-                    <InputError message={errors.locality} />
+                    <InputError message={errors.zone_id} />
                 </div>
 
                 <div className={`grid gap-2 ${span.half}`}>
@@ -229,7 +241,7 @@ export default function OrderBatchForm({
                         value={week}
                         onChange={(event) => {
                             setWeek(event.target.value);
-                            load(locality, event.target.value);
+                            load(zone, event.target.value);
                         }}
                         required
                     />
@@ -255,7 +267,7 @@ export default function OrderBatchForm({
                 </div>
             </div>
 
-            {locality !== '' && (
+            {zone !== '' && (
                 <section className="space-y-2 fade-in">
                     <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
                         <h2 className="text-base font-semibold">
@@ -292,7 +304,7 @@ export default function OrderBatchForm({
 
                     {candidates.length === 0 ? (
                         <p className="text-sm text-muted-foreground">
-                            {t('orders.batch.none_in_locality')}
+                            {t('orders.batch.none_in_zone')}
                         </p>
                     ) : (
                         <ul className="max-h-96 divide-y divide-border overflow-y-auto rounded-lg border border-border text-sm">

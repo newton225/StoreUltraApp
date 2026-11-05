@@ -8,17 +8,17 @@ import { Label } from '@/components/ui/label';
 import { useTranslation } from '@/hooks/use-translation';
 
 /**
- * Issues, in one click, the proforma of every waiting order of the small businesses of a locality
+ * Issues, in one click, the proforma of every waiting order of the small businesses of a zone (sub-prefecture)
  * (playbook UI-110 for the step, UI-111 for the confirmation, UI-114 for the folded panel).
  */
 export default function OrderProformaBatch({
-    localities,
+    zones,
 }: {
-    localities: { name: string; count: number }[];
+    zones: { id: number; name: string; count: number }[];
 }) {
     const { t } = useTranslation();
-    const [locality, setLocality] = useState('');
-    const count = localities.find((item) => item.name === locality)?.count ?? 0;
+    const [zone, setZone] = useState('');
+    const count = zones.find((item) => String(item.id) === zone)?.count ?? 0;
 
     return (
         <CollapsiblePanel
@@ -30,33 +30,33 @@ export default function OrderProformaBatch({
                     {t('orders.proformas.description')}
                 </p>
 
-                {localities.length === 0 ? (
+                {zones.length === 0 ? (
                     <p className="text-sm text-muted-foreground">
                         {t('orders.proformas.none_available')}
                     </p>
                 ) : (
                     <>
                         <div className="grid gap-2">
-                            <Label htmlFor="proforma-locality">
-                                {t('orders.proformas.locality')}
+                            <Label htmlFor="proforma-zone">
+                                {t('orders.proformas.zone')}
                             </Label>
                             <SelectField
-                                id="proforma-locality"
-                                name="locality"
+                                id="proforma-zone"
+                                name="zone_id"
                                 required
-                                onChange={setLocality}
+                                onChange={setZone}
                                 options={[
                                     {
                                         value: '',
                                         label: t('orders.proformas.choose'),
                                     },
-                                    ...localities.map((item) => ({
-                                        value: item.name,
+                                    ...zones.map((item) => ({
+                                        value: String(item.id),
                                         label: `${item.name} (${item.count})`,
                                     })),
                                 ]}
                             />
-                            {locality !== '' && (
+                            {zone !== '' && (
                                 <p className="text-sm text-muted-foreground fade-in">
                                     {t('orders.proformas.pending', { count })}
                                 </p>
@@ -69,11 +69,11 @@ export default function OrderProformaBatch({
                             description={t('orders.proformas.confirm_body', {
                                 count,
                             })}
-                            disabled={locality === ''}
+                            disabled={zone === ''}
                             onConfirm={() =>
                                 router.post(
                                     store.url(),
-                                    { locality },
+                                    { zone_id: zone },
                                     { preserveScroll: true },
                                 )
                             }

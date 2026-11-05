@@ -42,6 +42,8 @@ return [
         'company_name_help' => 'Name of the company, printed at the top of every document (proforma, invoice, delivery note…).',
         'company_address_help' => 'Address printed at the top of the documents.',
         'company_phone_help' => 'Phone number printed at the top of the documents.',
+        'document_project_title_help' => 'Title of the project, printed at the top of the invoice and the proforma with the list of sub-prefectures. Leave empty to print nothing.',
+        'document_subtitle_help' => 'Category of the goods, printed in large letters in the banner of the invoice and the proforma (for example: Building materials). Leave empty to print nothing.',
         'kits_per_client' => 'Kits per client and per cycle',
         'advance_amount' => 'Advance per cycle (FCFA)',
         'advance_frequency' => 'Advance frequency',
@@ -69,6 +71,8 @@ return [
         'company_name' => 'Company name',
         'company_address' => 'Address',
         'company_phone' => 'Phone',
+        'document_project_title' => 'Project title (invoices and proformas)',
+        'document_subtitle' => 'Category of the goods (invoices and proformas)',
     ],
 
     'allocations' => [

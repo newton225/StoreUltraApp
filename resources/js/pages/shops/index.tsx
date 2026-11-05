@@ -35,7 +35,7 @@ export default function ShopsIndex({ shops }: { shops: Shop[] }) {
                         title={t('catalog.shops.title')}
                         description={t('catalog.shops.description')}
                     />
-                    <Button asChild>
+                    <Button variant="info" asChild>
                         <Link href={create()}>{t('catalog.shops.new')}</Link>
                     </Button>
                 </div>
@@ -96,8 +96,8 @@ export default function ShopsIndex({ shops }: { shops: Shop[] }) {
                                             <Badge
                                                 variant={
                                                     shop.active
-                                                        ? 'secondary'
-                                                        : 'outline'
+                                                        ? 'success'
+                                                        : 'neutral'
                                                 }
                                             >
                                                 {shop.active

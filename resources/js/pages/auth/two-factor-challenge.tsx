@@ -107,6 +107,7 @@ export default function TwoFactorChallenge() {
                             )}
 
                             <Button
+                                variant="success"
                                 type="submit"
                                 className="w-full"
                                 disabled={processing}

@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useFormat } from '@/hooks/use-format';
 import { useTranslation } from '@/hooks/use-translation';
+import { useVisitBusy } from '@/hooks/use-visit-busy';
 
 type Row = {
     id: number;
@@ -54,6 +55,7 @@ export default function ExpensesIndex({
     types,
 }: Props) {
     const { t } = useTranslation();
+    const busy = useVisitBusy();
     const { money, date } = useFormat();
     const [from, setFrom] = useState(filters.from ?? '');
     const [to, setTo] = useState(filters.to ?? '');
@@ -92,7 +94,7 @@ export default function ExpensesIndex({
                     />
                     <div className="flex shrink-0 items-center gap-2">
                         <ExportMenu view="expenses" query={filters} />
-                        <Button asChild>
+                        <Button variant="info" asChild>
                             <Link href={create()}>{t('expenses.new')}</Link>
                         </Button>
                     </div>
@@ -168,12 +170,12 @@ export default function ExpensesIndex({
                                         <div className="font-medium">
                                             {row.type} · {money(row.amount)}{' '}
                                             {row.paid_from_cash && (
-                                                <Badge variant="outline">
+                                                <Badge variant="info">
                                                     {t('expenses.from_cash')}
                                                 </Badge>
                                             )}{' '}
                                             {row.cancelled && (
-                                                <Badge variant="secondary">
+                                                <Badge variant="danger">
                                                     {t(
                                                         'expenses.state_cancelled',
                                                     )}
@@ -207,7 +209,7 @@ export default function ExpensesIndex({
                                         {!row.cancelled &&
                                             cancelling !== row.id && (
                                                 <Button
-                                                    variant="ghost"
+                                                    variant="ghostDanger"
                                                     size="sm"
                                                     onClick={() =>
                                                         setCancelling(row.id)
@@ -233,6 +235,7 @@ export default function ExpensesIndex({
                                             )}
                                         />
                                         <Button
+                                            disabled={busy}
                                             size="sm"
                                             onClick={() =>
                                                 router.post(

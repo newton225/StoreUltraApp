@@ -283,7 +283,16 @@ export default function PaymentsIndex({
                                                 )}
                                         </td>
                                         <td className="px-4 py-2">
-                                            <Badge variant="outline">
+                                            <Badge
+                                                variant={
+                                                    payment.kind === 'refund'
+                                                        ? 'warning'
+                                                        : payment.kind ===
+                                                            'balance'
+                                                          ? 'success'
+                                                          : 'info'
+                                                }
+                                            >
                                                 {t(
                                                     `payments.kinds.${payment.kind}`,
                                                 )}

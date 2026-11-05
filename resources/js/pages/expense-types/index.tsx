@@ -127,8 +127,8 @@ export default function ExpenseTypesIndex({ types }: { types: ExpenseType[] }) {
                                         <Badge
                                             variant={
                                                 type.active
-                                                    ? 'secondary'
-                                                    : 'outline'
+                                                    ? 'success'
+                                                    : 'neutral'
                                             }
                                         >
                                             {t(

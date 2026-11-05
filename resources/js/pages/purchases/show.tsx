@@ -132,7 +132,6 @@ export default function ShowPurchase({ purchase, methods, today }: Props) {
                         <StatusBadge
                             group="purchases"
                             status={purchase.status}
-                            variant="outline"
                         />
                         <span className="text-muted-foreground">
                             {t('purchases.show.orders_count', {

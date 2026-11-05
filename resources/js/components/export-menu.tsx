@@ -34,7 +34,7 @@ export default function ExportMenu({
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="outline">
+                <Button variant="infoOutline">
                     <Download aria-hidden />
                     {t('exports.menu.label')}
                     <ChevronDown aria-hidden />

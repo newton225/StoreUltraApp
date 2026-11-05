@@ -7,6 +7,12 @@ return [
         'descending' => 'Trier par ordre décroissant',
     ],
 
+    'select' => [
+        'search' => 'Rechercher…',
+        'search_label' => 'Rechercher dans la liste',
+        'no_results' => 'Aucun résultat',
+    ],
+
     'pagination' => [
         'label' => 'Pagination',
         'page' => 'Page :current sur :last',

@@ -230,8 +230,8 @@ export default function AttachmentTypesIndex({
                                         <Badge
                                             variant={
                                                 type.active
-                                                    ? 'secondary'
-                                                    : 'outline'
+                                                    ? 'success'
+                                                    : 'neutral'
                                             }
                                         >
                                             {t(

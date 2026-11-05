@@ -258,7 +258,6 @@ export default function PurchasesIndex({
                                                 <StatusBadge
                                                     group="purchases"
                                                     status={purchase.status}
-                                                    variant="outline"
                                                 />
                                             </td>
                                             <td className="px-4 py-2 text-right">

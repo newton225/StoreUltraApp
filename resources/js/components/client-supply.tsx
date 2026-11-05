@@ -5,6 +5,7 @@ import ConfirmAction from '@/components/confirm-action';
 import { Button } from '@/components/ui/button';
 import { useFormat } from '@/hooks/use-format';
 import { useTranslation } from '@/hooks/use-translation';
+import { useVisitBusy } from '@/hooks/use-visit-busy';
 import { StatusBadge } from '@/components/status-badge';
 import SupplyPlanForm from '@/components/supply-plan-form';
 
@@ -52,6 +53,7 @@ export default function ClientSupply({
     kits,
 }: Props) {
     const { t } = useTranslation();
+    const busy = useVisitBusy();
     const { money, date } = useFormat();
 
     const setStatus = (plan: Plan, status: string): void => {
@@ -91,7 +93,6 @@ export default function ClientSupply({
                                         <StatusBadge
                                             group="orders.plans"
                                             status={plan.status}
-                                            variant="outline"
                                         />
                                     </div>
                                     <p className="text-muted-foreground">
@@ -110,7 +111,8 @@ export default function ClientSupply({
                                     <div className="flex gap-2">
                                         {plan.status === 'active' ? (
                                             <Button
-                                                variant="outline"
+                                                disabled={busy}
+                                                variant="warning"
                                                 size="sm"
                                                 onClick={() =>
                                                     setStatus(plan, 'paused')
@@ -120,7 +122,8 @@ export default function ClientSupply({
                                             </Button>
                                         ) : (
                                             <Button
-                                                variant="outline"
+                                                disabled={busy}
+                                                variant="success"
                                                 size="sm"
                                                 onClick={() =>
                                                     setStatus(plan, 'active')
@@ -190,7 +193,6 @@ export default function ClientSupply({
                                 <StatusBadge
                                     group="orders"
                                     status={order.status}
-                                    variant="outline"
                                 />
                             </li>
                         ))}

@@ -34,11 +34,11 @@ return [
     'orders' => [
         'new' => [
             'title' => 'Create orders',
-            'body' => 'An order for one client, or the same order for every active TPE of a locality in one go.',
+            'body' => 'An order for one client, or the same order for every active TPE of a sub-prefecture in one go.',
         ],
         'batches' => [
-            'title' => 'One step for a whole locality',
-            'body' => 'These blocks only appear when orders of a locality are waiting for the same step: issue their proformas, or record their advances, all at once.',
+            'title' => 'One step for a whole sub-prefecture',
+            'body' => 'These blocks only appear when orders of a sub-prefecture are waiting for the same step: issue their proformas, or record their advances, all at once.',
         ],
         'filters' => [
             'title' => 'Find an order',
@@ -52,16 +52,16 @@ return [
 
     'order_create' => [
         'modes' => [
-            'title' => 'One client or a whole locality',
-            'body' => '"One client" creates one order. "A whole locality" creates the same order for each active TPE of the locality, which you can untick one by one.',
+            'title' => 'One client or a whole sub-prefecture',
+            'body' => '"One client" creates one order. "A whole sub-prefecture" creates the same order for each active TPE of the sub-prefecture, which you can untick one by one.',
         ],
         'form_single' => [
             'title' => 'The order',
             'body' => 'Choose the client, the kit, the number of kits, the delivery week and the advance asked. Today\'s prices are frozen at creation: a later price change does not touch this order.',
         ],
         'form_batch' => [
-            'title' => 'The locality\'s order',
-            'body' => 'Choose the locality, the kit, the number of kits per TPE, the week and the advance. The list of TPE appears: a TPE that already has an order that week is greyed out and will not be doubled.',
+            'title' => 'The sub-prefecture\'s order',
+            'body' => 'Choose the sub-prefecture, the kit, the number of kits per TPE, the week and the advance. The list of TPE appears: a TPE that already has an order that week is greyed out and will not be doubled.',
         ],
     ],
 
