@@ -28,13 +28,13 @@ function advancePayload(Order $zoneOrder, array $rows, array $extra = []): array
 {
     $paidOn = $extra['paid_on'] ?? today()->toDateString();
     $collector = $extra['collected_by'] ?? null;
-    unset($extra['paid_on'], $extra['collected_by']);
+    $method = $extra['payment_method_id'] ?? test()->method->id;
+    unset($extra['paid_on'], $extra['collected_by'], $extra['payment_method_id']);
 
     return [
         'zone_id' => $zoneOrder->client->zone_id,
-        'payment_method_id' => test()->method->id,
         'idempotency_key' => 'batch-key-1',
-        'payments' => array_map(fn (array $row): array => ['paid_on' => $paidOn, 'collected_by' => $collector, ...$row], $rows),
+        'payments' => array_map(fn (array $row): array => ['paid_on' => $paidOn, 'collected_by' => $collector, 'payment_method_id' => $method, ...$row], $rows),
         ...$extra,
     ];
 }
@@ -195,4 +195,28 @@ test('the date and the collector can differ from one line to the next', function
         ->and($first->collected_by)->toBe($colleague->id)
         ->and($second->paid_on->toDateString())->toBe(today()->toDateString())
         ->and($second->collected_by)->toBe($this->owner->id);
+});
+
+test('the payment method can differ from one line to the next, and each method asks its own reference', function () {
+    $cash = $this->method;
+    $mobile = PaymentMethod::factory()->create(['requires_reference' => true]);
+    $a = waitingOrder('Fronan');
+    $b = waitingOrder('Fronan');
+
+    $this->actingAs($this->owner)
+        ->post(route('orders.advance-payments.store'), advancePayload($a, [
+            ['order_id' => $a->id, 'amount' => 40000, 'payment_method_id' => $cash->id],
+            ['order_id' => $b->id, 'amount' => 40000, 'payment_method_id' => $mobile->id],
+        ]))
+        ->assertSessionHasErrors('payments.1.reference');
+
+    expect(Payment::query()->count())->toBe(0);
+
+    $this->post(route('orders.advance-payments.store'), advancePayload($a, [
+        ['order_id' => $a->id, 'amount' => 40000, 'payment_method_id' => $cash->id],
+        ['order_id' => $b->id, 'amount' => 40000, 'payment_method_id' => $mobile->id, 'reference' => 'MP9'],
+    ]))->assertSessionDoesntHaveErrors();
+
+    expect(Payment::query()->where('order_id', $a->id)->sole()->payment_method_id)->toBe($cash->id)
+        ->and(Payment::query()->where('order_id', $b->id)->sole()->payment_method_id)->toBe($mobile->id);
 });

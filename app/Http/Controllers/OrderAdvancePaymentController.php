@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Actions\Orders\CollectAdvancesForZone;
 use App\Http\Requests\CollectAdvancesRequest;
-use App\Models\PaymentMethod;
 use App\Support\MoneyFormatter;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -18,10 +17,10 @@ class OrderAdvancePaymentController extends Controller
     {
         $result = $batch->handle(
             $request->integer('zone_id'),
-            PaymentMethod::query()->findOrFail($request->integer('payment_method_id')),
             array_values(array_map(fn (array $row): array => [
                 'order_id' => (int) $row['order_id'],
                 'amount' => (int) $row['amount'],
+                'payment_method_id' => (int) $row['payment_method_id'],
                 'paid_on' => (string) $row['paid_on'],
                 'collected_by' => ! empty($row['collected_by']) ? (int) $row['collected_by'] : null,
                 'reference' => $row['reference'] ?? null,

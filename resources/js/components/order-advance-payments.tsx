@@ -26,6 +26,7 @@ type Collector = { id: number; name: string };
 type Row = {
     on: boolean;
     amount: string;
+    method: string;
     paidOn: string;
     collector: string;
     reference: string;
@@ -69,10 +70,10 @@ function Cell({
 
 /**
  * Records the advance payment of the small businesses of a zone (sub-prefecture) in one go, with the same information
- * as the payment form of one order. The zone and the method are chosen once; the date and who collects are defaults
- * that every line follows until it is changed on that line; each line keeps its own amount, payer, phone and, when the
- * method asks for one, transaction reference (playbook UI-115 for the group action, UI-123 for the modifications
- * detected and the key that stops a replay from taking the money twice).
+ * as the payment form of one order. Only the zone is chosen once; the amount, the method, the date and who collects
+ * are defaults at the top that every line follows until it is changed on that line, and each line also keeps its own
+ * payer, phone and, when its method asks for one, transaction reference (playbook UI-115 for the group action, UI-123
+ * for the modifications detected and the key that stops a replay from taking the money twice).
  */
 export default function OrderAdvancePayments({
     zones,
@@ -89,20 +90,23 @@ export default function OrderAdvancePayments({
     const { money } = useFormat();
     const me = String(currentUserId);
     const [zone, setZone] = useState('');
-    const [method, setMethod] = useState('');
+    const [defaultMethod, setDefaultMethod] = useState('');
+    const [defaultAmount, setDefaultAmount] = useState('');
     const [defaultDate, setDefaultDate] = useState(today);
     const [defaultCollector, setDefaultCollector] = useState(me);
     const [edits, setEdits] = useState<Record<number, Partial<Row>>>({});
     const [key, setKey] = useState(() => crypto.randomUUID());
 
     const orders = zones.find((item) => String(item.id) === zone)?.orders ?? [];
-    const needsReference =
+    const asksReference = (method: string): boolean =>
         methods.find((item) => String(item.id) === method)
             ?.requires_reference === true;
 
     const rowOf = (order: WaitingOrder): Row => ({
         on: true,
-        amount: String(order.outstanding),
+        amount:
+            defaultAmount !== '' ? defaultAmount : String(order.outstanding),
+        method: defaultMethod,
         paidOn: defaultDate,
         collector: defaultCollector,
         reference: '',
@@ -122,17 +126,18 @@ export default function OrderAdvancePayments({
     const total = picked.reduce((sum, { row }) => sum + Number(row.amount), 0);
     const tooMany = picked.length > MAX_PAYMENTS;
     const complete =
-        method !== '' &&
         picked.length > 0 &&
         !tooMany &&
         picked.every(
             ({ row }) =>
+                row.method !== '' &&
                 row.paidOn !== '' &&
-                (!needsReference || row.reference.trim() !== ''),
+                (!asksReference(row.method) || row.reference.trim() !== ''),
         );
 
     const dirty =
-        method !== '' ||
+        defaultMethod !== '' ||
+        defaultAmount !== '' ||
         defaultCollector !== me ||
         defaultDate !== today() ||
         Object.keys(edits).length > 0;
@@ -140,7 +145,8 @@ export default function OrderAdvancePayments({
 
     const reset = (): void => {
         setEdits({});
-        setMethod('');
+        setDefaultMethod('');
+        setDefaultAmount('');
         setDefaultCollector(me);
         setDefaultDate(today());
         setKey(crypto.randomUUID());
@@ -153,6 +159,13 @@ export default function OrderAdvancePayments({
                 ? `${user.name} (${t('payments.panel.you')})`
                 : user.name,
     }));
+    const methodOptions = [
+        { value: '', label: t('orders.collect.choose_method') },
+        ...methods.map((item) => ({
+            value: String(item.id),
+            label: item.name,
+        })),
+    ];
 
     return (
         <CollapsiblePanel title={t('orders.collect.open')} defaultOpen={false}>
@@ -167,8 +180,8 @@ export default function OrderAdvancePayments({
                     </p>
                 ) : (
                     <>
-                        <div className="grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                            <div className="grid gap-2">
+                        <div className="grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-6">
+                            <div className="grid gap-2 lg:col-span-3">
                                 <Label htmlFor="collect-zone">
                                     {t('orders.collect.zone')}
                                 </Label>
@@ -192,30 +205,45 @@ export default function OrderAdvancePayments({
                                     ]}
                                 />
                             </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="collect-method">
+                            <div className="grid gap-2 lg:col-span-3">
+                                <FieldLabel
+                                    htmlFor="collect-method"
+                                    help={t('orders.collect.defaults_help')}
+                                >
                                     {t('orders.collect.method')}
-                                </Label>
+                                </FieldLabel>
                                 <SelectField
                                     id="collect-method"
                                     name="payment_method_id"
                                     required
-                                    onChange={setMethod}
-                                    options={[
-                                        {
-                                            value: '',
-                                            label: t(
-                                                'orders.collect.choose_method',
-                                            ),
-                                        },
-                                        ...methods.map((item) => ({
-                                            value: String(item.id),
-                                            label: item.name,
-                                        })),
-                                    ]}
+                                    onChange={setDefaultMethod}
+                                    options={methodOptions}
                                 />
                             </div>
-                            <div className="grid gap-2">
+                            <div className="grid gap-2 lg:col-span-2">
+                                <FieldLabel
+                                    htmlFor="collect-amount"
+                                    help={t('orders.collect.amount_all_help')}
+                                >
+                                    {t('orders.collect.amount_all')}
+                                </FieldLabel>
+                                <Input
+                                    id="collect-amount"
+                                    type="number"
+                                    min={1}
+                                    step={1}
+                                    inputMode="numeric"
+                                    className="tabular-nums"
+                                    placeholder={t(
+                                        'orders.collect.amount_all_placeholder',
+                                    )}
+                                    value={defaultAmount}
+                                    onChange={(event) =>
+                                        setDefaultAmount(event.target.value)
+                                    }
+                                />
+                            </div>
+                            <div className="grid gap-2 lg:col-span-2">
                                 <FieldLabel
                                     htmlFor="collect-date"
                                     help={t('orders.collect.defaults_help')}
@@ -232,7 +260,7 @@ export default function OrderAdvancePayments({
                                     }
                                 />
                             </div>
-                            <div className="grid gap-2">
+                            <div className="grid gap-2 sm:col-span-2 lg:col-span-2">
                                 <FieldLabel
                                     htmlFor="collect-collector"
                                     help={t('orders.collect.defaults_help')}
@@ -285,7 +313,16 @@ export default function OrderAdvancePayments({
                                     {orders.map((order) => {
                                         const row = rowOf(order);
                                         const id = `collect-${order.id}`;
+                                        const wantsReference = asksReference(
+                                            row.method,
+                                        );
 
+                                        const anyReference = orders.some(
+                                            (other) =>
+                                                asksReference(
+                                                    rowOf(other).method,
+                                                ),
+                                        );
                                         return (
                                             <li
                                                 key={order.id}
@@ -394,7 +431,7 @@ export default function OrderAdvancePayments({
                                                 </Cell>
 
                                                 <div
-                                                    className={`grid gap-x-4 gap-y-3 md:col-span-4 md:col-start-2 ${needsReference ? 'md:grid-cols-[minmax(0,1fr)_10rem_13rem]' : 'md:grid-cols-[minmax(0,1fr)_10rem]'}`}
+                                                    className={`grid gap-x-4 gap-y-3 md:col-span-4 md:col-start-2 ${anyReference ? 'md:grid-cols-[minmax(0,1fr)_8.5rem_10rem_11rem]' : 'md:grid-cols-[minmax(0,1fr)_10rem_13rem]'}`}
                                                 >
                                                     <Cell
                                                         label={t(
@@ -443,7 +480,34 @@ export default function OrderAdvancePayments({
                                                             }
                                                         />
                                                     </Cell>
-                                                    {needsReference && (
+                                                    <Cell
+                                                        label={t(
+                                                            'orders.collect.method',
+                                                        )}
+                                                        htmlFor={`${id}-method`}
+                                                    >
+                                                        <SelectField
+                                                            id={`${id}-method`}
+                                                            name={`method-${order.id}`}
+                                                            key={row.method}
+                                                            required
+                                                            defaultValue={
+                                                                row.method
+                                                            }
+                                                            onChange={(value) =>
+                                                                patch(
+                                                                    order.id,
+                                                                    {
+                                                                        method: value,
+                                                                    },
+                                                                )
+                                                            }
+                                                            options={
+                                                                methodOptions
+                                                            }
+                                                        />
+                                                    </Cell>
+                                                    {wantsReference ? (
                                                         <Cell
                                                             label={t(
                                                                 'orders.collect.reference',
@@ -475,7 +539,9 @@ export default function OrderAdvancePayments({
                                                                 }
                                                             />
                                                         </Cell>
-                                                    )}
+                                                    ) : anyReference ? (
+                                                        <span />
+                                                    ) : null}
                                                 </div>
                                             </li>
                                         );
@@ -508,15 +574,17 @@ export default function OrderAdvancePayments({
                                     store.url(),
                                     {
                                         zone_id: zone,
-                                        payment_method_id: method,
                                         idempotency_key: key,
                                         payments: picked.map(
                                             ({ order, row }) => ({
                                                 order_id: order.id,
                                                 amount: Number(row.amount),
+                                                payment_method_id: row.method,
                                                 paid_on: row.paidOn,
                                                 collected_by: row.collector,
-                                                reference: needsReference
+                                                reference: asksReference(
+                                                    row.method,
+                                                )
                                                     ? row.reference.trim()
                                                     : null,
                                                 payer_name:

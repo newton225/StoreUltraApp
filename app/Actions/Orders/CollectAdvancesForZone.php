@@ -70,22 +70,24 @@ class CollectAdvancesForZone
     }
 
     /**
-     * @param  list<array{order_id: int, amount: int, paid_on: string, collected_by: int|null, reference: string|null, payer_name: string|null, payer_phone: string|null}>  $rows  one per picked order
+     * @param  list<array{order_id: int, amount: int, payment_method_id: int, paid_on: string, collected_by: int|null, reference: string|null, payer_name: string|null, payer_phone: string|null}>  $rows  one per picked order
      * @param  string  $batchKey  sent again with the same rows, it records nothing twice
      * @return array{recorded: int, failed: int, total: int}
      */
-    public function handle(int $zoneId, PaymentMethod $method, array $rows, string $batchKey, User $user): array
+    public function handle(int $zoneId, array $rows, string $batchKey, User $user): array
     {
         $recorded = 0;
         $failed = 0;
         $total = 0;
 
         $orders = $this->pending($zoneId, $user)->keyBy('id');
+        $methods = PaymentMethod::query()->where('active', true)->get()->keyBy('id');
 
         foreach ($rows as $row) {
             $order = $orders->get($row['order_id']);
+            $method = $methods->get($row['payment_method_id']);
 
-            if ($order === null) {
+            if ($order === null || $method === null) {
                 $failed++;
 
                 continue;

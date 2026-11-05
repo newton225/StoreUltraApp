@@ -196,14 +196,15 @@ immuables) : à utiliser dans une base réservée aux démonstrations.
 - **Proformas par sous-préfecture** (page Commandes, panneau replié) : en un clic, émet la proforma de toutes les commandes
   en attente (brouillon) des clients d'une sous-préfecture et les passe à « Proforma émis », avec confirmation qui annonce
   le nombre. Une commande en échec n'arrête pas les autres ; relancer n'émet jamais une seconde proforma.
-- **Encaisser des avances par sous-préfecture** (même page, panneau replié) : on choisit la sous-préfecture et le **mode de paiement** ; la
-  **date** et la personne qui **encaisse** sont proposées pour tout le lot (aujourd'hui, et l'utilisateur) et chaque ligne peut s'en écarter.
-  Toutes les commandes qui attendent leur avance sont proposées, cochées, une carte par commande : **montant** (le reste à encaisser, à
-  corriger si le client ne paie qu'une partie), **date**, **encaissé par**, **payé par** (le client par défaut), **téléphone du payeur** et,
-  si le mode l'exige, la **référence de la transaction**. Un clic enregistre tous les paiements, chacun avec son numéro de reçu et sa ligne
-  d'audit, comme le ferait le formulaire de la commande ; une commande dont l'avance est couverte passe d'elle-même à « Avance reçue ». Un
-  paiement en échec (montant au-dessus du prix) n'arrête pas les autres et est compté ; renvoyer le même lot ne prend jamais l'argent deux
-  fois ; 60 paiements au plus à la fois. Réservé au bureau.
+- **Encaisser des avances par sous-préfecture** (même page, panneau replié) : on choisit la sous-préfecture ; le **mode de paiement**, un
+  **montant pour tous** (facultatif : vide, chaque ligne propose son reste à encaisser), la **date** et la personne qui **encaisse** sont des
+  valeurs proposées à toutes les lignes, et chaque ligne peut s'en écarter. Toutes les commandes qui attendent leur avance sont proposées,
+  cochées, une carte par commande : **montant**, **date**, **encaissé par**, **payé par** (le client par défaut), **téléphone du payeur**,
+  **mode de paiement** et, si ce mode l'exige, la **référence de la transaction** (chaque ligne a donc son propre mode, et la référence est
+  demandée ligne par ligne). Un clic enregistre tous les paiements, chacun avec son numéro de reçu et sa ligne d'audit, comme le ferait le
+  formulaire de la commande ; une commande dont l'avance est couverte passe d'elle-même à « Avance reçue ». Un paiement en échec (montant
+  au-dessus du prix) n'arrête pas les autres et est compté ; renvoyer le même lot ne prend jamais l'argent deux fois ; 60 paiements au plus
+  à la fois. Réservé au bureau.
 Les **factures restent générées individuellement**.
 - Total, avance due, avances reçues, relicat dû : toujours visibles.
 
