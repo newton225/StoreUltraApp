@@ -27,6 +27,7 @@ import SortHeader, { sortQuery } from '@/components/sort-header';
 import { useFormat } from '@/hooks/use-format';
 import { useTranslation } from '@/hooks/use-translation';
 import { StatusBadge } from '@/components/status-badge';
+import { useCanDo } from '@/hooks/use-can-do';
 
 type ListedOrder = {
     id: number;
@@ -121,6 +122,7 @@ export default function OrdersIndex({
     collectors,
     currentUserId,
 }: Props) {
+    const canZip = useCanDo('orders.download_zip');
     const { t } = useTranslation();
     const { money, date } = useFormat();
     const [search, setSearch] = useState(filters.search);
@@ -204,12 +206,14 @@ export default function OrdersIndex({
                             />
                         </div>
                     )}
-                    <div className="has-[[aria-expanded=true]]:lg:col-span-full">
-                        <OrderDocumentsZip
-                            choices={archiveChoices}
-                            week={filters.week}
-                        />
-                    </div>
+                    {canZip && (
+                        <div className="has-[[aria-expanded=true]]:lg:col-span-full">
+                            <OrderDocumentsZip
+                                choices={archiveChoices}
+                                week={filters.week}
+                            />
+                        </div>
+                    )}
                 </div>
 
                 <form

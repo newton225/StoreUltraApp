@@ -103,7 +103,7 @@ class ClientController extends Controller
 
         $client->load('zone:id,name', 'creator:id,name', 'members');
 
-        $canManageOrders = $request->user()->can('manage-orders');
+        $canManageOrders = $request->user()->can('manage-orders') && $request->user()->can('orders.plans');
 
         return Inertia::render('clients/show', [
             'client' => [

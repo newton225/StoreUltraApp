@@ -87,10 +87,10 @@ class OrderController extends Controller
             ],
             'weeks' => $calendar->known($user, ...($week === null ? [] : [$week])),
             'statuses' => array_column(OrderStatus::cases(), 'value'),
-            'canCreate' => $user->can('create', Order::class),
-            'proformaZones' => $user->can('manage-orders') ? $proformas->zones($user) : [],
+            'canCreate' => $user->can('create', Order::class) && $user->can('orders.create'),
+            'proformaZones' => $user->can('manage-orders') && $user->can('orders.batch') ? $proformas->zones($user) : [],
             'archiveChoices' => $archive->choices($user),
-            'collectZones' => $user->can('manage-orders') ? $collect->zones($user) : [],
+            'collectZones' => $user->can('manage-orders') && $user->can('orders.record_payment') ? $collect->zones($user) : [],
             'collectors' => $user->can('manage-orders') ? User::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']) : [],
             'currentUserId' => $user->id,
             'paymentMethods' => $user->can('manage-orders')
@@ -255,7 +255,7 @@ class OrderController extends Controller
                     'notes' => $delivery->notes,
                 ])->values(),
                 'remaining_kits' => $remainingKits,
-                'can_deliver' => $order->status === OrderStatus::Received && $remainingKits > 0,
+                'can_deliver' => $order->status === OrderStatus::Received && $remainingKits > 0 && Gate::allows('orders.record_delivery'),
                 'signature_required' => (bool) $settings->get('delivery_signature_required'),
                 'is_agent' => $isAgent,
                 'agents' => $isAgent
@@ -381,7 +381,7 @@ class OrderController extends Controller
                 'fne_status' => $invoice->fne_status,
                 'fne_number' => $invoice->fne_number,
             ],
-            'can_manage' => $canManage,
+            'can_manage' => $canManage && Gate::allows('orders.fne'),
         ];
     }
 
@@ -395,12 +395,12 @@ class OrderController extends Controller
         $kinds = [];
 
         foreach ([PaymentKind::Advance, PaymentKind::Balance] as $kind) {
-            if (in_array($order->status, $kind->allowedStatuses() ?? [], true)) {
+            if (Gate::allows('orders.record_payment') && in_array($order->status, $kind->allowedStatuses() ?? [], true)) {
                 $kinds[] = $kind->value;
             }
         }
 
-        if ($canRefund) {
+        if ($canRefund && Gate::allows('orders.record_payment')) {
             $kinds[] = PaymentKind::Refund->value;
         }
 
