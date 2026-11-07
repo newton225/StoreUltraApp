@@ -89,114 +89,124 @@ export default function CompanyEdit({ values, hasLogo, identifiers }: Props) {
                         {t('company.logo.help')}
                     </p>
 
-                    <div className="flex flex-wrap items-center gap-4">
-                        {preview !== null && chosen !== null && cropping ? (
-                            <LogoCropper
-                                src={preview}
-                                name={chosen.name}
-                                onCancel={() => {
-                                    replaceFile(null);
-                                    setCropping(false);
-                                }}
-                                onCropped={(file) => {
-                                    replaceFile(file);
-                                    setCropping(false);
-                                }}
-                            />
-                        ) : preview !== null ? (
-                            <div className="grid gap-1">
-                                <img
+                    <div className="flex flex-wrap items-start gap-x-10 gap-y-4">
+                        <div className="flex flex-wrap items-center gap-4">
+                            {preview !== null && chosen !== null && cropping ? (
+                                <LogoCropper
                                     src={preview}
-                                    alt={t('company.logo.preview_alt')}
-                                    className="bg-checkerboard max-h-24 max-w-48 rounded-md border border-dashed border-border object-contain p-2"
+                                    name={chosen.name}
+                                    onCancel={() => {
+                                        replaceFile(null);
+                                        setCropping(false);
+                                    }}
+                                    onCropped={(file) => {
+                                        replaceFile(file);
+                                        setCropping(false);
+                                    }}
                                 />
-                                <p className="text-xs text-muted-foreground">
-                                    {t('company.logo.preview')}
-                                </p>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    className="w-fit"
-                                    onClick={() => setCropping(true)}
-                                >
-                                    {t('company.logo.crop')}
-                                </Button>
-                            </div>
-                        ) : hasLogo ? (
-                            <img
-                                src={`${logo.url()}?v=${stamp}`}
-                                alt={t('company.logo.alt')}
-                                className="max-h-24 max-w-48 rounded-md border border-border bg-white object-contain p-2"
-                            />
-                        ) : (
-                            <p className="text-sm text-muted-foreground">
-                                {t('company.logo.none')}
-                            </p>
-                        )}
-                    </div>
-
-                    <Form
-                        {...storeLogo.form()}
-                        options={{ preserveScroll: true }}
-                        resetOnSuccess
-                        onSuccess={() => {
-                            setStamp(Date.now());
-                            setChosen(null);
-                            setCropping(false);
-                        }}
-                        className={`flex flex-wrap items-start gap-3 ${cropping ? 'hidden' : ''}`}
-                    >
-                        {({ errors, processing }) => (
-                            <>
-                                <div className="grid gap-2">
-                                    <FieldLabel htmlFor="company-logo">
-                                        {t('company.logo.choose')}
-                                    </FieldLabel>
-                                    <Input
-                                        ref={fileInput}
-                                        id="company-logo"
-                                        name="logo"
-                                        type="file"
-                                        accept="image/png,image/jpeg"
-                                        onChange={(event) => {
-                                            const file =
-                                                event.target.files?.[0] ?? null;
-                                            setChosen(file);
-                                            setCropping(file !== null);
-                                        }}
+                            ) : preview !== null ? (
+                                <div className="grid gap-1">
+                                    <img
+                                        src={preview}
+                                        alt={t('company.logo.preview_alt')}
+                                        className="bg-checkerboard max-h-40 max-w-64 rounded-md border border-border object-contain"
                                     />
-                                    <InputError message={errors.logo} />
+                                    <p className="text-xs text-muted-foreground">
+                                        {t('company.logo.preview')}
+                                    </p>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className="w-fit"
+                                        onClick={() => setCropping(true)}
+                                    >
+                                        {t('company.logo.crop')}
+                                    </Button>
                                 </div>
-                                <Button
-                                    type="submit"
-                                    variant="success"
-                                    className="mt-7"
-                                    disabled={chosen === null || processing}
-                                >
-                                    {t('company.logo.upload')}
-                                </Button>
-                                {hasLogo && (
-                                    <ConfirmAction
-                                        label={t('company.logo.remove')}
-                                        title={t('company.logo.remove_title')}
-                                        description={t(
-                                            'company.logo.remove_body',
-                                        )}
-                                        variant="ghostDanger"
-                                        destructive
+                            ) : hasLogo ? (
+                                <img
+                                    src={`${logo.url()}?v=${stamp}`}
+                                    alt={t('company.logo.alt')}
+                                    className="max-h-40 max-w-64 rounded-md border border-border bg-white object-contain p-2"
+                                />
+                            ) : (
+                                <p className="text-sm text-muted-foreground">
+                                    {t('company.logo.none')}
+                                </p>
+                            )}
+                        </div>
+
+                        <Form
+                            {...storeLogo.form()}
+                            options={{ preserveScroll: true }}
+                            resetOnSuccess
+                            onSuccess={() => {
+                                setStamp(Date.now());
+                                setChosen(null);
+                                setCropping(false);
+                            }}
+                            className={`flex flex-wrap items-start gap-3 ${cropping ? 'hidden' : ''}`}
+                        >
+                            {({ errors, processing }) => (
+                                <>
+                                    <div className="grid gap-2">
+                                        <FieldLabel htmlFor="company-logo">
+                                            {t('company.logo.choose')}
+                                        </FieldLabel>
+                                        <Input
+                                            ref={fileInput}
+                                            id="company-logo"
+                                            name="logo"
+                                            type="file"
+                                            accept="image/png,image/jpeg"
+                                            onChange={(event) => {
+                                                const file =
+                                                    event.target.files?.[0] ??
+                                                    null;
+                                                setChosen(file);
+                                                setCropping(file !== null);
+                                            }}
+                                        />
+                                        <InputError message={errors.logo} />
+                                    </div>
+                                    <Button
+                                        type="submit"
+                                        variant="success"
                                         className="mt-7"
-                                        onConfirm={() =>
-                                            router.delete(destroyLogo.url(), {
-                                                preserveScroll: true,
-                                                onSuccess: () =>
-                                                    setStamp(Date.now()),
-                                            })
-                                        }
-                                    />
-                                )}
-                            </>
-                        )}
-                    </Form>
+                                        disabled={chosen === null || processing}
+                                    >
+                                        {t('company.logo.upload')}
+                                    </Button>
+                                    {hasLogo && (
+                                        <ConfirmAction
+                                            label={t('company.logo.remove')}
+                                            title={t(
+                                                'company.logo.remove_title',
+                                            )}
+                                            description={t(
+                                                'company.logo.remove_body',
+                                            )}
+                                            variant="ghostDanger"
+                                            destructive
+                                            className="mt-7"
+                                            onConfirm={() =>
+                                                router.delete(
+                                                    destroyLogo.url(),
+                                                    {
+                                                        preserveScroll: true,
+                                                        onSuccess: () =>
+                                                            setStamp(
+                                                                Date.now(),
+                                                            ),
+                                                    },
+                                                )
+                                            }
+                                        />
+                                    )}
+                                </>
+                            )}
+                        </Form>
+                    </div>
                 </section>
 
                 <Form

@@ -104,8 +104,8 @@ export function LogoCropper({ src, name, onCropped, onCancel }: Props) {
     };
 
     return (
-        <div className="grid gap-3 rounded-md border border-border bg-muted/30 p-3">
-            <p className="text-sm text-muted-foreground">
+        <div className="grid w-fit max-w-full gap-3 rounded-md border border-border bg-muted/30 p-3">
+            <p className="max-w-sm text-sm text-muted-foreground">
                 {t('company.logo.crop_help')}
             </p>
             <div
