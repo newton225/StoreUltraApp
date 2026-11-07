@@ -30,6 +30,8 @@ class ClientController extends Controller
      */
     public function index(Request $request, BusinessSettings $settings): Response
     {
+        Gate::authorize('viewAny', Client::class);
+
         $user = $request->user();
         $search = trim($request->string('search')->toString());
         $status = ClientStatus::tryFrom($request->string('status')->toString());
@@ -61,6 +63,8 @@ class ClientController extends Controller
      */
     public function create(Request $request): Response
     {
+        Gate::authorize('create', Client::class);
+
         $user = $request->user();
 
         return Inertia::render('clients/create', [

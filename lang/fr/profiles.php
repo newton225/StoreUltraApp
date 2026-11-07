@@ -61,6 +61,14 @@ return [
     ],
 
     'actions' => [
+        'clients_create' => 'Créer des clients',
+        'clients_create_help' => 'Enregistrer un nouveau client (un agent de terrain, seulement dans ses zones).',
+        'clients_update' => 'Modifier les clients',
+        'clients_update_help' => 'Corriger les coordonnées, la zone et les notes d\'un client.',
+        'clients_change_status' => 'Changer le statut des clients',
+        'clients_change_status_help' => 'Activer, suspendre ou terminer un client, et confirmer ceux saisis par les agents.',
+        'clients_export' => 'Exporter la liste des clients',
+        'clients_export_help' => 'Télécharger la liste des clients en CSV ou PDF.',
         'orders_create' => 'Créer des commandes',
         'orders_create_help' => 'Saisir une nouvelle commande ou créer les commandes d\'une sous-préfecture.',
         'orders_record_payment' => 'Encaisser les paiements',
@@ -122,6 +130,8 @@ return [
     ],
 
     'permissions' => [
+        'manage_clients' => 'Gérer les clients',
+        'manage_clients_help' => 'Ouvrir la liste et les fiches des clients (un profil limité aux zones ne voit que les clients de ses zones).',
         'manage_orders' => 'Gérer les commandes et les encaissements',
         'manage_orders_help' => 'Créer des commandes et des livraisons automatiques, les faire avancer, encaisser et rembourser, émettre les documents (proforma, facture, bon de livraison), voir les paiements et les avances en retard, et télécharger les exports correspondants.',
         'manage_purchases' => 'Gérer les achats aux boutiques',

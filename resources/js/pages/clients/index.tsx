@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input';
 import SortHeader, { sortQuery } from '@/components/sort-header';
 import { useTranslation } from '@/hooks/use-translation';
 import { StatusBadge } from '@/components/status-badge';
+import { useCanDo } from '@/hooks/use-can-do';
 
 type ListedClient = {
     id: number;
@@ -56,6 +57,8 @@ export default function ClientsIndex({
     statuses,
     capacity,
 }: Props) {
+    const canCreate = useCanDo('clients.create');
+    const canExport = useCanDo('clients.export');
     const { t } = useTranslation();
     const [search, setSearch] = useState(filters.search);
 
@@ -90,10 +93,14 @@ export default function ClientsIndex({
                         description={t('clients.description')}
                     />
                     <div className="flex shrink-0 items-center gap-2">
-                        <ExportMenu view="clients" query={filters} />
-                        <Button variant="info" asChild>
-                            <Link href={create()}>{t('clients.new')}</Link>
-                        </Button>
+                        {canExport && (
+                            <ExportMenu view="clients" query={filters} />
+                        )}
+                        {canCreate && (
+                            <Button variant="info" asChild>
+                                <Link href={create()}>{t('clients.new')}</Link>
+                            </Button>
+                        )}
                     </div>
                 </div>
 

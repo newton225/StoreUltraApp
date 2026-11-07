@@ -20,7 +20,7 @@ class OrderPolicy
      */
     public function view(User $user, Order $order): bool
     {
-        return $user->can('view', $order->client);
+        return $user->reachesClient($order->client);
     }
 
     /**

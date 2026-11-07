@@ -104,7 +104,7 @@ export function LogoCropper({ src, name, onCropped, onCancel }: Props) {
     };
 
     return (
-        <div className="grid gap-3">
+        <div className="grid gap-3 rounded-md border border-border bg-muted/30 p-3">
             <p className="text-sm text-muted-foreground">
                 {t('company.logo.crop_help')}
             </p>
@@ -119,17 +119,18 @@ export function LogoCropper({ src, name, onCropped, onCancel }: Props) {
                     src={src}
                     alt={t('company.logo.preview_alt')}
                     draggable={false}
-                    className="block max-h-80 max-w-full"
+                    className="block max-h-[28rem] max-w-full"
                 />
                 {box !== null && (
                     <div
-                        className="pointer-events-none absolute border-2 border-dashed border-white shadow-[0_0_0_1px_rgba(0,0,0,0.7),inset_0_0_0_1px_rgba(0,0,0,0.7)]"
+                        className="pointer-events-none absolute border-2 border-dashed border-white"
                         style={{
                             left: box.x,
                             top: box.y,
                             width: box.w,
                             height: box.h,
-                            boxShadow: '0 0 0 9999px rgb(0 0 0 / 0.55)',
+                            boxShadow:
+                                '0 0 0 9999px rgb(0 0 0 / 0.55), inset 0 0 0 1px rgb(0 0 0 / 0.7)',
                         }}
                     />
                 )}

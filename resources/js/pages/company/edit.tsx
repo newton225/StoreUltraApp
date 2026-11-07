@@ -144,7 +144,7 @@ export default function CompanyEdit({ values, hasLogo, identifiers }: Props) {
                             setChosen(null);
                             setCropping(false);
                         }}
-                        className="flex flex-wrap items-start gap-3"
+                        className={`flex flex-wrap items-start gap-3 ${cropping ? 'hidden' : ''}`}
                     >
                         {({ errors, processing }) => (
                             <>

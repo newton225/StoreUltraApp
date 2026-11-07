@@ -72,6 +72,7 @@ export function AppSidebar() {
     const { auth } = usePage().props;
     const can = (permission: string): boolean =>
         auth.permissions.includes(permission);
+    const canClients = can('manage_clients');
     const canOrders = can('manage_orders');
     const canPurchases = can('manage_purchases');
     const canExpenses = can('manage_expenses');
@@ -94,11 +95,15 @@ export function AppSidebar() {
             label: t('navigation.groups.sales'),
             tone: 'sales',
             items: [
-                {
-                    title: t('navigation.clients'),
-                    href: clientsIndex(),
-                    icon: UserRound,
-                },
+                ...(!canClients
+                    ? []
+                    : [
+                          {
+                              title: t('navigation.clients'),
+                              href: clientsIndex(),
+                              icon: UserRound,
+                          },
+                      ]),
                 {
                     title: t('navigation.orders'),
                     href: ordersIndex(),

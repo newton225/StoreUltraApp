@@ -59,7 +59,8 @@ class ListExports
         $gate = Gate::forUser($user);
 
         return match ($view) {
-            'clients', 'orders', 'deliveries' => true,
+            'clients' => $gate->allows('clients.export'),
+            'orders', 'deliveries' => true,
             'payments', 'documents', 'arrears' => $gate->allows('manage-orders'),
             'cash', 'closings' => $gate->allows('manage-cash'),
             'users' => $gate->allows('manage-users'),

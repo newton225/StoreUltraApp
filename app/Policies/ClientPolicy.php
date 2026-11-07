@@ -8,11 +8,11 @@ use App\Models\User;
 class ClientPolicy
 {
     /**
-     * Every staff member can list the clients they are allowed to see.
+     * The clients menu opens the list; the user then only sees the clients they are allowed to.
      */
     public function viewAny(User $user): bool
     {
-        return true;
+        return $user->can('manage-clients');
     }
 
     /**
@@ -20,26 +20,26 @@ class ClientPolicy
      */
     public function view(User $user, Client $client): bool
     {
-        if (! $user->isRestrictedToZones()) {
-            return true;
+        if (! $this->viewAny($user)) {
+            return false;
         }
 
-        return $user->zones()->whereKey($client->zone_id)->exists();
+        return $user->reachesClient($client);
     }
 
     /**
-     * Every staff member can register a client (a field agent only in their zones, see the request).
+     * Whoever holds the action registers a client (a field agent only in their zones, see the request).
      */
     public function create(User $user): bool
     {
-        return true;
+        return $this->viewAny($user) && $user->can('clients.create');
     }
 
     /**
-     * Who can see a client can edit its details.
+     * Who can see a client and holds the action can edit its details.
      */
     public function update(User $user, Client $client): bool
     {
-        return $this->view($user, $client);
+        return $this->view($user, $client) && $user->can('clients.update');
     }
 }

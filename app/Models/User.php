@@ -157,6 +157,19 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     }
 
     /**
+     * Whether the client is within the user's reach: everyone for the office, only the assigned zones for a
+     * restricted profile. The clients menu is not involved: orders are visible on the same rule.
+     */
+    public function reachesClient(Client $client): bool
+    {
+        if (! $this->isRestrictedToZones()) {
+            return true;
+        }
+
+        return $this->zones()->whereKey($client->zone_id)->exists();
+    }
+
+    /**
      * Whether the user is the business owner.
      */
     public function isOwner(): bool

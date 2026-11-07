@@ -9,6 +9,7 @@ namespace App\Enums;
  */
 enum Permission: string
 {
+    case ManageClients = 'manage_clients';
     case ManageOrders = 'manage_orders';
     case ManagePurchases = 'manage_purchases';
     case ManageExpenses = 'manage_expenses';

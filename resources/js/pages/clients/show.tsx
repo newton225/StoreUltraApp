@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { useFormat } from '@/hooks/use-format';
 import { useTranslation } from '@/hooks/use-translation';
 import { StatusBadge } from '@/components/status-badge';
+import { useCanDo } from '@/hooks/use-can-do';
 
 type Client = {
     id: number;
@@ -56,6 +57,8 @@ export default function ShowClient({
     planDefaults,
     kits,
 }: Props) {
+    const canStatus = useCanDo('clients.change_status');
+    const canEdit = useCanDo('clients.update');
     const { t } = useTranslation();
     const { date } = useFormat();
 
@@ -90,9 +93,13 @@ export default function ShowClient({
                         />
                         <StatusBadge group="clients" status={client.status} />
                     </div>
-                    <Button asChild variant="infoOutline">
-                        <Link href={edit(client.id)}>{t('clients.edit')}</Link>
-                    </Button>
+                    {canEdit && (
+                        <Button asChild variant="infoOutline">
+                            <Link href={edit(client.id)}>
+                                {t('clients.edit')}
+                            </Link>
+                        </Button>
+                    )}
                 </div>
 
                 <section className="space-y-3">
@@ -119,7 +126,7 @@ export default function ShowClient({
                     )}
                 </section>
 
-                {canChangeStatus && (
+                {canChangeStatus && canStatus && (
                     <ClientStatusActions
                         clientId={client.id}
                         clientName={client.name}

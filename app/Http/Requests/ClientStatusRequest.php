@@ -19,7 +19,7 @@ class ClientStatusRequest extends FormRequest
         /** @var Client $client */
         $client = $this->route('client');
 
-        return ! $this->user()->isRestrictedToZones() && $this->user()->can('update', $client);
+        return ! $this->user()->isRestrictedToZones() && $this->user()->can('clients.change_status') && $this->user()->can('view', $client);
     }
 
     /**

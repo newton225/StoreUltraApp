@@ -61,6 +61,14 @@ return [
     ],
 
     'actions' => [
+        'clients_create' => 'Create clients',
+        'clients_create_help' => 'Register a new client (a field agent only in their zones).',
+        'clients_update' => 'Edit clients',
+        'clients_update_help' => 'Correct the contact details, the zone and the notes of a client.',
+        'clients_change_status' => 'Change the status of clients',
+        'clients_change_status_help' => 'Activate, suspend or end a client, and confirm the ones entered by agents.',
+        'clients_export' => 'Export the list of clients',
+        'clients_export_help' => 'Download the list of clients as CSV or PDF.',
         'orders_create' => 'Create orders',
         'orders_create_help' => 'Enter a new order or create the orders of a sub-prefecture.',
         'orders_record_payment' => 'Collect payments',
@@ -122,6 +130,8 @@ return [
     ],
 
     'permissions' => [
+        'manage_clients' => 'Manage clients',
+        'manage_clients_help' => 'Open the list and the files of the clients (a profile limited to zones only sees the clients of its zones).',
         'manage_orders' => 'Manage orders and collections',
         'manage_orders_help' => 'Create orders and automatic deliveries, move them along, collect and refund, issue the documents (proforma, invoice, delivery note), see the payments and the late advances, and download the matching exports.',
         'manage_purchases' => 'Manage purchases from the shops',

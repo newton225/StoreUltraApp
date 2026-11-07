@@ -9,6 +9,11 @@ namespace App\Enums;
  */
 enum PermissionAction: string
 {
+    case ClientsCreate = 'clients.create';
+    case ClientsUpdate = 'clients.update';
+    case ClientsChangeStatus = 'clients.change_status';
+    case ClientsExport = 'clients.export';
+
     case OrdersCreate = 'orders.create';
     case OrdersRecordPayment = 'orders.record_payment';
     case OrdersRecordDelivery = 'orders.record_delivery';
@@ -49,6 +54,7 @@ enum PermissionAction: string
     public function menu(): Permission
     {
         return match (true) {
+            str_starts_with($this->value, 'clients.') => Permission::ManageClients,
             str_starts_with($this->value, 'orders.') => Permission::ManageOrders,
             str_starts_with($this->value, 'purchases.') => Permission::ManagePurchases,
             str_starts_with($this->value, 'cash.') => Permission::ManageCash,
