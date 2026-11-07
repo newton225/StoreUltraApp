@@ -220,6 +220,17 @@
         @apply bg-popover text-popover-foreground;
     }
 
+    /* The side menu scrollbar only shows while the pointer is over the menu (the space stays reserved, nothing jumps). */
+    [data-sidebar='content'] {
+        scrollbar-width: thin;
+        scrollbar-color: transparent transparent;
+    }
+
+    [data-sidebar='content']:hover,
+    [data-sidebar='content']:focus-within {
+        scrollbar-color: var(--muted-foreground) transparent;
+    }
+
     body {
         @apply bg-background text-foreground;
     }
