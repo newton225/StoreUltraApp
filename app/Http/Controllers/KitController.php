@@ -64,6 +64,8 @@ class KitController extends Controller
      */
     public function store(StoreKitRequest $request, CreateKitVersion $createVersion): RedirectResponse
     {
+        Gate::authorize('catalog.kits');
+
         $kit = Kit::create($request->safe()->only(['name_fr', 'name_en']));
 
         $createVersion->handle($kit, $request->validated(), $request->user());
@@ -114,6 +116,8 @@ class KitController extends Controller
      */
     public function update(UpdateKitRequest $request, Kit $kit): RedirectResponse
     {
+        Gate::authorize('catalog.kits');
+
         $kit->update($request->validated());
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('kits.updated')]);

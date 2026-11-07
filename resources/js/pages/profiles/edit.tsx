@@ -25,9 +25,10 @@ import { useTranslation } from '@/hooks/use-translation';
 type Props = {
     profile: EditableProfile & { name: string; users_count: number };
     permissions: string[];
+    actions: Record<string, string[]>;
 };
 
-export default function EditProfile({ profile, permissions }: Props) {
+export default function EditProfile({ profile, permissions, actions }: Props) {
     const { t } = useTranslation();
     const [confirming, setConfirming] = useState(false);
 
@@ -78,6 +79,7 @@ export default function EditProfile({ profile, permissions }: Props) {
                 <ProfileForm
                     formProps={update.form(profile.id)}
                     permissions={permissions}
+                    actions={actions}
                     profile={profile}
                     readOnly={profile.is_system}
                 />

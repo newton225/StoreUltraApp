@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\OrderStatus;
+use App\Enums\PermissionAction;
 use App\Models\AuditLog;
 use App\Models\Order;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -20,7 +21,14 @@ class TransitionOrderRequest extends FormRequest
         /** @var Order $order */
         $order = $this->route('order');
 
-        return $this->user()->can('transition', $order);
+        $target = OrderStatus::tryFrom((string) $this->input('to'));
+        $action = match (true) {
+            $target === OrderStatus::Cancelled => PermissionAction::OrdersCancel,
+            $target?->needsPassword() === true => PermissionAction::OrdersFinalize,
+            default => PermissionAction::OrdersAdvance,
+        };
+
+        return $this->user()->can('transition', $order) && $this->user()->canDo($action);
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\Permission;
+use App\Enums\PermissionAction;
 use App\Models\Profile;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -36,7 +37,7 @@ class ProfileRequest extends FormRequest
             'label_en' => ['required', 'string', 'max:80'],
             'restricted_to_zones' => ['required', 'boolean'],
             'permissions' => ['nullable', 'array'],
-            'permissions.*' => ['string', 'distinct', Rule::in(Permission::values())],
+            'permissions.*' => ['string', 'distinct', Rule::in([...Permission::values(), ...PermissionAction::values()])],
         ];
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Permission;
+use App\Enums\PermissionAction;
 use App\Enums\UserRole;
 use App\Models\AuditLog;
 use App\Models\Profile;
@@ -169,7 +170,11 @@ test('a right is ticked and unticked straight from the table, and the change is 
     $this->actingAs($this->owner)
         ->patch(route('profiles.rights', $profile), ['right' => Permission::ManageOrders->value, 'granted' => true])
         ->assertRedirect();
-    expect($profile->refresh()->permissions)->toBe([Permission::ManageOrders->value]);
+    // A menu brings its actions with it.
+    expect($profile->refresh()->permissions)->toBe([
+        Permission::ManageOrders->value,
+        ...array_map(fn (PermissionAction $action): string => $action->value, PermissionAction::ofMenu(Permission::ManageOrders)),
+    ]);
 
     $this->actingAs($this->owner)
         ->patch(route('profiles.rights', $profile), ['right' => Permission::ManageOrders->value, 'granted' => false]);

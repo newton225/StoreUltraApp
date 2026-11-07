@@ -39,7 +39,7 @@ cochée est un point **supposé faux**.
 - [ ] Un lien y mène depuis la navigation (UI-30), visible seulement pour qui a la permission (UI-12).
 - [ ] **Clôture de période** (caisse, stock, compte) : écart écrit comme une écriture, période figée y compris par les chemins indirects, clôture immuable et tracée (DATA-76).
 - [ ] **Nouvelle permission** : ajoutée au catalogue fermé, aux profils système qui doivent l'avoir, à l'écran des
-  profils avec son explication dans toutes les langues (SEC-22, SEC-150 à SEC-160), et il apparaît dans le tableau croisé des droits par profil.
+  profils avec son explication dans toutes les langues (SEC-22, SEC-150 à SEC-160), et il apparaît dans le tableau croisé des droits par profil, menu et action (SEC-164).
 - [ ] Les **erreurs** sont des réponses utiles, pas des exceptions (CODE-50, CODE-51).
 
 ## 3. Nouvel écran

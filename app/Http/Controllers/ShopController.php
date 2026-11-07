@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ShopRequest;
 use App\Models\Shop;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -36,6 +37,8 @@ class ShopController extends Controller
      */
     public function store(ShopRequest $request): RedirectResponse
     {
+        Gate::authorize('catalog.shops');
+
         Shop::create($request->validated());
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('catalog.shops.created')]);
@@ -58,6 +61,8 @@ class ShopController extends Controller
      */
     public function update(ShopRequest $request, Shop $shop): RedirectResponse
     {
+        Gate::authorize('catalog.shops');
+
         $shop->update($request->validated());
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('catalog.shops.updated')]);

@@ -1,4 +1,4 @@
-import { Head, Link, router, setLayoutProps } from '@inertiajs/react';
+import { Head, Link, router, setLayoutProps, usePage } from '@inertiajs/react';
 import { Check } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -158,10 +158,21 @@ export default function ShowOrder({
         );
     };
 
+    const { auth } = usePage<{ auth: { actions: string[] } }>().props;
+    // The action the profile needs for a step: cancelling, a critical step or a usual one.
+    const mayDo = (status: string): boolean =>
+        auth.actions.includes(
+            status === 'cancelled'
+                ? 'orders.cancel'
+                : order.password_steps.includes(status)
+                  ? 'orders.finalize'
+                  : 'orders.advance',
+        );
     const nextStep = order.allowed_next.find(
-        (status) => status !== 'cancelled',
+        (status) => status !== 'cancelled' && mayDo(status),
     );
-    const canCancel = order.allowed_next.includes('cancelled');
+    const canCancel =
+        order.allowed_next.includes('cancelled') && mayDo('cancelled');
     // The advance has to be collected before the order can go on (setting "advance required").
     const waitingAdvance =
         nextStep === 'advance_received' && payments.advance_blocking;

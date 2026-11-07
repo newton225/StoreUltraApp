@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Permission;
+use App\Enums\PermissionAction;
 use App\Enums\UserRole;
 use Database\Factories\ProfileFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -93,6 +94,15 @@ class Profile extends Model
     public function grants(Permission $permission): bool
     {
         return in_array($permission->value, $this->permissions, true);
+    }
+
+    /**
+     * Whether this profile grants an action. The action alone decides: the menu opens the screens, and a
+     * field agent does a few things (payments, deliveries, receipts) without having the orders menu.
+     */
+    public function grantsAction(PermissionAction $action): bool
+    {
+        return in_array($action->value, $this->permissions, true);
     }
 
     /**

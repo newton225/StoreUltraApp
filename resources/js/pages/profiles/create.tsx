@@ -11,6 +11,7 @@ import { useTranslation } from '@/hooks/use-translation';
 
 type Props = {
     permissions: string[];
+    actions: Record<string, string[]>;
     template: {
         name: string;
         restricted_to_zones: boolean;
@@ -18,7 +19,11 @@ type Props = {
     } | null;
 };
 
-export default function CreateProfile({ permissions, template }: Props) {
+export default function CreateProfile({
+    permissions,
+    actions,
+    template,
+}: Props) {
     const { t } = useTranslation();
 
     setLayoutProps({
@@ -51,6 +56,7 @@ export default function CreateProfile({ permissions, template }: Props) {
                 <ProfileForm
                     formProps={store.form()}
                     permissions={permissions}
+                    actions={actions}
                     template={template}
                 />
             </div>

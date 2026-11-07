@@ -46,6 +46,7 @@ class HandleInertiaRequests extends Middleware
                 'canViewProfit' => $request->user()?->can('view-profit') ?? false,
                 'canManageSettings' => $request->user()?->can('manage-settings') ?? false,
                 'permissions' => $request->user()?->grantedPermissions() ?? [],
+                'actions' => $request->user()?->grantedActions() ?? [],
                 'restrictedToZones' => $request->user()?->isRestrictedToZones() ?? false,
             ],
             'locale' => app()->getLocale(),

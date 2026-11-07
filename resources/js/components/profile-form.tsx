@@ -1,4 +1,5 @@
 import { Form } from '@inertiajs/react';
+import { useState } from 'react';
 import { FieldLabel } from '@/components/field-label';
 import InputError from '@/components/input-error';
 import { SaveBar } from '@/components/save-bar';
@@ -18,8 +19,10 @@ export type EditableProfile = {
 
 type Props = {
     formProps: { action: string; method: 'post' };
-    /** Every permission of the closed catalogue. */
+    /** Every menu of the closed catalogue. */
     permissions: string[];
+    /** The actions of each menu. */
+    actions: Record<string, string[]>;
     profile?: EditableProfile;
     /** What a new profile starts from: the rights of an existing profile. */
     template?: { restricted_to_zones: boolean; permissions: string[] } | null;
@@ -34,14 +37,42 @@ type Props = {
 export default function ProfileForm({
     formProps,
     permissions,
+    actions,
     profile,
     template,
     readOnly = false,
 }: Props) {
     const { t } = useTranslation();
-    const granted = new Set(
-        profile?.permissions ?? template?.permissions ?? [],
+    const [selected, setSelected] = useState(
+        () => new Set(profile?.permissions ?? template?.permissions ?? []),
     );
+
+    // A menu brings its actions with it, or takes them away; an action is ticked on its own.
+    const toggleMenu = (menu: string, on: boolean): void => {
+        const next = new Set(selected);
+
+        for (const right of [menu, ...(actions[menu] ?? [])]) {
+            if (on) {
+                next.add(right);
+            } else {
+                next.delete(right);
+            }
+        }
+
+        setSelected(next);
+    };
+
+    const toggleAction = (action: string, on: boolean): void => {
+        const next = new Set(selected);
+
+        if (on) {
+            next.add(action);
+        } else {
+            next.delete(action);
+        }
+
+        setSelected(next);
+    };
     const restricted =
         profile?.restricted_to_zones ?? template?.restricted_to_zones ?? false;
 
@@ -113,33 +144,79 @@ export default function ProfileForm({
                                     {t('profiles.form.permissions_help')}
                                 </p>
                             </div>
-                            <ul className="grid gap-3 rounded-lg border border-border p-4 md:grid-cols-2">
+                            <div className="grid gap-4 md:grid-cols-2">
                                 {permissions.map((permission) => (
-                                    <li
+                                    <fieldset
                                         key={permission}
-                                        className="flex items-center gap-3"
+                                        className="grid content-start gap-2 rounded-lg border border-border p-4"
                                     >
-                                        <Checkbox
-                                            id={`permission-${permission}`}
-                                            name="permissions[]"
-                                            value={permission}
-                                            defaultChecked={granted.has(
-                                                permission,
+                                        <div className="flex items-center gap-3">
+                                            <Checkbox
+                                                id={`permission-${permission}`}
+                                                name="permissions[]"
+                                                value={permission}
+                                                checked={selected.has(
+                                                    permission,
+                                                )}
+                                                onCheckedChange={(value) =>
+                                                    toggleMenu(
+                                                        permission,
+                                                        value === true,
+                                                    )
+                                                }
+                                            />
+                                            <FieldLabel
+                                                htmlFor={`permission-${permission}`}
+                                                help={t(
+                                                    `profiles.permissions.${permission}_help`,
+                                                )}
+                                            >
+                                                {t(
+                                                    `profiles.permissions.${permission}`,
+                                                )}
+                                            </FieldLabel>
+                                        </div>
+                                        <ul className="ml-7 grid gap-2 border-l border-border pl-4">
+                                            {(actions[permission] ?? []).map(
+                                                (action) => (
+                                                    <li
+                                                        key={action}
+                                                        className="flex items-center gap-3"
+                                                    >
+                                                        <Checkbox
+                                                            id={`permission-${action}`}
+                                                            name="permissions[]"
+                                                            value={action}
+                                                            checked={selected.has(
+                                                                action,
+                                                            )}
+                                                            onCheckedChange={(
+                                                                value,
+                                                            ) =>
+                                                                toggleAction(
+                                                                    action,
+                                                                    value ===
+                                                                        true,
+                                                                )
+                                                            }
+                                                        />
+                                                        <FieldLabel
+                                                            htmlFor={`permission-${action}`}
+                                                            help={t(
+                                                                `profiles.actions.${action.replace('.', '_')}_help`,
+                                                            )}
+                                                        >
+                                                            {t(
+                                                                `profiles.actions.${action.replace('.', '_')}`,
+                                                            )}
+                                                        </FieldLabel>
+                                                    </li>
+                                                ),
                                             )}
-                                        />
-                                        <FieldLabel
-                                            htmlFor={`permission-${permission}`}
-                                            help={t(
-                                                `profiles.permissions.${permission}_help`,
-                                            )}
-                                        >
-                                            {t(
-                                                `profiles.permissions.${permission}`,
-                                            )}
-                                        </FieldLabel>
-                                    </li>
+                                        </ul>
+                                    </fieldset>
                                 ))}
-                            </ul>
+                            </div>
                             <InputError message={errors.permissions} />
                         </div>
 

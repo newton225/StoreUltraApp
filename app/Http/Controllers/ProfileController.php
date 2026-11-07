@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\Permission;
+use App\Enums\PermissionAction;
 use App\Http\Requests\ProfileRequest;
 use App\Http\Requests\ToggleProfileRightRequest;
 use App\Models\AuditLog;
@@ -29,6 +30,7 @@ class ProfileController extends Controller
                 ->map(fn (Profile $profile): array => $this->listed($profile))
                 ->values(),
             'permissions' => Permission::values(),
+            'actions' => PermissionAction::byMenu(),
         ]);
     }
 
@@ -41,6 +43,7 @@ class ProfileController extends Controller
 
         return Inertia::render('profiles/create', [
             'permissions' => Permission::values(),
+            'actions' => PermissionAction::byMenu(),
             'template' => $template === null ? null : [
                 'name' => $template->label,
                 'restricted_to_zones' => $template->restricted_to_zones,
@@ -79,6 +82,7 @@ class ProfileController extends Controller
                 'users_count' => $profile->users()->count(),
             ],
             'permissions' => Permission::values(),
+            'actions' => PermissionAction::byMenu(),
         ]);
     }
 
@@ -125,9 +129,14 @@ class ProfileController extends Controller
             if ($right === 'restricted_to_zones') {
                 $profile->forceFill(['restricted_to_zones' => $granted]);
             } else {
+                // A menu brings its actions with it, or takes them away; an action goes alone.
+                $affected = [$right, ...array_map(
+                    fn (PermissionAction $action): string => $action->value,
+                    Permission::tryFrom($right) === null ? [] : PermissionAction::ofMenu(Permission::from($right)),
+                )];
                 $permissions = array_values(array_unique([
-                    ...array_filter($profile->permissions, fn (string $held): bool => $held !== $right),
-                    ...($granted ? [$right] : []),
+                    ...array_filter($profile->permissions, fn (string $held): bool => ! in_array($held, $affected, true)),
+                    ...($granted ? $affected : []),
                 ]));
                 $profile->forceFill(['permissions' => $permissions]);
             }

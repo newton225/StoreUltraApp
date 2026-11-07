@@ -57,54 +57,54 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('clients', ClientController::class)->except(['destroy']);
     Route::patch('clients/{client}/status', [ClientController::class, 'status'])->name('clients.status');
     Route::get('order-documents/zip', [OrderDocumentArchiveController::class, 'show'])->middleware('throttle:archives')
-        ->name('orders.documents.zip');
+        ->middleware('can:orders.download_zip')->name('orders.documents.zip');
     Route::resource('orders', OrderController::class)->only(['index', 'create', 'store', 'show']);
-    Route::post('documents', [DocumentController::class, 'store'])->name('documents.store');
+    Route::post('documents', [DocumentController::class, 'store'])->middleware('can:orders.issue_documents')->name('documents.store');
     Route::get('documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
     Route::get('deliveries', [DeliveryController::class, 'index'])->name('deliveries.index');
     Route::get('deliveries/{delivery}/signature', [DeliveryController::class, 'signature'])->name('deliveries.signature');
     Route::post('orders/{order}/deliveries', [DeliveryController::class, 'store'])->middleware('throttle:uploads')
-        ->name('orders.deliveries.store');
-    Route::post('orders/{order}/payments', [PaymentController::class, 'store'])->name('orders.payments.store');
+        ->middleware('can:orders.record_delivery')->name('orders.deliveries.store');
+    Route::post('orders/{order}/payments', [PaymentController::class, 'store'])->middleware('can:orders.record_payment')->name('orders.payments.store');
     Route::post('orders/{order}/transition', [OrderTransitionController::class, 'store'])->name('orders.transition');
 
     Route::middleware('can:manage-orders')->group(function () {
-        Route::post('orders/advance-payments', [OrderAdvancePaymentController::class, 'store'])->name('orders.advance-payments.store');
-        Route::post('orders/proformas', [OrderProformaController::class, 'store'])->name('orders.proformas.store');
-        Route::post('orders/batch', [OrderBatchController::class, 'store'])->name('orders.batch.store');
+        Route::post('orders/advance-payments', [OrderAdvancePaymentController::class, 'store'])->middleware('can:orders.record_payment')->name('orders.advance-payments.store');
+        Route::post('orders/proformas', [OrderProformaController::class, 'store'])->middleware('can:orders.batch')->name('orders.proformas.store');
+        Route::post('orders/batch', [OrderBatchController::class, 'store'])->middleware('can:orders.batch')->name('orders.batch.store');
         Route::get('documents', [DocumentController::class, 'index'])->name('documents.index');
-        Route::post('documents/{document}/cancel', [DocumentController::class, 'cancel'])->name('documents.cancel');
-        Route::patch('invoices/{invoice}/fne', [InvoiceController::class, 'fne'])->name('invoices.fne');
+        Route::post('documents/{document}/cancel', [DocumentController::class, 'cancel'])->middleware('can:orders.cancel_documents')->name('documents.cancel');
+        Route::patch('invoices/{invoice}/fne', [InvoiceController::class, 'fne'])->middleware('can:orders.fne')->name('invoices.fne');
         Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
         Route::get('payments/arrears', [PaymentController::class, 'arrears'])->name('payments.arrears');
-        Route::post('clients/{client}/plans', [SupplyPlanController::class, 'store'])->name('clients.plans.store');
-        Route::patch('plans/{plan}', [SupplyPlanController::class, 'update'])->name('plans.update');
+        Route::post('clients/{client}/plans', [SupplyPlanController::class, 'store'])->middleware('can:orders.plans')->name('clients.plans.store');
+        Route::patch('plans/{plan}', [SupplyPlanController::class, 'update'])->middleware('can:orders.plans')->name('plans.update');
     });
 
     Route::middleware('can:manage-purchases')->group(function () {
         Route::get('purchases', [PurchaseController::class, 'index'])->name('purchases.index');
-        Route::post('purchases/generate', [PurchaseController::class, 'generate'])->name('purchases.generate');
+        Route::post('purchases/generate', [PurchaseController::class, 'generate'])->middleware('can:purchases.generate')->name('purchases.generate');
         Route::get('purchases/{purchaseOrder}', [PurchaseController::class, 'show'])->name('purchases.show');
-        Route::post('purchases/{purchaseOrder}/send', [PurchaseController::class, 'send'])->name('purchases.send');
-        Route::post('purchases/{purchaseOrder}/receive', [PurchaseController::class, 'receive'])->name('purchases.receive');
-        Route::post('purchases/{purchaseOrder}/cancel', [PurchaseController::class, 'cancel'])->name('purchases.cancel');
-        Route::post('shops/{shop}/payments', [ShopPaymentController::class, 'store'])->name('shops.payments.store');
+        Route::post('purchases/{purchaseOrder}/send', [PurchaseController::class, 'send'])->middleware('can:purchases.send')->name('purchases.send');
+        Route::post('purchases/{purchaseOrder}/receive', [PurchaseController::class, 'receive'])->middleware('can:purchases.receive')->name('purchases.receive');
+        Route::post('purchases/{purchaseOrder}/cancel', [PurchaseController::class, 'cancel'])->middleware('can:purchases.cancel')->name('purchases.cancel');
+        Route::post('shops/{shop}/payments', [ShopPaymentController::class, 'store'])->middleware('can:purchases.pay_shop')->name('shops.payments.store');
     });
 
     Route::middleware('can:manage-cash')->group(function () {
         Route::get('cash', [CashMovementController::class, 'index'])->name('cash.index');
-        Route::post('cash', [CashMovementController::class, 'store'])->name('cash.store');
-        Route::post('cash/{cashMovement}/cancel', [CashMovementController::class, 'cancel'])->name('cash.cancel');
-        Route::post('cash/closings', [CashCloseController::class, 'store'])->name('cash.closings.store');
-        Route::post('cash/link-expenses', [CashCloseController::class, 'link'])->name('cash.link-expenses');
+        Route::post('cash', [CashMovementController::class, 'store'])->middleware('can:cash.record')->name('cash.store');
+        Route::post('cash/{cashMovement}/cancel', [CashMovementController::class, 'cancel'])->middleware('can:cash.cancel')->name('cash.cancel');
+        Route::post('cash/closings', [CashCloseController::class, 'store'])->middleware('can:cash.close')->name('cash.closings.store');
+        Route::post('cash/link-expenses', [CashCloseController::class, 'link'])->middleware('can:cash.link_expenses')->name('cash.link-expenses');
     });
 
     Route::middleware('can:manage-expenses')->group(function () {
         Route::get('expenses', [ExpenseController::class, 'index'])->name('expenses.index');
-        Route::get('expenses/create', [ExpenseController::class, 'create'])->name('expenses.create');
-        Route::post('expenses', [ExpenseController::class, 'store'])->middleware('throttle:uploads')->name('expenses.store');
-        Route::post('expenses/{expense}/cancel', [ExpenseController::class, 'cancel'])->name('expenses.cancel');
-        Route::get('expenses/{expense}/proof', [ExpenseController::class, 'proof'])->name('expenses.proof');
+        Route::get('expenses/create', [ExpenseController::class, 'create'])->middleware('can:expenses.create')->name('expenses.create');
+        Route::post('expenses', [ExpenseController::class, 'store'])->middleware('throttle:uploads')->middleware('can:expenses.create')->name('expenses.store');
+        Route::post('expenses/{expense}/cancel', [ExpenseController::class, 'cancel'])->middleware('can:expenses.cancel')->name('expenses.cancel');
+        Route::get('expenses/{expense}/proof', [ExpenseController::class, 'proof'])->middleware('can:expenses.view_proof')->name('expenses.proof');
     });
 
     Route::get('profits', [ProfitController::class, 'index'])->middleware('can:view-profit')->name('profits.index');
@@ -119,10 +119,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('shops', ShopController::class)->except(['show', 'destroy']);
         Route::resource('products', ProductController::class)->except(['show', 'destroy']);
         Route::resource('kits', KitController::class)->except(['edit', 'destroy']);
-        Route::post('kits/{kit}/versions', [KitVersionController::class, 'store'])->name('kits.versions.store');
-        Route::patch('products/{product}/archive', [ProductController::class, 'archive'])->name('products.archive');
-        Route::patch('products/{product}/restore', [ProductController::class, 'restore'])->name('products.restore');
-        Route::post('products/{product}/prices', [ProductPriceController::class, 'store'])->name('products.prices.store');
+        Route::post('kits/{kit}/versions', [KitVersionController::class, 'store'])->middleware('can:catalog.kits')->name('kits.versions.store');
+        Route::patch('products/{product}/archive', [ProductController::class, 'archive'])->middleware('can:catalog.archive')->name('products.archive');
+        Route::patch('products/{product}/restore', [ProductController::class, 'restore'])->middleware('can:catalog.archive')->name('products.restore');
+        Route::post('products/{product}/prices', [ProductPriceController::class, 'store'])->middleware('can:catalog.prices')->name('products.prices.store');
     });
 
     Route::middleware('can:manage-settings')->group(function () {

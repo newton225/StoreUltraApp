@@ -393,6 +393,15 @@ encaisse. Contrôles :
   Masquer une colonne côté écran sans retirer la donnée de la réponse est un défaut de sécurité. Un test vérifie, pour
   un agent et pour un employé sans le droit, que les clés sont absentes.
 
+- **SEC-164.** **Un profil se règle par menu et par action.** Le menu ouvre les écrans ; l'action autorise ce qu'on y fait
+  (créer, encaisser, annuler, clôturer, générer, envoyer, recevoir, payer…). Deux niveaux, un seul catalogue fermé dans le code
+  (SEC-152) : un menu coché apporte toutes ses actions, que l'on décoche une à une ; décocher le menu les retire. Chaque route
+  d'écriture est protégée par son action (le serveur décide, l'écran ne fait que cacher le bouton), y compris les étapes d'un cycle de
+  vie, où l'action dépend de l'étape visée (étape courante, étape critique, annulation). Une action qui n'a de sens qu'avec
+  un menu n'est jamais ajoutée sans lui, sauf pour un rôle de terrain qui agit sans ouvrir le menu. Une nouvelle action = l'enum,
+  la route ou le contrôleur, les textes dans toutes les langues, la migration qui l'accorde aux profils qui avaient le menu
+  (rien ne change le jour de la mise à jour) et la ligne du tableau croisé (SEC-158).
+
 ## 16. Erreurs fréquentes à ne pas refaire
 
 | Erreur | Conséquence |

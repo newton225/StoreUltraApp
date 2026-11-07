@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\Permission;
+use App\Enums\PermissionAction;
 use App\Models\Profile;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -35,7 +36,13 @@ class ProfileFactory extends Factory
      */
     public function granting(array $permissions): static
     {
-        return $this->state(fn (): array => ['permissions' => array_map(fn (Permission $permission): string => $permission->value, $permissions)]);
+        return $this->state(fn (): array => ['permissions' => [
+            ...array_map(fn (Permission $permission): string => $permission->value, $permissions),
+            ...array_map(
+                fn (PermissionAction $action): string => $action->value,
+                array_merge(...array_map(fn (Permission $permission): array => PermissionAction::ofMenu($permission), $permissions)),
+            ),
+        ]]);
     }
 
     /**

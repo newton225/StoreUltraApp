@@ -25,9 +25,16 @@ type ListedProfile = {
 type Props = {
     profiles: ListedProfile[];
     permissions: string[];
+    actions: Record<string, string[]>;
 };
 
-export default function ProfilesIndex({ profiles, permissions }: Props) {
+const actionKey = (action: string): string => action.replace('.', '_');
+
+export default function ProfilesIndex({
+    profiles,
+    permissions,
+    actions,
+}: Props) {
     const { t } = useTranslation();
 
     setLayoutProps({
@@ -67,9 +74,11 @@ export default function ProfilesIndex({ profiles, permissions }: Props) {
                         </thead>
                         <tbody>
                             {profiles.map((profile) => {
+                                const menus = profile.permissions.filter(
+                                    (held) => permissions.includes(held),
+                                );
                                 const everything =
-                                    profile.permissions.length ===
-                                    permissions.length;
+                                    menus.length === permissions.length;
 
                                 return (
                                     <tr
@@ -115,19 +124,22 @@ export default function ProfilesIndex({ profiles, permissions }: Props) {
                                                 </span>
                                             ) : (
                                                 <ul className="flex flex-wrap gap-1.5">
-                                                    {profile.permissions.map(
-                                                        (permission) => (
-                                                            <li
-                                                                key={permission}
-                                                            >
-                                                                <Badge variant="outline">
-                                                                    {t(
-                                                                        `profiles.permissions.${permission}`,
-                                                                    )}
-                                                                </Badge>
-                                                            </li>
-                                                        ),
-                                                    )}
+                                                    {(menus.length > 0
+                                                        ? menus
+                                                        : profile.permissions
+                                                    ).map((permission) => (
+                                                        <li key={permission}>
+                                                            <Badge variant="outline">
+                                                                {t(
+                                                                    permission.includes(
+                                                                        '.',
+                                                                    )
+                                                                        ? `profiles.actions.${actionKey(permission)}`
+                                                                        : `profiles.permissions.${permission}`,
+                                                                )}
+                                                            </Badge>
+                                                        </li>
+                                                    ))}
                                                 </ul>
                                             )}
                                         </td>
@@ -197,45 +209,37 @@ export default function ProfilesIndex({ profiles, permissions }: Props) {
                                 </tr>
                             </thead>
                             <tbody>
-                                {permissions.map((permission) => (
-                                    <tr
+                                {permissions.flatMap((permission) => [
+                                    <MatrixRow
                                         key={permission}
-                                        className="border-t border-border"
-                                    >
-                                        <th
-                                            scope="row"
-                                            className="px-4 py-2 font-normal"
-                                        >
-                                            <span className="flex items-center gap-1.5">
-                                                {t(
-                                                    `profiles.permissions.${permission}`,
+                                        profiles={profiles}
+                                        right={permission}
+                                        label={t(
+                                            `profiles.permissions.${permission}`,
+                                        )}
+                                        help={t(
+                                            `profiles.permissions.${permission}_help`,
+                                        )}
+                                        actions={actions}
+                                    />,
+                                    ...(actions[permission] ?? []).map(
+                                        (action) => (
+                                            <MatrixRow
+                                                key={action}
+                                                profiles={profiles}
+                                                right={action}
+                                                label={t(
+                                                    `profiles.actions.${actionKey(action)}`,
                                                 )}
-                                                <HelpHint
-                                                    label={t(
-                                                        `profiles.permissions.${permission}_help`,
-                                                    )}
-                                                />
-                                            </span>
-                                        </th>
-                                        {profiles.map((profile) => (
-                                            <td
-                                                key={profile.id}
-                                                className="px-4 py-2 text-center"
-                                            >
-                                                <RightCell
-                                                    profile={profile}
-                                                    right={permission}
-                                                    on={profile.permissions.includes(
-                                                        permission,
-                                                    )}
-                                                    label={t(
-                                                        `profiles.permissions.${permission}`,
-                                                    )}
-                                                />
-                                            </td>
-                                        ))}
-                                    </tr>
-                                ))}
+                                                help={t(
+                                                    `profiles.actions.${actionKey(action)}_help`,
+                                                )}
+                                                actions={actions}
+                                                nested
+                                            />
+                                        ),
+                                    ),
+                                ])}
                                 <tr className="border-t border-border">
                                     <th
                                         scope="row"
@@ -251,6 +255,7 @@ export default function ProfilesIndex({ profiles, permissions }: Props) {
                                             <RightCell
                                                 profile={profile}
                                                 right="restricted_to_zones"
+                                                actions={actions}
                                                 on={profile.restricted_to_zones}
                                                 label={t(
                                                     'profiles.restricted_row',
@@ -268,6 +273,58 @@ export default function ProfilesIndex({ profiles, permissions }: Props) {
     );
 }
 
+/** One line of the table of rights: a menu, or one of its actions (indented), with its cell for every profile. */
+function MatrixRow({
+    profiles,
+    right,
+    label,
+    help,
+    actions,
+    nested = false,
+}: {
+    profiles: ListedProfile[];
+    right: string;
+    label: string;
+    help: string;
+    actions: Record<string, string[]>;
+    nested?: boolean;
+}) {
+    return (
+        <tr
+            className={
+                nested
+                    ? 'border-t border-border/50'
+                    : 'border-t border-border bg-muted/20'
+            }
+        >
+            <th
+                scope="row"
+                className={
+                    nested
+                        ? 'py-1.5 pr-4 pl-9 text-sm font-normal text-muted-foreground'
+                        : 'px-4 py-2 font-medium'
+                }
+            >
+                <span className="flex items-center gap-1.5">
+                    {label}
+                    <HelpHint label={help} />
+                </span>
+            </th>
+            {profiles.map((profile) => (
+                <td key={profile.id} className="px-4 py-1.5 text-center">
+                    <RightCell
+                        profile={profile}
+                        right={right}
+                        on={profile.permissions.includes(right)}
+                        label={label}
+                        actions={actions}
+                    />
+                </td>
+            ))}
+        </tr>
+    );
+}
+
 /**
  * One cell of the table of rights. A custom profile gets a checkbox saved on the spot (the page updates
  * at once and goes back if the server refuses); a system profile only shows the mark.
@@ -277,11 +334,13 @@ function RightCell({
     right,
     on,
     label,
+    actions,
 }: {
     profile: ListedProfile;
     right: string;
     on: boolean;
     label: string;
+    actions: Record<string, string[]>;
 }) {
     const { t } = useTranslation();
 
@@ -290,6 +349,8 @@ function RightCell({
     }
 
     const toggle = (granted: boolean): void => {
+        const affected = [right, ...(actions[right] ?? [])];
+
         router
             .optimistic<Props>((props) => ({
                 profiles: props.profiles.map((listed) =>
@@ -300,9 +361,14 @@ function RightCell({
                           : {
                                 ...listed,
                                 permissions: granted
-                                    ? [...listed.permissions, right]
+                                    ? [
+                                          ...new Set([
+                                              ...listed.permissions,
+                                              ...affected,
+                                          ]),
+                                      ]
                                     : listed.permissions.filter(
-                                          (held) => held !== right,
+                                          (held) => !affected.includes(held),
                                       ),
                             },
                 ),

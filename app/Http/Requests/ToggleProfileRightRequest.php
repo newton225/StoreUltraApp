@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\Permission;
+use App\Enums\PermissionAction;
 use App\Models\Profile;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -28,7 +29,7 @@ class ToggleProfileRightRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'right' => ['required', 'string', Rule::in([...Permission::values(), 'restricted_to_zones'])],
+            'right' => ['required', 'string', Rule::in([...Permission::values(), ...PermissionAction::values(), 'restricted_to_zones'])],
             'granted' => ['required', 'boolean'],
         ];
     }

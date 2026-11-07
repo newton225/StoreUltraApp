@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Permission;
+use App\Enums\PermissionAction;
 use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -110,6 +111,28 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     public function hasPermission(Permission $permission): bool
     {
         return $this->isOwner() || $this->effectiveProfile()->grants($permission);
+    }
+
+    /**
+     * Whether the user may do an action: the owner always, the others when their profile grants the menu
+     * and the action.
+     */
+    public function canDo(PermissionAction $action): bool
+    {
+        return $this->isOwner() || $this->effectiveProfile()->grantsAction($action);
+    }
+
+    /**
+     * The actions the user may do, as the values of the catalogue.
+     *
+     * @return list<string>
+     */
+    public function grantedActions(): array
+    {
+        return array_values(array_filter(
+            PermissionAction::values(),
+            fn (string $value): bool => $this->canDo(PermissionAction::from($value)),
+        ));
     }
 
     /**

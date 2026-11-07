@@ -11,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -57,6 +58,8 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request): RedirectResponse
     {
+        Gate::authorize('catalog.products');
+
         $product = DB::transaction(function () use ($request): Product {
             $product = Product::create($request->safe()->only(['name', 'unit', 'shop_id']));
 
@@ -94,6 +97,8 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, Product $product): RedirectResponse
     {
+        Gate::authorize('catalog.products');
+
         $product->update($request->validated());
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('catalog.products.updated')]);

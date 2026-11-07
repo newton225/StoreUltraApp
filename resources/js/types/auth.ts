@@ -20,6 +20,8 @@ export type Auth = {
     canManageSettings: boolean;
     /** The permissions of the profile of the user (the values of the closed catalogue). */
     permissions: string[];
+    /** The actions the user may do (the values of the closed catalogue). */
+    actions: string[];
     restrictedToZones: boolean;
 };
 

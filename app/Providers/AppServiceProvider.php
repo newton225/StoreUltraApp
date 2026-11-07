@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Enums\Permission;
+use App\Enums\PermissionAction;
 use App\Listeners\RecordAuthenticationEvents;
 use App\Models\User;
 use App\Support\ProductionCheck;
@@ -88,6 +89,10 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('manage-expenses', fn (User $user): bool => $user->hasPermission(Permission::ManageExpenses));
         Gate::define('manage-cash', fn (User $user): bool => $user->hasPermission(Permission::ManageCash));
         Gate::define('view-profit', fn (User $user): bool => $user->hasPermission(Permission::ViewProfit));
+
+        foreach (PermissionAction::cases() as $action) {
+            Gate::define($action->value, fn (User $user): bool => $user->canDo($action));
+        }
     }
 
     /**

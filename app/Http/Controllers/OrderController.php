@@ -136,6 +136,8 @@ class OrderController extends Controller
      */
     public function store(StoreOrderRequest $request, CreateOrder $createOrder, WeekCalendar $calendar): RedirectResponse
     {
+        Gate::authorize('orders.create');
+
         $week = $calendar->startOf(CarbonImmutable::parse($request->validated('delivery_week')));
         $kit = Kit::findOrFail($request->integer('kit_id'));
         $version = $kit->versionForWeek($week);
