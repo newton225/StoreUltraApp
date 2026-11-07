@@ -21,6 +21,7 @@ import { Label } from '@/components/ui/label';
 import { useFormat } from '@/hooks/use-format';
 import { useTranslation } from '@/hooks/use-translation';
 import { StatusBadge } from '@/components/status-badge';
+import { useCanDo } from '@/hooks/use-can-do';
 
 type Item = {
     id: number;
@@ -66,6 +67,7 @@ type Props = {
 };
 
 export default function ShowPurchase({ purchase, methods, today }: Props) {
+    const canPayShop = useCanDo('purchases.pay_shop');
     const { t, locale } = useTranslation();
     const { money, date } = useFormat();
     const [received, setReceived] = useState<
@@ -432,153 +434,167 @@ export default function ShowPurchase({ purchase, methods, today }: Props) {
                         </ul>
                     )}
 
-                    <Form
-                        {...storeShopPayment.form(purchase.shop.id)}
-                        options={{ preserveScroll: true }}
-                        resetOnSuccess
-                        className="space-y-4 rounded-lg border border-border p-4"
-                    >
-                        {({ processing, errors: formErrors }) => {
-                            const formErr: Record<string, string | undefined> =
-                                formErrors;
+                    {canPayShop && (
+                        <Form
+                            {...storeShopPayment.form(purchase.shop.id)}
+                            options={{ preserveScroll: true }}
+                            resetOnSuccess
+                            className="space-y-4 rounded-lg border border-border p-4"
+                        >
+                            {({ processing, errors: formErrors }) => {
+                                const formErr: Record<
+                                    string,
+                                    string | undefined
+                                > = formErrors;
 
-                            return (
-                                <>
-                                    <h3 className="text-sm font-medium">
-                                        {t('purchases.payment.title')}
-                                    </h3>
-                                    <input
-                                        type="hidden"
-                                        name="purchase_order_id"
-                                        value={purchase.id}
-                                    />
-                                    <div className="grid items-start gap-4 sm:grid-cols-2">
-                                        <div className="grid gap-2">
-                                            <Label htmlFor="sp-kind">
-                                                {t('purchases.payment.kind')}
-                                            </Label>
-                                            <SelectField
-                                                id="sp-kind"
-                                                name="kind"
-                                                required
-                                                defaultValue="payment"
-                                                options={[
-                                                    {
-                                                        value: 'payment',
-                                                        label: t(
-                                                            'purchases.payment.kinds.payment',
-                                                        ),
-                                                    },
-                                                    {
-                                                        value: 'refund',
-                                                        label: t(
-                                                            'purchases.payment.kinds.refund',
-                                                        ),
-                                                    },
-                                                ]}
-                                            />
-                                            <InputError
-                                                message={formErr.kind}
-                                            />
-                                        </div>
-                                        <div className="grid gap-2">
-                                            <Label htmlFor="sp-amount">
-                                                {t('purchases.payment.amount')}
-                                            </Label>
-                                            <Input
-                                                id="sp-amount"
-                                                name="amount"
-                                                type="number"
-                                                min={1}
-                                                required
-                                            />
-                                            <InputError
-                                                message={formErr.amount}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="grid items-start gap-4 sm:grid-cols-2">
-                                        <div className="grid gap-2">
-                                            <Label htmlFor="sp-method">
-                                                {t('purchases.payment.method')}
-                                            </Label>
-                                            <SelectField
-                                                id="sp-method"
-                                                name="payment_method_id"
-                                                required
-                                                defaultValue=""
-                                                onChange={setMethodId}
-                                                options={[
-                                                    {
-                                                        value: '',
-                                                        label: t(
-                                                            'purchases.payment.choose_method',
-                                                        ),
-                                                    },
-                                                    ...methods.map(
-                                                        (method) => ({
-                                                            value: String(
-                                                                method.id,
+                                return (
+                                    <>
+                                        <h3 className="text-sm font-medium">
+                                            {t('purchases.payment.title')}
+                                        </h3>
+                                        <input
+                                            type="hidden"
+                                            name="purchase_order_id"
+                                            value={purchase.id}
+                                        />
+                                        <div className="grid items-start gap-4 sm:grid-cols-2">
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="sp-kind">
+                                                    {t(
+                                                        'purchases.payment.kind',
+                                                    )}
+                                                </Label>
+                                                <SelectField
+                                                    id="sp-kind"
+                                                    name="kind"
+                                                    required
+                                                    defaultValue="payment"
+                                                    options={[
+                                                        {
+                                                            value: 'payment',
+                                                            label: t(
+                                                                'purchases.payment.kinds.payment',
                                                             ),
-                                                            label: method.name,
-                                                        }),
-                                                    ),
-                                                ]}
-                                            />
-                                            <InputError
-                                                message={
-                                                    formErr.payment_method_id
-                                                }
-                                            />
+                                                        },
+                                                        {
+                                                            value: 'refund',
+                                                            label: t(
+                                                                'purchases.payment.kinds.refund',
+                                                            ),
+                                                        },
+                                                    ]}
+                                                />
+                                                <InputError
+                                                    message={formErr.kind}
+                                                />
+                                            </div>
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="sp-amount">
+                                                    {t(
+                                                        'purchases.payment.amount',
+                                                    )}
+                                                </Label>
+                                                <Input
+                                                    id="sp-amount"
+                                                    name="amount"
+                                                    type="number"
+                                                    min={1}
+                                                    required
+                                                />
+                                                <InputError
+                                                    message={formErr.amount}
+                                                />
+                                            </div>
                                         </div>
-                                        <div className="grid gap-2">
-                                            <Label htmlFor="sp-date">
-                                                {t('purchases.payment.date')}
-                                            </Label>
-                                            <Input
-                                                id="sp-date"
-                                                name="paid_on"
-                                                type="date"
-                                                max={today}
-                                                defaultValue={today}
-                                                required
-                                            />
-                                            <InputError
-                                                message={formErr.paid_on}
-                                            />
+                                        <div className="grid items-start gap-4 sm:grid-cols-2">
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="sp-method">
+                                                    {t(
+                                                        'purchases.payment.method',
+                                                    )}
+                                                </Label>
+                                                <SelectField
+                                                    id="sp-method"
+                                                    name="payment_method_id"
+                                                    required
+                                                    defaultValue=""
+                                                    onChange={setMethodId}
+                                                    options={[
+                                                        {
+                                                            value: '',
+                                                            label: t(
+                                                                'purchases.payment.choose_method',
+                                                            ),
+                                                        },
+                                                        ...methods.map(
+                                                            (method) => ({
+                                                                value: String(
+                                                                    method.id,
+                                                                ),
+                                                                label: method.name,
+                                                            }),
+                                                        ),
+                                                    ]}
+                                                />
+                                                <InputError
+                                                    message={
+                                                        formErr.payment_method_id
+                                                    }
+                                                />
+                                            </div>
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="sp-date">
+                                                    {t(
+                                                        'purchases.payment.date',
+                                                    )}
+                                                </Label>
+                                                <Input
+                                                    id="sp-date"
+                                                    name="paid_on"
+                                                    type="date"
+                                                    max={today}
+                                                    defaultValue={today}
+                                                    required
+                                                />
+                                                <InputError
+                                                    message={formErr.paid_on}
+                                                />
+                                            </div>
                                         </div>
-                                    </div>
-                                    {needsReference && (
-                                        <div className="grid gap-2">
-                                            <Label htmlFor="sp-reference">
-                                                {t(
-                                                    'purchases.payment.reference',
-                                                )}
-                                            </Label>
-                                            <Input
-                                                id="sp-reference"
-                                                name="reference"
-                                                required
-                                            />
-                                            <InputError
-                                                message={formErr.reference}
-                                            />
-                                        </div>
-                                    )}
-                                    <ConfirmAction
-                                        label={t('purchases.payment.submit')}
-                                        title={t(
-                                            'purchases.payment.confirm_title',
+                                        {needsReference && (
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="sp-reference">
+                                                    {t(
+                                                        'purchases.payment.reference',
+                                                    )}
+                                                </Label>
+                                                <Input
+                                                    id="sp-reference"
+                                                    name="reference"
+                                                    required
+                                                />
+                                                <InputError
+                                                    message={formErr.reference}
+                                                />
+                                            </div>
                                         )}
-                                        description={t(
-                                            'purchases.payment.confirm_body',
-                                        )}
-                                        disabled={processing}
-                                    />
-                                </>
-                            );
-                        }}
-                    </Form>
+                                        <ConfirmAction
+                                            label={t(
+                                                'purchases.payment.submit',
+                                            )}
+                                            title={t(
+                                                'purchases.payment.confirm_title',
+                                            )}
+                                            description={t(
+                                                'purchases.payment.confirm_body',
+                                            )}
+                                            disabled={processing}
+                                        />
+                                    </>
+                                );
+                            }}
+                        </Form>
+                    )}
                 </section>
             </div>
         </>

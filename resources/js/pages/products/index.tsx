@@ -19,6 +19,7 @@ import SortHeader, { sortQuery } from '@/components/sort-header';
 import type { SortState } from '@/components/sort-header';
 import { useTranslation } from '@/hooks/use-translation';
 import { useVisitBusy } from '@/hooks/use-visit-busy';
+import { useCanDo } from '@/hooks/use-can-do';
 
 type Product = {
     id: number;
@@ -42,6 +43,7 @@ export default function ProductsIndex({
     search: currentSearch,
     sort,
 }: Props) {
+    const canArchive = useCanDo('catalog.archive');
     const [search, setSearch] = useState(currentSearch);
     const { t } = useTranslation();
     const busy = useVisitBusy();
@@ -215,36 +217,40 @@ export default function ProductsIndex({
                                                         )}
                                                     </Link>
                                                 </Button>
-                                                <Button
-                                                    disabled={busy}
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className={
-                                                        product.archived_at
-                                                            ? 'border-success/40 text-success-text hover:bg-success/10 hover:text-success-text'
-                                                            : 'border-orange/40 text-orange-text hover:bg-orange/10 hover:text-orange-text'
-                                                    }
-                                                    onClick={() =>
-                                                        router.patch(
-                                                            (product.archived_at
-                                                                ? restore
-                                                                : archive
-                                                            ).url(product.id),
-                                                            {},
-                                                            {
-                                                                preserveScroll: true,
-                                                            },
-                                                        )
-                                                    }
-                                                >
-                                                    {product.archived_at
-                                                        ? t(
-                                                              'catalog.products.restore',
-                                                          )
-                                                        : t(
-                                                              'catalog.products.archive',
-                                                          )}
-                                                </Button>
+                                                {canArchive && (
+                                                    <Button
+                                                        disabled={busy}
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className={
+                                                            product.archived_at
+                                                                ? 'border-success/40 text-success-text hover:bg-success/10 hover:text-success-text'
+                                                                : 'border-orange/40 text-orange-text hover:bg-orange/10 hover:text-orange-text'
+                                                        }
+                                                        onClick={() =>
+                                                            router.patch(
+                                                                (product.archived_at
+                                                                    ? restore
+                                                                    : archive
+                                                                ).url(
+                                                                    product.id,
+                                                                ),
+                                                                {},
+                                                                {
+                                                                    preserveScroll: true,
+                                                                },
+                                                            )
+                                                        }
+                                                    >
+                                                        {product.archived_at
+                                                            ? t(
+                                                                  'catalog.products.restore',
+                                                              )
+                                                            : t(
+                                                                  'catalog.products.archive',
+                                                              )}
+                                                    </Button>
+                                                )}
                                             </td>
                                         </tr>
                                     );

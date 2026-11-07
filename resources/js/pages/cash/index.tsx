@@ -28,6 +28,7 @@ import { Label } from '@/components/ui/label';
 import { useFormat } from '@/hooks/use-format';
 import { useTranslation } from '@/hooks/use-translation';
 import { newIdempotencyKey } from '@/lib/idempotency';
+import { useCanDo } from '@/hooks/use-can-do';
 
 type Row = {
     id: number;
@@ -108,6 +109,10 @@ export default function CashIndex({
     balance_today: balanceToday,
     unlinked_expenses: unlinkedExpenses,
 }: Props) {
+    const canRecord = useCanDo('cash.record');
+    const canCancel = useCanDo('cash.cancel');
+    const canClose = useCanDo('cash.close');
+    const canLink = useCanDo('cash.link_expenses');
     const { t } = useTranslation();
     const { money, date } = useFormat();
     const [from, setFrom] = useState(filters.from ?? '');
@@ -181,194 +186,204 @@ export default function CashIndex({
                     ))}
                 </div>
 
-                <div data-tour="movement">
-                    <CollapsiblePanel title={t('cash.form.open')}>
-                        <Form
-                            {...store.form()}
-                            className="space-y-4"
-                            resetOnSuccess
-                            onSuccess={() =>
-                                setIdempotencyKey(newIdempotencyKey())
-                            }
-                        >
-                            {({ errors: formErrors, processing }) => (
-                                <>
-                                    <input
-                                        type="hidden"
-                                        name="idempotency_key"
-                                        value={idempotencyKey}
-                                    />
-                                    <div className="grid items-start gap-4 sm:grid-cols-3">
-                                        <div className="grid gap-2">
-                                            <FieldLabel
-                                                htmlFor="cash-direction"
-                                                help={t(
-                                                    'cash.form.direction_help',
-                                                )}
-                                            >
-                                                {t('cash.form.direction')}
-                                            </FieldLabel>
-                                            <SelectField
-                                                id="cash-direction"
-                                                name="direction"
-                                                required
-                                                defaultValue="in"
-                                                options={['in', 'out'].map(
-                                                    (value) => ({
-                                                        value,
-                                                        label: t(
-                                                            `cash.directions.${value}`,
-                                                        ),
-                                                    }),
-                                                )}
-                                            />
-                                            <InputError
-                                                message={formErrors.direction}
-                                            />
+                {canRecord && (
+                    <div data-tour="movement">
+                        <CollapsiblePanel title={t('cash.form.open')}>
+                            <Form
+                                {...store.form()}
+                                className="space-y-4"
+                                resetOnSuccess
+                                onSuccess={() =>
+                                    setIdempotencyKey(newIdempotencyKey())
+                                }
+                            >
+                                {({ errors: formErrors, processing }) => (
+                                    <>
+                                        <input
+                                            type="hidden"
+                                            name="idempotency_key"
+                                            value={idempotencyKey}
+                                        />
+                                        <div className="grid items-start gap-4 sm:grid-cols-3">
+                                            <div className="grid gap-2">
+                                                <FieldLabel
+                                                    htmlFor="cash-direction"
+                                                    help={t(
+                                                        'cash.form.direction_help',
+                                                    )}
+                                                >
+                                                    {t('cash.form.direction')}
+                                                </FieldLabel>
+                                                <SelectField
+                                                    id="cash-direction"
+                                                    name="direction"
+                                                    required
+                                                    defaultValue="in"
+                                                    options={['in', 'out'].map(
+                                                        (value) => ({
+                                                            value,
+                                                            label: t(
+                                                                `cash.directions.${value}`,
+                                                            ),
+                                                        }),
+                                                    )}
+                                                />
+                                                <InputError
+                                                    message={
+                                                        formErrors.direction
+                                                    }
+                                                />
+                                            </div>
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="cash-amount">
+                                                    {t('cash.form.amount')}
+                                                </Label>
+                                                <Input
+                                                    id="cash-amount"
+                                                    name="amount"
+                                                    type="number"
+                                                    min={1}
+                                                    step={1}
+                                                    inputMode="numeric"
+                                                    required
+                                                />
+                                                <InputError
+                                                    message={formErrors.amount}
+                                                />
+                                            </div>
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="cash-date">
+                                                    {t('cash.form.date')}
+                                                </Label>
+                                                <Input
+                                                    id="cash-date"
+                                                    name="occurred_on"
+                                                    type="date"
+                                                    max={today}
+                                                    min={nextDay(lastClosedOn)}
+                                                    defaultValue={today}
+                                                    required
+                                                />
+                                                <InputError
+                                                    message={
+                                                        formErrors.occurred_on
+                                                    }
+                                                />
+                                            </div>
                                         </div>
-                                        <div className="grid gap-2">
-                                            <Label htmlFor="cash-amount">
-                                                {t('cash.form.amount')}
-                                            </Label>
-                                            <Input
-                                                id="cash-amount"
-                                                name="amount"
-                                                type="number"
-                                                min={1}
-                                                step={1}
-                                                inputMode="numeric"
-                                                required
-                                            />
-                                            <InputError
-                                                message={formErrors.amount}
-                                            />
-                                        </div>
-                                        <div className="grid gap-2">
-                                            <Label htmlFor="cash-date">
-                                                {t('cash.form.date')}
-                                            </Label>
-                                            <Input
-                                                id="cash-date"
-                                                name="occurred_on"
-                                                type="date"
-                                                max={today}
-                                                min={nextDay(lastClosedOn)}
-                                                defaultValue={today}
-                                                required
-                                            />
-                                            <InputError
-                                                message={formErrors.occurred_on}
-                                            />
-                                        </div>
-                                    </div>
 
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="cash-label">
-                                            {t('cash.form.label')}
-                                        </Label>
-                                        <Input
-                                            id="cash-label"
-                                            name="label"
-                                            maxLength={160}
-                                            placeholder={t(
-                                                'cash.form.label_placeholder',
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="cash-label">
+                                                {t('cash.form.label')}
+                                            </Label>
+                                            <Input
+                                                id="cash-label"
+                                                name="label"
+                                                maxLength={160}
+                                                placeholder={t(
+                                                    'cash.form.label_placeholder',
+                                                )}
+                                                required
+                                            />
+                                            <InputError
+                                                message={formErrors.label}
+                                            />
+                                        </div>
+
+                                        <div className="grid items-start gap-4 sm:grid-cols-2">
+                                            <div className="grid gap-2">
+                                                <FieldLabel
+                                                    htmlFor="cash-counterparty"
+                                                    help={t(
+                                                        'cash.form.counterparty_help',
+                                                    )}
+                                                >
+                                                    {t(
+                                                        'cash.form.counterparty',
+                                                    )}
+                                                </FieldLabel>
+                                                <Input
+                                                    id="cash-counterparty"
+                                                    name="counterparty"
+                                                    maxLength={120}
+                                                />
+                                                <InputError
+                                                    message={
+                                                        formErrors.counterparty
+                                                    }
+                                                />
+                                            </div>
+                                            <div className="grid gap-2">
+                                                <FieldLabel
+                                                    htmlFor="cash-document"
+                                                    help={t(
+                                                        'cash.form.document_reference_help',
+                                                    )}
+                                                >
+                                                    {t(
+                                                        'cash.form.document_reference',
+                                                    )}
+                                                </FieldLabel>
+                                                <Input
+                                                    id="cash-document"
+                                                    name="document_reference"
+                                                    maxLength={60}
+                                                />
+                                                <InputError
+                                                    message={
+                                                        formErrors.document_reference
+                                                    }
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="cash-notes">
+                                                {t('cash.form.notes')}
+                                            </Label>
+                                            <Textarea
+                                                rows={3}
+                                                id="cash-notes"
+                                                name="notes"
+                                                maxLength={1000}
+                                            />
+                                            <InputError
+                                                message={formErrors.notes}
+                                            />
+                                        </div>
+
+                                        <p className="text-sm text-muted-foreground">
+                                            {t('cash.form.recorded_note', {
+                                                name: currentUserName,
+                                            })}
+                                        </p>
+
+                                        <ConfirmAction
+                                            label={t('cash.form.submit')}
+                                            title={t('cash.form.confirm_title')}
+                                            description={t(
+                                                'cash.form.confirm_body',
                                             )}
-                                            required
+                                            disabled={processing}
                                         />
-                                        <InputError
-                                            message={formErrors.label}
-                                        />
-                                    </div>
+                                    </>
+                                )}
+                            </Form>
+                        </CollapsiblePanel>
+                    </div>
+                )}
 
-                                    <div className="grid items-start gap-4 sm:grid-cols-2">
-                                        <div className="grid gap-2">
-                                            <FieldLabel
-                                                htmlFor="cash-counterparty"
-                                                help={t(
-                                                    'cash.form.counterparty_help',
-                                                )}
-                                            >
-                                                {t('cash.form.counterparty')}
-                                            </FieldLabel>
-                                            <Input
-                                                id="cash-counterparty"
-                                                name="counterparty"
-                                                maxLength={120}
-                                            />
-                                            <InputError
-                                                message={
-                                                    formErrors.counterparty
-                                                }
-                                            />
-                                        </div>
-                                        <div className="grid gap-2">
-                                            <FieldLabel
-                                                htmlFor="cash-document"
-                                                help={t(
-                                                    'cash.form.document_reference_help',
-                                                )}
-                                            >
-                                                {t(
-                                                    'cash.form.document_reference',
-                                                )}
-                                            </FieldLabel>
-                                            <Input
-                                                id="cash-document"
-                                                name="document_reference"
-                                                maxLength={60}
-                                            />
-                                            <InputError
-                                                message={
-                                                    formErrors.document_reference
-                                                }
-                                            />
-                                        </div>
-                                    </div>
+                {canClose && (
+                    <CashClosing
+                        closings={closings}
+                        balanceToday={balanceToday}
+                        lastClosedOn={lastClosedOn}
+                        today={today}
+                        userName={currentUserName}
+                    />
+                )}
 
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="cash-notes">
-                                            {t('cash.form.notes')}
-                                        </Label>
-                                        <Textarea
-                                            rows={3}
-                                            id="cash-notes"
-                                            name="notes"
-                                            maxLength={1000}
-                                        />
-                                        <InputError
-                                            message={formErrors.notes}
-                                        />
-                                    </div>
-
-                                    <p className="text-sm text-muted-foreground">
-                                        {t('cash.form.recorded_note', {
-                                            name: currentUserName,
-                                        })}
-                                    </p>
-
-                                    <ConfirmAction
-                                        label={t('cash.form.submit')}
-                                        title={t('cash.form.confirm_title')}
-                                        description={t(
-                                            'cash.form.confirm_body',
-                                        )}
-                                        disabled={processing}
-                                    />
-                                </>
-                            )}
-                        </Form>
-                    </CollapsiblePanel>
-                </div>
-
-                <CashClosing
-                    closings={closings}
-                    balanceToday={balanceToday}
-                    lastClosedOn={lastClosedOn}
-                    today={today}
-                    userName={currentUserName}
-                />
-
-                <CashLinkExpenses expenses={unlinkedExpenses} />
+                {canLink && <CashLinkExpenses expenses={unlinkedExpenses} />}
 
                 <form
                     className="grid items-end justify-start gap-3 sm:grid-cols-[10rem_10rem_14rem]"
@@ -478,7 +493,8 @@ export default function CashIndex({
                                                 .join(' · ')}
                                         </div>
                                     </div>
-                                    {!row.cancelled &&
+                                    {canCancel &&
+                                        !row.cancelled &&
                                         !row.from_expense &&
                                         cancelling !== row.id && (
                                             <Button

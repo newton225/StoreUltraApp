@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { useFormat } from '@/hooks/use-format';
 import { useTranslation } from '@/hooks/use-translation';
 import { StatusBadge } from '@/components/status-badge';
+import { useCanDo } from '@/hooks/use-can-do';
 
 type Purchase = {
     id: number;
@@ -68,6 +69,7 @@ export default function PurchasesIndex({
     summary,
     accounts,
 }: Props) {
+    const canGenerate = useCanDo('purchases.generate');
     const { t } = useTranslation();
     const { money, date } = useFormat();
 
@@ -136,28 +138,34 @@ export default function PurchasesIndex({
                             </span>
                         )}
                     </p>
-                    <Form
-                        {...generate.form()}
-                        className="flex flex-wrap items-end gap-3"
-                    >
-                        {({ processing, errors }) => (
-                            <>
-                                <input type="hidden" name="week" value={week} />
-                                <InputError message={errors.week} />
-                                <ConfirmAction
-                                    variant="default"
-                                    label={t('purchases.generate.submit')}
-                                    title={t(
-                                        'purchases.generate.confirm_title',
-                                    )}
-                                    description={t(
-                                        'purchases.generate.confirm_body',
-                                    )}
-                                    disabled={processing}
-                                />
-                            </>
-                        )}
-                    </Form>
+                    {canGenerate && (
+                        <Form
+                            {...generate.form()}
+                            className="flex flex-wrap items-end gap-3"
+                        >
+                            {({ processing, errors }) => (
+                                <>
+                                    <input
+                                        type="hidden"
+                                        name="week"
+                                        value={week}
+                                    />
+                                    <InputError message={errors.week} />
+                                    <ConfirmAction
+                                        variant="default"
+                                        label={t('purchases.generate.submit')}
+                                        title={t(
+                                            'purchases.generate.confirm_title',
+                                        )}
+                                        description={t(
+                                            'purchases.generate.confirm_body',
+                                        )}
+                                        disabled={processing}
+                                    />
+                                </>
+                            )}
+                        </Form>
+                    )}
                 </section>
 
                 <section className="space-y-4">

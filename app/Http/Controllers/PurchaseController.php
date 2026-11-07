@@ -26,6 +26,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -137,9 +138,9 @@ class PurchaseController extends Controller
                     'paid_on' => $payment->paid_on->toDateString(),
                     'payer' => $payment->payer?->name,
                 ])->values(),
-                'can_send' => $status === PurchaseOrderStatus::Draft,
-                'can_cancel' => $status === PurchaseOrderStatus::Draft,
-                'can_receive' => $status->canReceive(),
+                'can_send' => $status === PurchaseOrderStatus::Draft && Gate::allows('purchases.send'),
+                'can_cancel' => $status === PurchaseOrderStatus::Draft && Gate::allows('purchases.cancel'),
+                'can_receive' => $status->canReceive() && Gate::allows('purchases.receive'),
                 'document' => ($document = Document::query()
                     ->where('type', 'purchase_order')
                     ->where('subject_type', PurchaseOrder::class)

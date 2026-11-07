@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { useFormat } from '@/hooks/use-format';
 import { useTranslation } from '@/hooks/use-translation';
 import { useVisitBusy } from '@/hooks/use-visit-busy';
+import { useCanDo } from '@/hooks/use-can-do';
 
 type Row = {
     id: number;
@@ -54,6 +55,8 @@ export default function ExpensesIndex({
     filters,
     types,
 }: Props) {
+    const canCreate = useCanDo('expenses.create');
+    const canCancel = useCanDo('expenses.cancel');
     const { t } = useTranslation();
     const busy = useVisitBusy();
     const { money, date } = useFormat();
@@ -94,9 +97,11 @@ export default function ExpensesIndex({
                     />
                     <div className="flex shrink-0 items-center gap-2">
                         <ExportMenu view="expenses" query={filters} />
-                        <Button variant="info" asChild>
-                            <Link href={create()}>{t('expenses.new')}</Link>
-                        </Button>
+                        {canCreate && (
+                            <Button variant="info" asChild>
+                                <Link href={create()}>{t('expenses.new')}</Link>
+                            </Button>
+                        )}
                     </div>
                 </div>
 
@@ -206,7 +211,8 @@ export default function ExpensesIndex({
                                                 {t('expenses.proof')}
                                             </a>
                                         )}
-                                        {!row.cancelled &&
+                                        {canCancel &&
+                                            !row.cancelled &&
                                             cancelling !== row.id && (
                                                 <Button
                                                     variant="ghostDanger"
