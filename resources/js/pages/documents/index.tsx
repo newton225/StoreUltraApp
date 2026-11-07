@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useTranslation } from '@/hooks/use-translation';
 import { useVisitBusy } from '@/hooks/use-visit-busy';
+import { useCanDo } from '@/hooks/use-can-do';
 
 type Doc = {
     id: number;
@@ -49,6 +50,7 @@ export default function DocumentsIndex({
     types,
     period,
 }: Props) {
+    const canExport = useCanDo('documents.export');
     const { t, locale } = useTranslation();
     const busy = useVisitBusy();
     const [search, setSearch] = useState(filters.search);
@@ -103,7 +105,9 @@ export default function DocumentsIndex({
                         title={t('documents.ui.title')}
                         description={t('documents.ui.description')}
                     />
-                    <ExportMenu view="documents" query={filters} />
+                    {canExport && (
+                        <ExportMenu view="documents" query={filters} />
+                    )}
                 </div>
 
                 <section className="space-y-3 rounded-lg border border-border p-4">

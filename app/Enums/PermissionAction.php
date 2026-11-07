@@ -27,6 +27,12 @@ enum PermissionAction: string
     case OrdersPlans = 'orders.plans';
     case OrdersFne = 'orders.fne';
 
+    case DeliveriesExport = 'deliveries.export';
+
+    case PaymentsExport = 'payments.export';
+
+    case DocumentsExport = 'documents.export';
+
     case PurchasesGenerate = 'purchases.generate';
     case PurchasesSend = 'purchases.send';
     case PurchasesReceive = 'purchases.receive';
@@ -54,6 +60,9 @@ enum PermissionAction: string
     public function menu(): Permission
     {
         return match (true) {
+            str_starts_with($this->value, 'deliveries.') => Permission::ManageDeliveries,
+            str_starts_with($this->value, 'payments.') => Permission::ManagePayments,
+            str_starts_with($this->value, 'documents.') => Permission::ManageDocuments,
             str_starts_with($this->value, 'clients.') => Permission::ManageClients,
             str_starts_with($this->value, 'orders.') => Permission::ManageOrders,
             str_starts_with($this->value, 'purchases.') => Permission::ManagePurchases,

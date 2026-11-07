@@ -73,7 +73,9 @@ export function AppSidebar() {
     const can = (permission: string): boolean =>
         auth.permissions.includes(permission);
     const canClients = can('manage_clients');
-    const canOrders = can('manage_orders');
+    const canDeliveries = can('manage_deliveries');
+    const canPayments = can('manage_payments');
+    const canDocuments = can('manage_documents');
     const canPurchases = can('manage_purchases');
     const canExpenses = can('manage_expenses');
     const canCash = can('manage_cash');
@@ -109,12 +111,16 @@ export function AppSidebar() {
                     href: ordersIndex(),
                     icon: ClipboardList,
                 },
-                {
-                    title: t('navigation.deliveries'),
-                    href: deliveriesIndex(),
-                    icon: Truck,
-                },
-                ...(!canOrders
+                ...(!canDeliveries
+                    ? []
+                    : [
+                          {
+                              title: t('navigation.deliveries'),
+                              href: deliveriesIndex(),
+                              icon: Truck,
+                          },
+                      ]),
+                ...(!canPayments
                     ? []
                     : [
                           {
@@ -127,6 +133,10 @@ export function AppSidebar() {
                               href: arrearsIndex(),
                               icon: CreditCard,
                           },
+                      ]),
+                ...(!canDocuments
+                    ? []
+                    : [
                           {
                               title: t('navigation.documents'),
                               href: documentsIndex(),

@@ -9,6 +9,7 @@ import SelectField from '@/components/select-field';
 import { Button } from '@/components/ui/button';
 import { useFormat } from '@/hooks/use-format';
 import { useTranslation } from '@/hooks/use-translation';
+import { useCanDo } from '@/hooks/use-can-do';
 
 type ToDeliver = {
     id: number;
@@ -52,6 +53,7 @@ export default function DeliveriesIndex({
     zones,
     filters,
 }: Props) {
+    const canExport = useCanDo('deliveries.export');
     const { t } = useTranslation();
     const { date } = useFormat();
 
@@ -69,7 +71,9 @@ export default function DeliveriesIndex({
                         title={t('deliveries.title')}
                         description={t('deliveries.description')}
                     />
-                    <ExportMenu view="deliveries" query={filters} />
+                    {canExport && (
+                        <ExportMenu view="deliveries" query={filters} />
+                    )}
                 </div>
 
                 <div className="max-w-xs">

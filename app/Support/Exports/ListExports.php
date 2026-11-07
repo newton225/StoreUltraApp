@@ -60,8 +60,10 @@ class ListExports
 
         return match ($view) {
             'clients' => $gate->allows('clients.export'),
-            'orders', 'deliveries' => true,
-            'payments', 'documents', 'arrears' => $gate->allows('manage-orders'),
+            'orders' => true,
+            'deliveries' => $gate->allows('deliveries.export'),
+            'payments', 'arrears' => $gate->allows('payments.export'),
+            'documents' => $gate->allows('documents.export'),
             'cash', 'closings' => $gate->allows('manage-cash'),
             'users' => $gate->allows('manage-users'),
             'expenses' => $gate->allows('manage-expenses'),

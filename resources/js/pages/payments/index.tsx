@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { useFormat } from '@/hooks/use-format';
 import SortHeader, { sortQuery } from '@/components/sort-header';
 import { useTranslation } from '@/hooks/use-translation';
+import { useCanDo } from '@/hooks/use-can-do';
 
 type ListedPayment = {
     id: number;
@@ -59,6 +60,7 @@ export default function PaymentsIndex({
     kinds,
     methods,
 }: Props) {
+    const canExport = useCanDo('payments.export');
     const { t } = useTranslation();
     const { money, date } = useFormat();
     const [search, setSearch] = useState(filters.search);
@@ -97,7 +99,9 @@ export default function PaymentsIndex({
                         title={t('payments.title')}
                         description={t('payments.description')}
                     />
-                    <ExportMenu view="payments" query={filters} />
+                    {canExport && (
+                        <ExportMenu view="payments" query={filters} />
+                    )}
                 </div>
 
                 <dl className="grid gap-3 text-sm sm:grid-cols-3">

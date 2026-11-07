@@ -13,6 +13,9 @@ enum Permission: string
     case ManageOrders = 'manage_orders';
     case ManagePurchases = 'manage_purchases';
     case ManageExpenses = 'manage_expenses';
+    case ManageDeliveries = 'manage_deliveries';
+    case ManagePayments = 'manage_payments';
+    case ManageDocuments = 'manage_documents';
     case ManageCash = 'manage_cash';
     case ManageCatalog = 'manage_catalog';
     case ViewProfit = 'view_profit';

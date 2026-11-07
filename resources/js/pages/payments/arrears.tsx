@@ -8,6 +8,7 @@ import Heading from '@/components/heading';
 import SelectField from '@/components/select-field';
 import { useFormat } from '@/hooks/use-format';
 import { useTranslation } from '@/hooks/use-translation';
+import { useCanDo } from '@/hooks/use-can-do';
 
 type Row = {
     id: number;
@@ -34,6 +35,7 @@ export default function Arrears({
     zones,
     filters,
 }: Props) {
+    const canExport = useCanDo('payments.export');
     const { t } = useTranslation();
     const { money, date } = useFormat();
 
@@ -51,7 +53,7 @@ export default function Arrears({
                         title={t('payments.arrears.title')}
                         description={t('payments.arrears.description')}
                     />
-                    <ExportMenu view="arrears" query={filters} />
+                    {canExport && <ExportMenu view="arrears" query={filters} />}
                 </div>
 
                 <div className="flex flex-wrap items-center justify-between gap-4">

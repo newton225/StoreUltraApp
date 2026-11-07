@@ -61,6 +61,12 @@ return [
     ],
 
     'actions' => [
+        'deliveries_export' => 'Export the list of deliveries',
+        'deliveries_export_help' => 'Download the list of deliveries as CSV or PDF.',
+        'payments_export' => 'Export payments and late advances',
+        'payments_export_help' => 'Download the list of payments and the list of late advances.',
+        'documents_export' => 'Export the list of documents',
+        'documents_export_help' => 'Download the list of issued documents as CSV or PDF.',
         'clients_create' => 'Create clients',
         'clients_create_help' => 'Register a new client (a field agent only in their zones).',
         'clients_update' => 'Edit clients',
@@ -130,6 +136,12 @@ return [
     ],
 
     'permissions' => [
+        'manage_deliveries' => 'See deliveries',
+        'manage_deliveries_help' => 'Open the list of deliveries (a profile limited to zones only sees those of its zones).',
+        'manage_payments' => 'See payments',
+        'manage_payments_help' => 'Open the list of payments and the list of late advances.',
+        'manage_documents' => 'See documents',
+        'manage_documents_help' => 'Open the list of issued documents (proformas, invoices, receipts, delivery notes).',
         'manage_clients' => 'Manage clients',
         'manage_clients_help' => 'Open the list and the files of the clients (a profile limited to zones only sees the clients of its zones).',
         'manage_orders' => 'Manage orders and collections',

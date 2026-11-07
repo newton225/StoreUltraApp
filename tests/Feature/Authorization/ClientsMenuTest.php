@@ -55,3 +55,27 @@ it('gives the clients menu and its actions to every profile that existed before'
 
     expect($permissions)->toContain('manage_orders', 'manage_clients', 'clients.create', 'clients.update', 'clients.change_status', 'clients.export');
 });
+
+it('opens deliveries, payments and documents only with their own menu', function () {
+    $none = clientsUser([]);
+
+    foreach (['deliveries.index', 'payments.index', 'payments.arrears', 'documents.index'] as $route) {
+        $this->actingAs($none)->get(route($route))->assertForbidden();
+    }
+
+    $this->actingAs(clientsUser([Permission::ManageDeliveries->value]))->get(route('deliveries.index'))->assertOk();
+    $this->actingAs(clientsUser([Permission::ManagePayments->value]))->get(route('payments.index'))->assertOk();
+    $this->actingAs(clientsUser([Permission::ManageDocuments->value]))->get(route('documents.index'))->assertOk();
+    $this->actingAs(clientsUser([Permission::ManageOrders->value]))->get(route('payments.index'))->assertForbidden();
+});
+
+it('gives the new menus to the profiles that could already open the screens', function () {
+    $migration = require database_path('migrations/2026_11_07_130000_give_deliveries_payments_documents_menus.php');
+    $withOrders = Profile::factory()->create(['permissions' => [Permission::ManageOrders->value]]);
+    $without = Profile::factory()->create(['permissions' => []]);
+
+    $migration->up();
+
+    expect($withOrders->refresh()->permissions)->toContain('manage_deliveries', 'manage_payments', 'manage_documents', 'payments.export', 'documents.export')
+        ->and($without->refresh()->permissions)->toContain('manage_deliveries')->not->toContain('manage_payments');
+});

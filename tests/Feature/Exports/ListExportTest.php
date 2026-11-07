@@ -176,7 +176,10 @@ test('the new exports follow the right of their page', function () {
 
     export($costsOnly, 'closings', 'csv')->assertNotFound();
     export($cashOnly, 'closings', 'csv')->assertOk();
-    export($orders, 'arrears', 'csv')->assertOk();
+    $payments = User::factory()->create(['profile_id' => Profile::factory()->granting([Permission::ManagePayments])->create()->id]);
+
+    export($payments, 'arrears', 'csv')->assertOk();
+    export($orders, 'arrears', 'csv')->assertNotFound();
     export($cashOnly, 'arrears', 'csv')->assertNotFound();
     export($orders, 'users', 'csv')->assertNotFound();
     export($orders, 'attachments', 'csv')->assertNotFound();

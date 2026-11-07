@@ -61,6 +61,12 @@ return [
     ],
 
     'actions' => [
+        'deliveries_export' => 'Exporter la liste des livraisons',
+        'deliveries_export_help' => 'Télécharger la liste des livraisons en CSV ou PDF.',
+        'payments_export' => 'Exporter les paiements et les avances en retard',
+        'payments_export_help' => 'Télécharger la liste des paiements et celle des avances en retard.',
+        'documents_export' => 'Exporter la liste des documents',
+        'documents_export_help' => 'Télécharger la liste des documents émis en CSV ou PDF.',
         'clients_create' => 'Créer des clients',
         'clients_create_help' => 'Enregistrer un nouveau client (un agent de terrain, seulement dans ses zones).',
         'clients_update' => 'Modifier les clients',
@@ -130,6 +136,12 @@ return [
     ],
 
     'permissions' => [
+        'manage_deliveries' => 'Voir les livraisons',
+        'manage_deliveries_help' => 'Ouvrir la liste des livraisons (un profil limité aux zones ne voit que celles de ses zones).',
+        'manage_payments' => 'Voir les paiements',
+        'manage_payments_help' => 'Ouvrir la liste des paiements et celle des avances en retard.',
+        'manage_documents' => 'Voir les documents',
+        'manage_documents_help' => 'Ouvrir la liste des documents émis (proformas, factures, reçus, bons de livraison).',
         'manage_clients' => 'Gérer les clients',
         'manage_clients_help' => 'Ouvrir la liste et les fiches des clients (un profil limité aux zones ne voit que les clients de ses zones).',
         'manage_orders' => 'Gérer les commandes et les encaissements',

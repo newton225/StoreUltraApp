@@ -61,7 +61,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('orders', OrderController::class)->only(['index', 'create', 'store', 'show']);
     Route::post('documents', [DocumentController::class, 'store'])->middleware('can:orders.issue_documents')->name('documents.store');
     Route::get('documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
-    Route::get('deliveries', [DeliveryController::class, 'index'])->name('deliveries.index');
+    Route::get('deliveries', [DeliveryController::class, 'index'])->middleware('can:manage-deliveries')->name('deliveries.index');
     Route::get('deliveries/{delivery}/signature', [DeliveryController::class, 'signature'])->name('deliveries.signature');
     Route::post('orders/{order}/deliveries', [DeliveryController::class, 'store'])->middleware('throttle:uploads')
         ->middleware('can:orders.record_delivery')->name('orders.deliveries.store');
@@ -72,13 +72,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('orders/advance-payments', [OrderAdvancePaymentController::class, 'store'])->middleware('can:orders.record_payment')->name('orders.advance-payments.store');
         Route::post('orders/proformas', [OrderProformaController::class, 'store'])->middleware('can:orders.batch')->name('orders.proformas.store');
         Route::post('orders/batch', [OrderBatchController::class, 'store'])->middleware('can:orders.batch')->name('orders.batch.store');
-        Route::get('documents', [DocumentController::class, 'index'])->name('documents.index');
         Route::post('documents/{document}/cancel', [DocumentController::class, 'cancel'])->middleware('can:orders.cancel_documents')->name('documents.cancel');
         Route::patch('invoices/{invoice}/fne', [InvoiceController::class, 'fne'])->middleware('can:orders.fne')->name('invoices.fne');
-        Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
-        Route::get('payments/arrears', [PaymentController::class, 'arrears'])->name('payments.arrears');
         Route::post('clients/{client}/plans', [SupplyPlanController::class, 'store'])->middleware('can:orders.plans')->name('clients.plans.store');
         Route::patch('plans/{plan}', [SupplyPlanController::class, 'update'])->middleware('can:orders.plans')->name('plans.update');
+    });
+
+    Route::get('documents', [DocumentController::class, 'index'])->middleware('can:manage-documents')->name('documents.index');
+    Route::middleware('can:manage-payments')->group(function () {
+        Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
+        Route::get('payments/arrears', [PaymentController::class, 'arrears'])->name('payments.arrears');
     });
 
     Route::middleware('can:manage-purchases')->group(function () {
