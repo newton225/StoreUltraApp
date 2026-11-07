@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useFormat } from '@/hooks/use-format';
 import { useTranslation } from '@/hooks/use-translation';
+import { useCanDo } from '@/hooks/use-can-do';
 
 type ListedKit = {
     id: number;
@@ -32,6 +33,7 @@ export default function KitsIndex({
     kits: ListedKit[];
     seesCosts: boolean;
 }) {
+    const canCreate = useCanDo('catalog.kits');
     const { t } = useTranslation();
     const { money } = useFormat();
 
@@ -54,9 +56,11 @@ export default function KitsIndex({
                     />
                     <div className="flex shrink-0 items-center gap-2">
                         <ExportMenu view="kits" />
-                        <Button variant="info" asChild>
-                            <Link href={create()}>{t('kits.new')}</Link>
-                        </Button>
+                        {canCreate && (
+                            <Button variant="info" asChild>
+                                <Link href={create()}>{t('kits.new')}</Link>
+                            </Button>
+                        )}
                     </div>
                 </div>
 

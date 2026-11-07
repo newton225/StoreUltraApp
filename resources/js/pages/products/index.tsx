@@ -43,6 +43,7 @@ export default function ProductsIndex({
     search: currentSearch,
     sort,
 }: Props) {
+    const canCreate = useCanDo('catalog.products');
     const canArchive = useCanDo('catalog.archive');
     const [search, setSearch] = useState(currentSearch);
     const { t } = useTranslation();
@@ -83,11 +84,13 @@ export default function ProductsIndex({
                                 search: currentSearch,
                             }}
                         />
-                        <Button variant="info" asChild>
-                            <Link href={create()}>
-                                {t('catalog.products.new')}
-                            </Link>
-                        </Button>
+                        {canCreate && (
+                            <Button variant="info" asChild>
+                                <Link href={create()}>
+                                    {t('catalog.products.new')}
+                                </Link>
+                            </Button>
+                        )}
                     </div>
                 </div>
 
@@ -204,19 +207,23 @@ export default function ProductsIndex({
                                                     : ''}
                                             </td>
                                             <td className="space-x-1 px-4 py-2 text-right whitespace-nowrap">
-                                                <Button
-                                                    asChild
-                                                    variant="ghost"
-                                                    size="sm"
-                                                >
-                                                    <Link
-                                                        href={edit(product.id)}
+                                                {canCreate && (
+                                                    <Button
+                                                        asChild
+                                                        variant="ghost"
+                                                        size="sm"
                                                     >
-                                                        {t(
-                                                            'catalog.products.edit',
-                                                        )}
-                                                    </Link>
-                                                </Button>
+                                                        <Link
+                                                            href={edit(
+                                                                product.id,
+                                                            )}
+                                                        >
+                                                            {t(
+                                                                'catalog.products.edit',
+                                                            )}
+                                                        </Link>
+                                                    </Button>
+                                                )}
                                                 {canArchive && (
                                                     <Button
                                                         disabled={busy}

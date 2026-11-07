@@ -8,6 +8,7 @@ import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/hooks/use-translation';
+import { useCanDo } from '@/hooks/use-can-do';
 
 type Shop = {
     id: number;
@@ -19,6 +20,7 @@ type Shop = {
 };
 
 export default function ShopsIndex({ shops }: { shops: Shop[] }) {
+    const canEdit = useCanDo('catalog.shops');
     const { t } = useTranslation();
 
     setLayoutProps({
@@ -35,9 +37,13 @@ export default function ShopsIndex({ shops }: { shops: Shop[] }) {
                         title={t('catalog.shops.title')}
                         description={t('catalog.shops.description')}
                     />
-                    <Button variant="info" asChild>
-                        <Link href={create()}>{t('catalog.shops.new')}</Link>
-                    </Button>
+                    {canEdit && (
+                        <Button variant="info" asChild>
+                            <Link href={create()}>
+                                {t('catalog.shops.new')}
+                            </Link>
+                        </Button>
+                    )}
                 </div>
 
                 {shops.length === 0 ? (
@@ -108,15 +114,19 @@ export default function ShopsIndex({ shops }: { shops: Shop[] }) {
                                             </Badge>
                                         </td>
                                         <td className="px-4 py-2 text-right">
-                                            <Button
-                                                asChild
-                                                variant="ghost"
-                                                size="sm"
-                                            >
-                                                <Link href={edit(shop.id)}>
-                                                    {t('catalog.shops.edit')}
-                                                </Link>
-                                            </Button>
+                                            {canEdit && (
+                                                <Button
+                                                    asChild
+                                                    variant="ghost"
+                                                    size="sm"
+                                                >
+                                                    <Link href={edit(shop.id)}>
+                                                        {t(
+                                                            'catalog.shops.edit',
+                                                        )}
+                                                    </Link>
+                                                </Button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}
