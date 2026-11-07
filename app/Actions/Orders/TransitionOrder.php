@@ -36,6 +36,14 @@ class TransitionOrder
                 throw InvalidOrderTransition::advanceMissing();
             }
 
+            if ($to === OrderStatus::Delivered && $current->remainingKits() > 0) {
+                throw InvalidOrderTransition::deliveryMissing();
+            }
+
+            if ($to === OrderStatus::Settled && $current->netPaid() < $current->total_sale) {
+                throw InvalidOrderTransition::balanceDue();
+            }
+
             $current->forceFill(['status' => $to])->save();
 
             $current->statusChanges()->create([

@@ -2,6 +2,7 @@
 
 use App\Enums\OrderStatus;
 use App\Models\AuditLog;
+use App\Models\Delivery;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\User;
@@ -12,7 +13,15 @@ test('an order moves one step at a time along its life', function () {
     $this->actingAs(User::factory()->create());
 
     foreach (['proforma_issued', 'advance_received', 'ordered', 'received', 'delivered', 'settled', 'closed'] as $status) {
-        $this->post(route('orders.transition', $order), ['to' => $status])->assertSessionHasNoErrors();
+        if ($status === 'delivered') {
+            Delivery::factory()->for($order)->create(['kits_delivered' => $order->kits_count]);
+        }
+
+        if ($status === 'settled') {
+            Payment::factory()->for($order)->create(['kind' => 'balance', 'amount' => $order->total_sale]);
+        }
+
+        $this->post(route('orders.transition', $order), ['to' => $status, 'password' => 'password'])->assertSessionHasNoErrors();
         expect($order->refresh()->status->value)->toBe($status);
     }
 });
@@ -126,4 +135,60 @@ test('the order page says whether the advance still blocks the next step', funct
 
     $this->get(route('orders.show', $unpaid))
         ->assertInertia(fn ($page) => $page->where('payments.advance_blocking', false));
+});
+
+test('cancelling an order on which money was received asks for the password, and a refusal is traced', function () {
+    $user = User::factory()->create();
+    $order = Order::factory()->create(['status' => 'advance_received']);
+    Payment::factory()->for($order)->create(['kind' => 'advance', 'amount' => 10000]);
+    $this->actingAs($user);
+
+    $this->post(route('orders.transition', $order), ['to' => 'cancelled', 'reason' => 'Client parti'])->assertSessionHasErrors('password');
+    $this->post(route('orders.transition', $order), ['to' => 'cancelled', 'reason' => 'Client parti', 'password' => 'not-my-password'])->assertSessionHasErrors('password');
+
+    expect($order->refresh()->status->value)->toBe('advance_received')
+        ->and(AuditLog::query()->where('action', 'order.step_password_failed')->count())->toBe(1);
+
+    $this->post(route('orders.transition', $order), ['to' => 'cancelled', 'reason' => 'Client parti', 'password' => 'password'])->assertSessionHasNoErrors();
+
+    expect($order->refresh()->status->value)->toBe('cancelled');
+});
+
+test('an order without any payment is cancelled without a password', function () {
+    $order = Order::factory()->create(['status' => 'proforma_issued']);
+
+    $this->actingAs(User::factory()->create())
+        ->post(route('orders.transition', $order), ['to' => 'cancelled', 'reason' => 'Doublon'])
+        ->assertSessionHasNoErrors();
+
+    expect($order->refresh()->status->value)->toBe('cancelled');
+});
+
+test('the critical steps asked by hand need the password, and the earlier ones do not', function () {
+    $order = Order::factory()->create(['status' => 'received']);
+    Delivery::factory()->for($order)->create(['kits_delivered' => $order->kits_count]);
+    $this->actingAs(User::factory()->create());
+
+    $this->post(route('orders.transition', $order), ['to' => 'delivered'])->assertSessionHasErrors('password');
+    expect($order->refresh()->status->value)->toBe('received');
+
+    $this->post(route('orders.transition', $order), ['to' => 'delivered', 'password' => 'password'])->assertSessionHasNoErrors();
+    expect($order->refresh()->status->value)->toBe('delivered');
+
+    $draft = Order::factory()->create(['status' => 'draft']);
+    $this->post(route('orders.transition', $draft), ['to' => 'proforma_issued'])->assertSessionHasNoErrors();
+});
+
+test('an order cannot be marked delivered while kits remain, nor settled while money is still due', function () {
+    $order = Order::factory()->create(['status' => 'received', 'total_sale' => 100000]);
+    $this->actingAs(User::factory()->create());
+
+    $this->post(route('orders.transition', $order), ['to' => 'delivered', 'password' => 'password'])->assertSessionHasErrors();
+    expect($order->refresh()->status->value)->toBe('received');
+
+    Delivery::factory()->for($order)->create(['kits_delivered' => $order->kits_count]);
+    $this->post(route('orders.transition', $order), ['to' => 'delivered', 'password' => 'password'])->assertSessionHasNoErrors();
+    $this->post(route('orders.transition', $order), ['to' => 'settled', 'password' => 'password'])->assertSessionHasErrors();
+
+    expect($order->refresh()->status->value)->toBe('delivered');
 });

@@ -8,6 +8,7 @@ import InputError from '@/components/input-error';
 import type { PageLinks } from '@/components/pagination';
 import Pagination from '@/components/pagination';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useFormat } from '@/hooks/use-format';
 import { useTranslation } from '@/hooks/use-translation';
@@ -120,7 +121,8 @@ export default function CashClosing({
                                 <Label htmlFor="closing-notes">
                                     {t('cash.closing.notes')}
                                 </Label>
-                                <Input
+                                <Textarea
+                                    rows={3}
                                     id="closing-notes"
                                     name="notes"
                                     maxLength={1000}

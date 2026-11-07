@@ -4,6 +4,7 @@ import InputError from '@/components/input-error';
 import SelectField from '@/components/select-field';
 import { SaveBar } from '@/components/save-bar';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import ZoneQuickAdd from '@/components/zone-quick-add';
 import { useTranslation } from '@/hooks/use-translation';
@@ -213,7 +214,8 @@ export default function ClientForm({
                             <Label htmlFor="notes">
                                 {t('clients.form.notes')}
                             </Label>
-                            <Input
+                            <Textarea
+                                rows={3}
                                 id="notes"
                                 name="notes"
                                 defaultValue={client?.notes ?? ''}

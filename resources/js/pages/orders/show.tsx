@@ -26,6 +26,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useFormat } from '@/hooks/use-format';
 import { useTranslation } from '@/hooks/use-translation';
@@ -59,6 +60,7 @@ type Order = {
     notes: string | null;
     kit: { name: string; version: number };
     allowed_next: string[];
+    password_steps: string[];
     items: {
         id: number;
         product_name: string;
@@ -118,6 +120,7 @@ export default function ShowOrder({
     const [cancelling, setCancelling] = useState(false);
     const [tab, setTab] = useState('lines');
     const [reason, setReason] = useState('');
+    const [password, setPassword] = useState('');
     const [confirming, setConfirming] = useState<string | null>(null);
     const [sending, setSending] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -136,15 +139,20 @@ export default function ShowOrder({
             {
                 preserveScroll: true,
                 onStart: () => setSending(true),
-                onFinish: () => {
-                    setSending(false);
-                    setConfirming(null);
+                onFinish: () => setSending(false),
+                onError: (received) => {
+                    setErrors(received);
+
+                    if (!received.password) {
+                        setConfirming(null);
+                    }
                 },
-                onError: (received) => setErrors(received),
                 onSuccess: () => {
                     setErrors({});
+                    setConfirming(null);
                     setCancelling(false);
                     setReason('');
+                    setPassword('');
                 },
             },
         );
@@ -157,6 +165,17 @@ export default function ShowOrder({
     // The advance has to be collected before the order can go on (setting "advance required").
     const waitingAdvance =
         nextStep === 'advance_received' && payments.advance_blocking;
+    // Delivered and settled follow from what is recorded: kits handed over, money collected.
+    const waitingDelivery =
+        nextStep === 'delivered' && delivery.remaining_kits > 0;
+    const waitingBalance = nextStep === 'settled' && payments.balance_due > 0;
+    const blocked = waitingAdvance || waitingDelivery || waitingBalance;
+    const goToTab = (name: string): void => {
+        setTab(name);
+        document
+            .querySelector('[data-tour="tabs"]')
+            ?.scrollIntoView({ behavior: 'smooth' });
+    };
 
     return (
         <>
@@ -263,6 +282,32 @@ export default function ShowOrder({
                                                         },
                                                     )}
                                                 </p>
+                                            ) : waitingDelivery ? (
+                                                <p
+                                                    role="status"
+                                                    className="text-sm text-warning-text"
+                                                >
+                                                    {t(
+                                                        'orders.show.delivery_waiting',
+                                                        {
+                                                            count: delivery.remaining_kits,
+                                                        },
+                                                    )}
+                                                </p>
+                                            ) : waitingBalance ? (
+                                                <p
+                                                    role="status"
+                                                    className="text-sm text-warning-text"
+                                                >
+                                                    {t(
+                                                        'orders.show.balance_waiting',
+                                                        {
+                                                            amount: money(
+                                                                payments.balance_due,
+                                                            ),
+                                                        },
+                                                    )}
+                                                </p>
                                             ) : (
                                                 <p className="text-sm text-muted-foreground">
                                                     {t(
@@ -272,7 +317,20 @@ export default function ShowOrder({
                                             )}
                                         </div>
                                         <div className="flex flex-wrap items-center gap-2">
-                                            {waitingAdvance && (
+                                            {waitingDelivery && (
+                                                <Button
+                                                    variant="infoOutline"
+                                                    onClick={() =>
+                                                        goToTab('delivery')
+                                                    }
+                                                >
+                                                    {t(
+                                                        'orders.show.record_delivery',
+                                                    )}
+                                                </Button>
+                                            )}
+                                            {(waitingAdvance ||
+                                                waitingBalance) && (
                                                 <Button
                                                     variant="infoOutline"
                                                     onClick={() => {
@@ -294,7 +352,7 @@ export default function ShowOrder({
                                             )}
                                             <Button
                                                 variant="success"
-                                                disabled={waitingAdvance}
+                                                disabled={blocked}
                                                 onClick={() =>
                                                     setConfirming(nextStep)
                                                 }
@@ -324,14 +382,51 @@ export default function ShowOrder({
                                         <Label htmlFor="reason">
                                             {t('orders.show.cancel_reason')}
                                         </Label>
-                                        <Input
+                                        <Textarea
+                                            rows={3}
                                             id="reason"
+                                            required
                                             value={reason}
                                             onChange={(event) =>
                                                 setReason(event.target.value)
                                             }
                                         />
                                         <InputError message={errors.reason} />
+                                        {order.password_steps.includes(
+                                            'cancelled',
+                                        ) && (
+                                            <>
+                                                <Label htmlFor="cancel-password">
+                                                    {t(
+                                                        'orders.show.cancel_password',
+                                                    )}
+                                                </Label>
+                                                <Input
+                                                    id="cancel-password"
+                                                    type="password"
+                                                    required
+                                                    autoComplete="current-password"
+                                                    value={password}
+                                                    onChange={(event) =>
+                                                        setPassword(
+                                                            event.target.value,
+                                                        )
+                                                    }
+                                                    aria-describedby="cancel-password-help"
+                                                />
+                                                <p
+                                                    id="cancel-password-help"
+                                                    className="text-xs text-muted-foreground"
+                                                >
+                                                    {t(
+                                                        'orders.show.cancel_password_help',
+                                                    )}
+                                                </p>
+                                                <InputError
+                                                    message={errors.password}
+                                                />
+                                            </>
+                                        )}
                                         <div className="flex flex-wrap gap-2">
                                             <Button
                                                 disabled={busy}
@@ -339,6 +434,11 @@ export default function ShowOrder({
                                                 onClick={() =>
                                                     move('cancelled', {
                                                         reason,
+                                                        ...(order.password_steps.includes(
+                                                            'cancelled',
+                                                        )
+                                                            ? { password }
+                                                            : {}),
                                                     })
                                                 }
                                             >
@@ -384,6 +484,24 @@ export default function ShowOrder({
                                         {t(`orders.status_help.${confirming}`)}
                                     </DialogDescription>
                                 </DialogHeader>
+                                {order.password_steps.includes(confirming) && (
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="step-password">
+                                            {t('orders.show.step_password')}
+                                        </Label>
+                                        <Input
+                                            id="step-password"
+                                            type="password"
+                                            required
+                                            autoComplete="current-password"
+                                            value={password}
+                                            onChange={(event) =>
+                                                setPassword(event.target.value)
+                                            }
+                                        />
+                                        <InputError message={errors.password} />
+                                    </div>
+                                )}
                                 <DialogFooter>
                                     <Button
                                         variant="outline"
@@ -395,7 +513,16 @@ export default function ShowOrder({
                                     <Button
                                         variant="success"
                                         disabled={sending}
-                                        onClick={() => move(confirming)}
+                                        onClick={() =>
+                                            move(
+                                                confirming,
+                                                order.password_steps.includes(
+                                                    confirming,
+                                                )
+                                                    ? { password }
+                                                    : {},
+                                            )
+                                        }
                                     >
                                         {t(`orders.show.actions.${confirming}`)}
                                     </Button>

@@ -8,6 +8,7 @@ import SelectField from '@/components/select-field';
 import SignatureField from '@/components/signature-field';
 import ConfirmAction from '@/components/confirm-action';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useFormat } from '@/hooks/use-format';
 import { useTranslation } from '@/hooks/use-translation';
@@ -215,7 +216,8 @@ export default function OrderDeliveries({
                                         <Label htmlFor="delivery-notes">
                                             {t('deliveries.panel.notes')}
                                         </Label>
-                                        <Input
+                                        <Textarea
+                                            rows={3}
                                             id="delivery-notes"
                                             name="notes"
                                         />
@@ -272,7 +274,21 @@ export default function OrderDeliveries({
                                                     name="payment_method_id"
                                                     prompt
                                                     defaultValue=""
-                                                    onChange={setMethodId}
+                                                    onChange={(value) => {
+                                                        setMethodId(value);
+
+                                                        // Choosing how it is paid means collecting: the balance is offered.
+                                                        if (
+                                                            value !== '' &&
+                                                            collect === ''
+                                                        ) {
+                                                            setCollect(
+                                                                String(
+                                                                    balanceDue,
+                                                                ),
+                                                            );
+                                                        }
+                                                    }}
                                                     options={[
                                                         {
                                                             value: '',

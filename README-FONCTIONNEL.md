@@ -573,3 +573,7 @@ Un sujet à la fois (`playbook/01`, PRI-06), chacun avec ses tests écrits d'abo
 | 10 | Modèles de documents existants, logo et mentions légales à reprendre ? | Modèle simple à valider |
 | 11 | Briques logicielles à ajouter (génération de PDF, signature à l'écran, stockage des fichiers, base de production) ? | Décision du responsable avant toute installation |
 | 12 | Répartition des frais de transport : au prorata des kits, ou par livraison ? | Au prorata des kits |
+
+**Livrée et soldée.** Une commande ne passe à **Livrée** que lorsque tous ses kits sont enregistrés comme livrés, et à **Soldée** que lorsque le total est payé : le serveur refuse l’étape sinon, et la fiche montre ce qui reste (kits, montant) avec un bouton vers l’onglet Livraison ou Paiements. Ces deux étapes s’enchaînent d’elles-mêmes quand la livraison ou le paiement qui les complète est enregistré.
+
+**Annulation d’une commande.** Le motif est obligatoire. Si de l’argent a déjà été encaissé sur la commande, la personne doit aussi saisir son mot de passe ; un mot de passe refusé est écrit au journal d’audit (`order.step_password_failed`). Sans paiement, le motif suffit. Les étapes **Livrée, Soldée et Clôturée**, quand on les passe à la main depuis la fiche, demandent aussi le mot de passe dans la fenêtre de confirmation ; celles que l’application enchaîne seule (livraison enregistrée, paiement qui solde la commande) n’en redemandent pas.

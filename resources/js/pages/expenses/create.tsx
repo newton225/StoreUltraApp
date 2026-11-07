@@ -10,6 +10,7 @@ import InputError from '@/components/input-error';
 import SelectField from '@/components/select-field';
 import { SaveBar } from '@/components/save-bar';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { formGrid } from '@/lib/form-layout';
 import { useTranslation } from '@/hooks/use-translation';
@@ -307,7 +308,11 @@ export default function CreateExpense({
                                     <Label htmlFor="notes">
                                         {t('expenses.form.notes')}
                                     </Label>
-                                    <Input id="notes" name="notes" />
+                                    <Textarea
+                                        rows={3}
+                                        id="notes"
+                                        name="notes"
+                                    />
                                     <InputError message={errors.notes} />
                                 </div>
 

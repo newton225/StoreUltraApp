@@ -18,6 +18,9 @@ cochée est un point **supposé faux**.
 
 ## 2. Nouvelle route ou nouveau point d'entrée
 
+- [ ] **Étape dépendant de faits enregistrés** (livrée, soldée) : refusée côté serveur sans eux, bouton grisé avec la situation réelle et le geste qui manque (UI-129).
+- [ ] **Texte libre (observations, commentaires, notes, motifs) en zone de texte de plusieurs lignes** (UI-128).
+- [ ] **Annulation d’un enregistrement sur lequel de l’argent est encaissé, et étapes critiques d’un cycle de vie (livré, soldé, clôturé)** : mot de passe de la personne connectée, vérifié côté serveur, refus journalisé (SEC-15).
 - [ ] **Autorisation** vérifiée avant la validation (SEC-21), politique dédiée (CODE-12).
 - [ ] **Chaque rôle** testé autorisé et refusé ; un client tiers reçoit **404** (TEST-10, SEC-27).
 - [ ] **Validation** par un objet dédié, **affectation de masse** impossible (SEC-41).

@@ -22,6 +22,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useFormat } from '@/hooks/use-format';
 import { useTranslation } from '@/hooks/use-translation';
@@ -617,7 +618,11 @@ export default function AttachmentsIndex({
                                             <Label htmlFor="notes">
                                                 {t('attachments.form.notes')}
                                             </Label>
-                                            <Input id="notes" name="notes" />
+                                            <Textarea
+                                                rows={3}
+                                                id="notes"
+                                                name="notes"
+                                            />
                                             <InputError
                                                 message={errors.notes}
                                             />

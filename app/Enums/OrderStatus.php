@@ -32,6 +32,14 @@ enum OrderStatus: string
     }
 
     /**
+     * The steps taken by hand that the person confirms with their password (playbook SEC-15).
+     */
+    public function needsPassword(): bool
+    {
+        return in_array($this, [self::Delivered, self::Settled, self::Closed], true);
+    }
+
+    /**
      * Whether nothing can happen to the order any more.
      */
     public function isFinal(): bool

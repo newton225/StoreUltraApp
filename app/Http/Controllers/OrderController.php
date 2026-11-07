@@ -185,6 +185,10 @@ class OrderController extends Controller
                 'notes' => $order->notes,
                 'kit' => ['name' => $order->kitVersion->kit->name, 'version' => $order->kitVersion->version],
                 'allowed_next' => $order->status->allowedNext(),
+                'password_steps' => [
+                    ...array_map(fn (OrderStatus $status): string => $status->value, array_filter(OrderStatus::cases(), fn (OrderStatus $status): bool => $status->needsPassword())),
+                    ...($order->payments->isNotEmpty() ? [OrderStatus::Cancelled->value] : []),
+                ],
                 'items' => $order->items->map(fn ($item): array => [
                     'id' => $item->id,
                     'product_name' => $item->product->name,

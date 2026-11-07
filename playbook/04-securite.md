@@ -34,7 +34,12 @@ identifiant, une raison et, quand c'est utile, la façon de la contrôler. La gr
 - **SEC-14.** **Verrouillage progressif** après échecs répétés sur la connexion et la 2FA, journalisé ; messages
   qui ne révèlent pas si le compte existe.
 - **SEC-15.** **Re-authentification** (mot de passe, puis second facteur rejoué juste avant) pour les opérations
-  sensibles : comptes de paiement, rôles, abonnement, suppression d'un membre, identité légale.
+  sensibles : comptes de paiement, rôles, abonnement, suppression d'un membre, identité légale, **annulation d'un
+  enregistrement sur lequel de l'argent a déjà été encaissé** (mot de passe de la personne connectée, vérifié côté
+  serveur ; un mot de passe refusé est écrit au journal ; sans argent encaissé, le motif suffit), **et les étapes critiques et
+irréversibles d'un cycle de vie prises à la main** (livrée, soldée, clôturée pour une commande), confirmées dans la fenêtre
+de confirmation avec le mot de passe ; les étapes que l'application enchaîne seule après une saisie déjà protégée
+(livraison enregistrée, paiement qui solde) n'en redemandent pas.
 - **SEC-16.** **Régénérer la session** à la connexion, à l'élévation de privilège et au changement d'espace.
 - **SEC-17.** **Sessions** : cookie `HttpOnly`, `Secure`, `SameSite`, chiffrées ; **expiration d'inactivité et
   expiration absolue** ; invalidation de toutes les sessions au changement de mot de passe ; liste des appareils

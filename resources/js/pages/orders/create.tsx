@@ -13,6 +13,7 @@ import SelectField from '@/components/select-field';
 import { SaveBar } from '@/components/save-bar';
 import TabLinks from '@/components/tab-links';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useTranslation } from '@/hooks/use-translation';
 import { formGrid } from '@/lib/form-layout';
@@ -241,7 +242,11 @@ export default function CreateOrder({
                                         <Label htmlFor="notes">
                                             {t('orders.create.notes')}
                                         </Label>
-                                        <Input id="notes" name="notes" />
+                                        <Textarea
+                                            rows={3}
+                                            id="notes"
+                                            name="notes"
+                                        />
                                         <InputError message={errors.notes} />
                                     </div>
 

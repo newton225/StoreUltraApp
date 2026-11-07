@@ -569,6 +569,15 @@ Chaque vue prévoit ses états, tous :
   fond teinté** (lignes alternées, UI-126, cartes, bandeaux). Il vient d'**un seul jeton** (`--input`) à deux valeurs, jamais d'une
   teinte écrite à la main ni du même gris que les séparateurs et les fonds : un champ dont le bord se confond avec le fond ne dit
   pas où l'on saisit. Se vérifie à l'œil, en clair et en sombre, sur un formulaire ordinaire **et** sur une ligne à fond teinté.
+- **UI-128.** **Un champ de texte libre est une zone de texte sur plusieurs lignes, pas une ligne de saisie.** Observations, commentaires,
+  notes, motifs et descriptions utilisent un composant de zone de texte (même contour, mêmes états et même hauteur minimale de
+  trois lignes, redimensionnable en hauteur), jamais le champ d'une ligne réservé aux valeurs courtes (nom, référence, montant). Le
+  serveur borne la longueur (`max`) ; une seule ligne reste admise pour un motif posé dans une rangée de tableau où la place manque.
+- **UI-129.** **Une étape qui découle de faits enregistrés ne se coche pas à la main sans eux.** « Livrée » n'est possible que quand tous les
+  éléments sont réellement remis, « soldée » que quand tout est payé : le **serveur** refuse l'étape sinon (un écran contourné ne doit
+  jamais produire un état faux), et le bloc « prochaine étape » **dit la situation réelle** (ce qui reste, en chiffres), **grise** le bouton
+  de l'étape et propose **le geste qui manque** (« Enregistrer la livraison », « Enregistrer le paiement ») qui ouvre le bon onglet. Le texte
+  explicatif d'un état n'est jamais montré comme si c'était la situation courante.
 - **UI-113.** **Dans tous les formulaires, un champ obligatoire porte un astérisque rouge (`*`) après son
   libellé**, toujours, sans exception d'écran. Le marquage est produit **une seule fois** par le composant
   `Label`, qui lit l'attribut `required` du champ qu'il désigne (`htmlFor` = `id` du champ) : on ne l'écrit donc

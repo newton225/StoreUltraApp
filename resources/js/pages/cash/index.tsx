@@ -23,6 +23,7 @@ import SelectField from '@/components/select-field';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useFormat } from '@/hooks/use-format';
 import { useTranslation } from '@/hooks/use-translation';
@@ -328,7 +329,8 @@ export default function CashIndex({
                                         <Label htmlFor="cash-notes">
                                             {t('cash.form.notes')}
                                         </Label>
-                                        <Input
+                                        <Textarea
+                                            rows={3}
                                             id="cash-notes"
                                             name="notes"
                                             maxLength={1000}

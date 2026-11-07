@@ -17,6 +17,16 @@ class InvalidOrderTransition extends RuntimeException
         return new self("An order cannot go from [{$from->value}] to [{$to->value}].");
     }
 
+    public static function deliveryMissing(): self
+    {
+        return new self('Kits are still to be delivered.', 'orders.errors.delivery_missing');
+    }
+
+    public static function balanceDue(): self
+    {
+        return new self('The order is not fully paid.', 'orders.errors.balance_due');
+    }
+
     public static function advanceMissing(): self
     {
         return new self('The advance is not covered yet.', 'orders.errors.advance_missing');
