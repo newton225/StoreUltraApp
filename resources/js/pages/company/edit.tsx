@@ -108,7 +108,7 @@ export default function CompanyEdit({ values, hasLogo, identifiers }: Props) {
                                 <img
                                     src={preview}
                                     alt={t('company.logo.preview_alt')}
-                                    className="max-h-24 max-w-48 rounded-md border border-dashed border-border bg-white object-contain p-2"
+                                    className="bg-checkerboard max-h-24 max-w-48 rounded-md border border-dashed border-border object-contain p-2"
                                 />
                                 <p className="text-xs text-muted-foreground">
                                     {t('company.logo.preview')}

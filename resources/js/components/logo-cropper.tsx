@@ -109,7 +109,7 @@ export function LogoCropper({ src, name, onCropped, onCancel }: Props) {
                 {t('company.logo.crop_help')}
             </p>
             <div
-                className="relative w-fit max-w-full cursor-crosshair touch-none overflow-hidden rounded-md border border-border bg-white select-none"
+                className="bg-checkerboard relative w-fit max-w-full cursor-crosshair touch-none overflow-hidden rounded-md border border-border select-none"
                 onPointerDown={down}
                 onPointerMove={move}
                 onPointerUp={up}
@@ -123,7 +123,7 @@ export function LogoCropper({ src, name, onCropped, onCancel }: Props) {
                 />
                 {box !== null && (
                     <div
-                        className="pointer-events-none absolute border-2 border-dashed border-white"
+                        className="pointer-events-none absolute border-2 border-dashed border-white shadow-[0_0_0_1px_rgba(0,0,0,0.7),inset_0_0_0_1px_rgba(0,0,0,0.7)]"
                         style={{
                             left: box.x,
                             top: box.y,
