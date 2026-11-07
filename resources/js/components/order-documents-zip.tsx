@@ -3,26 +3,47 @@ import { show } from '@/actions/App/Http/Controllers/OrderDocumentArchiveControl
 import CollapsiblePanel from '@/components/collapsible-panel';
 import SelectField from '@/components/select-field';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import WeekSelect from '@/components/week-select';
 import { useTranslation } from '@/hooks/use-translation';
+
+type Count = { ready: number; missing: number };
+
+export type ArchiveChoices = {
+    weeks: string[];
+    zones: {
+        id: number;
+        name: string;
+        counts: Record<string, { proforma: Count; invoice: Count }>;
+    }[];
+};
 
 /**
  * Downloads, in one zip, the proformas or the invoices already issued for the orders of a zone (sub-prefecture)
- * and a delivery week. Nothing is issued here (playbook UI-114 for the folded panel).
+ * and a delivery week. Nothing is issued here (playbook UI-114 for the folded panel). The weeks are the ones that
+ * have orders, and each sub-prefecture says how many documents are ready and how many are still to generate.
  */
 export default function OrderDocumentsZip({
-    zones,
+    choices,
     week,
 }: {
-    zones: { id: number; name: string }[];
+    choices: ArchiveChoices;
     week: string | null;
 }) {
     const { t } = useTranslation();
-    const [kind, setKind] = useState('proforma');
+    const [kind, setKind] = useState<'proforma' | 'invoice'>('proforma');
     const [zone, setZone] = useState('');
-    const [chosenWeek, setChosenWeek] = useState(week ?? '');
-    const ready = zone !== '' && chosenWeek !== '';
+    const [chosenWeek, setChosenWeek] = useState(
+        week !== null && choices.weeks.includes(week)
+            ? week
+            : (choices.weeks[0] ?? ''),
+    );
+
+    const countOf = (id: number): Count =>
+        choices.zones.find((item) => item.id === id)?.counts[chosenWeek]?.[
+            kind
+        ] ?? { ready: 0, missing: 0 };
+    const ready = zone !== '' && countOf(Number(zone)).ready > 0;
 
     return (
         <CollapsiblePanel title={t('orders.archive.open')} defaultOpen={false}>
@@ -40,7 +61,13 @@ export default function OrderDocumentsZip({
                             id="archive-kind"
                             name="type"
                             defaultValue="proforma"
-                            onChange={setKind}
+                            onChange={(value) =>
+                                setKind(
+                                    value === 'invoice'
+                                        ? 'invoice'
+                                        : 'proforma',
+                                )
+                            }
                             options={[
                                 {
                                     value: 'proforma',
@@ -57,13 +84,11 @@ export default function OrderDocumentsZip({
                         <Label htmlFor="archive-week">
                             {t('orders.archive.week')}
                         </Label>
-                        <Input
+                        <WeekSelect
                             id="archive-week"
-                            type="date"
+                            weeks={choices.weeks}
                             value={chosenWeek}
-                            onChange={(event) =>
-                                setChosenWeek(event.target.value)
-                            }
+                            onChange={setChosenWeek}
                         />
                     </div>
                     <div className="grid gap-2 sm:col-span-2">
@@ -72,6 +97,7 @@ export default function OrderDocumentsZip({
                         </Label>
                         <SelectField
                             id="archive-zone"
+                            searchable
                             name="zone"
                             prompt
                             onChange={setZone}
@@ -80,10 +106,23 @@ export default function OrderDocumentsZip({
                                     value: '',
                                     label: t('orders.archive.choose'),
                                 },
-                                ...zones.map((item) => ({
-                                    value: String(item.id),
-                                    label: item.name,
-                                })),
+                                ...choices.zones.map((item) => {
+                                    const count = countOf(item.id);
+
+                                    return {
+                                        value: String(item.id),
+                                        label: t(
+                                            count.missing > 0
+                                                ? 'orders.archive.zone_missing'
+                                                : 'orders.archive.zone_ready',
+                                            {
+                                                name: item.name,
+                                                ready: count.ready,
+                                                missing: count.missing,
+                                            },
+                                        ),
+                                    };
+                                }),
                             ]}
                         />
                     </div>

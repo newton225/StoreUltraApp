@@ -10,12 +10,16 @@ import SelectField from '@/components/select-field';
 import { Badge } from '@/components/ui/badge';
 import ConfirmAction from '@/components/confirm-action';
 import { Input } from '@/components/ui/input';
+import { useFormat } from '@/hooks/use-format';
 import { useTranslation } from '@/hooks/use-translation';
 
 export type DocumentTarget = {
     type: string;
     subject_id: number;
     label: string | null;
+    detail?:
+        | { kind: string; amount: number; on: string }
+        | { kits: number; on: string };
     document: { id: number; number: string; locale: string } | null;
     can_issue: boolean;
 };
@@ -38,6 +42,7 @@ export default function OrderDocuments({
     documents: OrderDocumentsData;
 }) {
     const { t, locale } = useTranslation();
+    const { money, date } = useFormat();
     const [language, setLanguage] = useState(locale);
     const [fneNumber, setFneNumber] = useState('');
     const [recordedFne, setRecordedFne] = useState('');
@@ -66,6 +71,13 @@ export default function OrderDocuments({
         target.label
             ? t(`documents.ui.panel.${target.type}`, { number: target.label })
             : t(`documents.ui.panel.${target.type}`);
+
+    const detailText = (
+        detail: NonNullable<DocumentTarget['detail']>,
+    ): string =>
+        'kind' in detail
+            ? `${t(`payments.kinds.${detail.kind}`)} · ${money(detail.amount)} · ${date(detail.on)}`
+            : `${t('documents.ui.panel.kits', { count: detail.kits })} · ${date(detail.on)}`;
 
     const visible = documents.targets.filter(
         (target) => target.document !== null || target.can_issue,
@@ -122,7 +134,14 @@ export default function OrderDocuments({
                         key={`${target.type}-${target.subject_id}`}
                         className="flex flex-wrap items-center justify-between gap-2 px-4 py-2"
                     >
-                        <span className="font-medium">{label(target)}</span>
+                        <span className="font-medium">
+                            {label(target)}
+                            {target.detail && (
+                                <span className="ml-2 font-normal text-muted-foreground">
+                                    {detailText(target.detail)}
+                                </span>
+                            )}
+                        </span>
                         {target.document ? (
                             <span className="flex items-center gap-3">
                                 <Badge variant="outline">
@@ -139,7 +158,10 @@ export default function OrderDocuments({
                             </span>
                         ) : (
                             <ConfirmAction
-                                label={t('documents.ui.panel.issue')}
+                                variant="outline"
+                                label={t(
+                                    `documents.ui.panel.generate.${target.type}`,
+                                )}
                                 title={t('documents.ui.panel.confirm_title', {
                                     document: label(target),
                                 })}

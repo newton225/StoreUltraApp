@@ -154,6 +154,7 @@ export default function KitCompositionFields({
                             </Label>
                             <SelectField
                                 id={`product-${row.key}`}
+                                searchable
                                 name={`items[${index}][product_id]`}
                                 required
                                 defaultValue={row.product_id}

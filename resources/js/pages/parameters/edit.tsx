@@ -1,4 +1,4 @@
-import { Form, Head, Link, setLayoutProps } from '@inertiajs/react';
+import { Form, Head, setLayoutProps } from '@inertiajs/react';
 import { ChevronDown } from 'lucide-react';
 import { update } from '@/actions/App/Http/Controllers/Settings/BusinessSettingsController';
 import Heading from '@/components/heading';
@@ -9,7 +9,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { useTranslation } from '@/hooks/use-translation';
 import { edit } from '@/routes/parameters';
-import { index as attachments } from '@/actions/App/Http/Controllers/AttachmentController';
 import { formGrid } from '@/lib/form-layout';
 import { FieldLabel } from '@/components/field-label';
 
@@ -150,8 +149,6 @@ export default function ParametersEdit({ values, definitions }: Props) {
                         // Three fields per row, or two wide ones to fill a row of two.
                         const field = (key: string) =>
                             fieldWith(key, 'md:col-span-2');
-                        const wideField = (key: string) =>
-                            fieldWith(key, 'md:col-span-3');
 
                         return (
                             <>
@@ -167,32 +164,6 @@ export default function ParametersEdit({ values, definitions }: Props) {
                                         'advance_required',
                                         'delivery_signature_required',
                                     ].map(field)}
-                                </section>
-
-                                <section className={formGrid}>
-                                    <h2 className="col-span-full text-base font-semibold">
-                                        {t('parameters.sections.company')}
-                                    </h2>
-                                    <p className="col-span-full -mt-3 text-sm text-muted-foreground">
-                                        {t('parameters.sections.company_help')}{' '}
-                                        <Link
-                                            href={attachments()}
-                                            className="underline underline-offset-4"
-                                        >
-                                            {t(
-                                                'parameters.sections.company_link',
-                                            )}
-                                        </Link>
-                                    </p>
-                                    {[
-                                        'company_name',
-                                        'company_address',
-                                        'company_phone',
-                                    ].map(field)}
-                                    {[
-                                        'document_project_title',
-                                        'document_subtitle',
-                                    ].map(wideField)}
                                 </section>
 
                                 <details

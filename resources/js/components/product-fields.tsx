@@ -53,6 +53,7 @@ export default function ProductFields({ product, shops, errors }: Props) {
                 </Label>
                 <SelectField
                     id="shop_id"
+                    searchable
                     name="shop_id"
                     required
                     defaultValue={String(product?.shop_id ?? '')}

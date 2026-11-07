@@ -75,6 +75,7 @@ export default function DeliveriesIndex({
                 <div className="max-w-xs">
                     <SelectField
                         id="filter-zone"
+                        searchable
                         name="zone"
                         defaultValue={String(filters.zone ?? '')}
                         onChange={(value) =>

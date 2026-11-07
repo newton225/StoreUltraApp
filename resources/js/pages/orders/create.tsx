@@ -124,6 +124,7 @@ export default function CreateOrder({
                                         </Label>
                                         <SelectField
                                             id="client_id"
+                                            searchable
                                             name="client_id"
                                             required
                                             options={[
@@ -153,6 +154,7 @@ export default function CreateOrder({
                                         </FieldLabel>
                                         <SelectField
                                             id="kit_id"
+                                            searchable
                                             name="kit_id"
                                             required
                                             options={[

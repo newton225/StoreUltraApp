@@ -578,6 +578,36 @@ Chaque vue prévoit ses états, tous :
   jamais produire un état faux), et le bloc « prochaine étape » **dit la situation réelle** (ce qui reste, en chiffres), **grise** le bouton
   de l'étape et propose **le geste qui manque** (« Enregistrer la livraison », « Enregistrer le paiement ») qui ouvre le bon onglet. Le texte
   explicatif d'un état n'est jamais montré comme si c'était la situation courante.
+- **UI-130.** **Un bouton nomme l'action et son objet, dans les mots de l'utilisateur.** « Générer la facture », « Enregistrer la livraison »,
+  jamais un verbe seul (« Émettre », « Valider », « Traiter ») : dans une liste dont le libellé de ligne se coupe sur petit écran, le bouton doit
+  se comprendre sans la ligne. Pas de jargon de métier quand un mot courant existe, et un même mot ne désigne pas deux gestes différents sur
+  l'application. Un geste définitif répété sur chaque ligne d'une liste est en **contour** (UI-16), pas en vert plein ; la conséquence
+  (numéro définitif, plus modifiable) est dite dans la fenêtre de confirmation.
+- **UI-131.** **Tout formulaire ou panneau ouvert dans la page offre une sortie visible, sans rien faire.** Une ligne qui déplie un champ de motif
+  (annuler un document, un frais, une commande) porte, à côté du bouton qui confirme, un bouton **« Garder … »** (l'objet qu'on garde : « Garder
+  le document ») qui referme, vide le champ et efface les erreurs. La sortie ne s'appelle jamais « Annuler » quand « Annuler » désigne aussi le geste
+  qu'on confirme : on ne sait plus lequel des deux on touche. Elle est en variante discrète (UI-16) et ne demande pas de confirmation.
+- **UI-132.** **Une semaine se choisit dans une liste de semaines, pas en tapant une date.** Le champ « semaine » est une liste « Semaine du
+  2 nov. 2026 », la plus récente en premier, qui ne propose que les semaines ayant des données (plus la semaine courante et celle déjà
+  choisie) : on retrouve la bonne semaine sans chercher dans un calendrier, et le premier jour est toujours celui du paramètre de
+  l'entreprise. Un filtre ajoute « Toutes les semaines ». Un composant unique sert partout. Le sélecteur de **date** reste pour une vraie
+  date (paiement, dépense) ou une période.
+- **UI-133.** **Les documents émis sont uniformes : un en-tête et un pied de page communs, alimentés par une page « Mon entreprise ».** Le
+  propriétaire saisit une seule fois, sur une page dédiée, le nom, le logo, la forme juridique, le capital, les contacts, la personne qui
+  signe et une mention de pied de page ; les numéros légaux viennent des documents administratifs déjà tenus (pas de ressaisie). **Tous** les
+  documents (proforma, facture, reçu, bon de livraison, bon de commande, bordereau) reprennent le même en-tête (logo à gauche, identité à
+  côté, filet de séparation) et le même pied de page, par **deux modèles partagés** : changer l'un change tous les documents, et un nouveau
+  type de document les inclut au lieu de refaire sa propre tête. Le logo est une image PNG ou JPEG contrôlée comme tout envoi (SEC-24),
+  stockée en privé et écrite dans le PDF ; un document déjà émis ne change jamais.
+- **UI-134.** **Une liste de choix qui grandit avec les données se cherche en tapant, dès le départ.** Zones, kits, clients, boutiques,
+  produits, utilisateurs, commandes, livraisons, semaines : la liste est **marquée comme cherchable explicitement** (pas selon le nombre de
+  lignes du jour, sinon elle change de comportement un matin), filtre sans tenir compte des accents, et se pilote au clavier (UI-121). Une
+  liste fermée (statut, type, sens, langue) reste une liste simple. Quand le volume devient trop grand pour tout envoyer à la page, la liste
+  est chargée par recherche côté serveur plutôt qu'en entier.
+
+- **UI-135.** **Une image que l'on téléverse se voit avant l'enregistrement, et se recadre.** Dès qu'un fichier image est choisi, la page montre
+  son aperçu (avec la mention « pas encore enregistré ») et propose une fenêtre de recadrage : on trace le rectangle à garder, ou on garde l'image
+  entière. Le résultat recadré remplace le fichier du formulaire. Le recadrage se fait sans bibliothèque (canevas), au doigt comme à la souris.
 - **UI-113.** **Dans tous les formulaires, un champ obligatoire porte un astérisque rouge (`*`) après son
   libellé**, toujours, sans exception d'écran. Le marquage est produit **une seule fois** par le composant
   `Label`, qui lit l'attribut `required` du champ qu'il désigne (`htmlFor` = `id` du champ) : on ne l'écrit donc

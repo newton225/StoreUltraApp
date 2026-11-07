@@ -88,7 +88,7 @@ test('each order of the list says which valid proforma and invoice it has', func
             && collect($rows)->firstWhere('id', $both->id)['invoice_document'] === $invoice->id
             && collect($rows)->firstWhere('id', $cancelled->id)['proforma_document'] === null
             && collect($rows)->firstWhere('id', $none->id)['invoice_document'] === null)
-        ->where('archiveZones', fn ($zones) => collect($zones)->pluck('name')->all() === ['Fronan']));
+        ->where('archiveChoices.zones', fn ($zones) => collect($zones)->pluck('name')->all() === ['Fronan']));
 });
 
 test('the chosen proformas come in one zip, named after the proforma and the client', function () {
@@ -176,4 +176,20 @@ test('the request must name a kind of document and either orders or a zone with 
 
 test('a guest cannot download the archive', function () {
     $this->get(route('orders.documents.zip', ['type' => 'proforma', 'orders' => [1]]))->assertRedirect(route('login'));
+});
+
+test('each zone says, week by week, how many documents are ready and how many are still to generate', function () {
+    $done = archiveOrder('Fronan', 'Aya Kone');
+    proformaOf($done);
+    archiveOrder('Fronan', 'Bema Traore');
+    archiveOrder('Katiola', 'Cisse Ali', today()->subWeek()->startOfWeek()->toDateString());
+    Order::query()->whereKey(archiveOrder('Fronan', 'Dia Sy')->id)->update(['status' => 'cancelled']);
+
+    $week = $this->week->toDateString();
+
+    $this->actingAs($this->owner)->get(route('orders.index'))->assertInertia(fn (Assert $page) => $page
+        ->where('archiveChoices.weeks', fn ($weeks) => collect($weeks)->first() === $week && count($weeks) === 2)
+        ->where('archiveChoices.zones', fn ($zones) => collect($zones)->firstWhere('name', 'Fronan')['counts'][$week]['proforma'] === ['ready' => 1, 'missing' => 1]
+            && collect($zones)->firstWhere('name', 'Fronan')['counts'][$week]['invoice'] === ['ready' => 0, 'missing' => 0]
+            && ! isset(collect($zones)->firstWhere('name', 'Katiola')['counts'][$week])));
 });

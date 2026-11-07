@@ -33,6 +33,8 @@ type ShopRow = {
     advance: number;
     percent: number;
     balance: number;
+    theoretical_margin?: number;
+    real_margin?: number;
 };
 
 type Report = {
@@ -49,7 +51,7 @@ type Report = {
         refunds: number;
         receivables: number;
     };
-    shops: { summary: ShopRow[]; debts: number } | null;
+    shops: { summary: ShopRow[]; debts: number; with_profit: boolean } | null;
     weekly: WeeklyRow[];
     profit: {
         theoretical_margin: number;
@@ -159,8 +161,17 @@ export default function Dashboard({
             sale: sum.sale + row.sale,
             advance: sum.advance + row.advance,
             balance: sum.balance + row.balance,
+            theoretical: sum.theoretical + (row.theoretical_margin ?? 0),
+            real: sum.real + (row.real_margin ?? 0),
         }),
-        { purchase: 0, sale: 0, advance: 0, balance: 0 },
+        {
+            purchase: 0,
+            sale: 0,
+            advance: 0,
+            balance: 0,
+            theoretical: 0,
+            real: 0,
+        },
     );
 
     return (
@@ -214,6 +225,7 @@ export default function Dashboard({
                         </Label>
                         <SelectField
                             id="zone"
+                            searchable
                             name="zone"
                             defaultValue={String(filters.zone ?? '')}
                             onChange={(value) => apply({ zone: value })}
@@ -235,6 +247,7 @@ export default function Dashboard({
                         </Label>
                         <SelectField
                             id="kit"
+                            searchable
                             name="kit"
                             defaultValue={String(filters.kit ?? '')}
                             onChange={(value) => apply({ kit: value })}
@@ -257,6 +270,7 @@ export default function Dashboard({
                             </Label>
                             <SelectField
                                 id="shop"
+                                searchable
                                 name="shop"
                                 defaultValue={String(filters.shop ?? '')}
                                 onChange={(value) => apply({ shop: value })}
@@ -432,6 +446,12 @@ export default function Dashboard({
                                                     'advance',
                                                     'percent',
                                                     'balance',
+                                                    ...(shops.with_profit
+                                                        ? ([
+                                                              'theoretical_margin',
+                                                              'real_margin',
+                                                          ] as const)
+                                                        : []),
                                                 ] as const
                                             ).map((column) => (
                                                 <th
@@ -469,6 +489,22 @@ export default function Dashboard({
                                                 <td className="px-3 py-2 text-right">
                                                     {money(row.balance)}
                                                 </td>
+                                                {shops.with_profit && (
+                                                    <>
+                                                        <td className="px-3 py-2 text-right">
+                                                            {money(
+                                                                row.theoretical_margin ??
+                                                                    0,
+                                                            )}
+                                                        </td>
+                                                        <td className="px-3 py-2 text-right">
+                                                            {money(
+                                                                row.real_margin ??
+                                                                    0,
+                                                            )}
+                                                        </td>
+                                                    </>
+                                                )}
                                             </tr>
                                         ))}
                                         {shopTotals && (
@@ -489,11 +525,30 @@ export default function Dashboard({
                                                 <td className="px-3 py-2 text-right">
                                                     {money(shopTotals.balance)}
                                                 </td>
+                                                {shops.with_profit && (
+                                                    <>
+                                                        <td className="px-3 py-2 text-right">
+                                                            {money(
+                                                                shopTotals.theoretical,
+                                                            )}
+                                                        </td>
+                                                        <td className="px-3 py-2 text-right">
+                                                            {money(
+                                                                shopTotals.real,
+                                                            )}
+                                                        </td>
+                                                    </>
+                                                )}
                                             </tr>
                                         )}
                                     </tbody>
                                 </table>
                             </div>
+                        )}
+                        {shops.with_profit && shops.summary.length > 0 && (
+                            <p className="text-sm text-muted-foreground">
+                                {t('dashboard.shops.margin_help')}
+                            </p>
                         )}
                     </section>
                 )}

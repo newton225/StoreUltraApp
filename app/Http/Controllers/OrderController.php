@@ -85,10 +85,11 @@ class OrderController extends Controller
                 'week' => $week === null ? null : $calendar->startOf($week)->toDateString(),
                 ...$sort,
             ],
+            'weeks' => $calendar->known($user, ...($week === null ? [] : [$week])),
             'statuses' => array_column(OrderStatus::cases(), 'value'),
             'canCreate' => $user->can('create', Order::class),
             'proformaZones' => $user->can('manage-orders') ? $proformas->zones($user) : [],
-            'archiveZones' => $archive->zones($user),
+            'archiveChoices' => $archive->choices($user),
             'collectZones' => $user->can('manage-orders') ? $collect->zones($user) : [],
             'collectors' => $user->can('manage-orders') ? User::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']) : [],
             'currentUserId' => $user->id,
@@ -324,42 +325,49 @@ class OrderController extends Controller
 
         $invoiceable = in_array($order->status, [OrderStatus::Delivered, OrderStatus::Settled, OrderStatus::Closed], true);
 
-        $targets = [
-            [
+        // Listed in the order of the process: proforma, advance receipts, delivery notes, invoice, then the balance
+        // and refund receipts; inside a step, oldest first.
+        $steps = [
+            [10, '', 0, [
                 'type' => 'proforma',
                 'subject_id' => $order->id,
                 'label' => null,
                 'document' => $find('proforma', Order::class, $order->id),
                 'can_issue' => $canManage && $order->status !== OrderStatus::Cancelled,
-            ],
-            [
+            ]],
+            [40, '', 0, [
                 'type' => 'invoice',
                 'subject_id' => $order->id,
                 'label' => null,
                 'document' => $find('invoice', Invoice::class, $invoice?->id),
                 'can_issue' => $canManage && $invoiceable && $invoice === null,
-            ],
+            ]],
         ];
 
         foreach ($order->payments as $payment) {
-            $targets[] = [
+            $steps[] = [$payment->kind === PaymentKind::Advance ? 20 : 50, $payment->paid_on->toDateString(), $payment->id, [
                 'type' => 'receipt',
                 'subject_id' => $payment->id,
                 'label' => $payment->receipt_number,
+                'detail' => ['kind' => $payment->kind->value, 'amount' => $payment->amount, 'on' => $payment->paid_on->toDateString()],
                 'document' => $find('receipt', Payment::class, $payment->id),
                 'can_issue' => true,
-            ];
+            ]];
         }
 
         foreach ($order->deliveries as $delivery) {
-            $targets[] = [
+            $steps[] = [30, $delivery->delivered_on->toDateString(), $delivery->id, [
                 'type' => 'delivery_note',
                 'subject_id' => $delivery->id,
                 'label' => $delivery->reference,
+                'detail' => ['kits' => $delivery->kits_delivered, 'on' => $delivery->delivered_on->toDateString()],
                 'document' => $find('delivery_note', Delivery::class, $delivery->id),
                 'can_issue' => true,
-            ];
+            ]];
         }
+
+        usort($steps, fn (array $x, array $y): int => [$x[0], $x[1], $x[2]] <=> [$y[0], $y[1], $y[2]]);
+        $targets = array_map(fn (array $step): array => $step[3], $steps);
 
         return [
             'targets' => $targets,

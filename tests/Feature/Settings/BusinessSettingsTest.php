@@ -95,7 +95,6 @@ test('the owner updates the settings', function () {
             'advance_required' => false,
             'client_cap' => 60,
             'invoice_period' => 'weekly',
-            'company_name' => 'Zebe SARL',
         ]))
         ->assertSessionHasNoErrors()
         ->assertRedirect(route('parameters.edit'));
@@ -106,7 +105,6 @@ test('the owner updates the settings', function () {
     expect($settings->get('advance_amount'))->toBe(150000);
     expect($settings->get('advance_frequency'))->toBe('monthly');
     expect($settings->get('advance_required'))->toBeFalse();
-    expect($settings->get('company_name'))->toBe('Zebe SARL');
 });
 
 test('invalid settings are rejected and nothing is saved', function (array $changes, string $field) {

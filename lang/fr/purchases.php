@@ -29,6 +29,14 @@ return [
         'cancelled' => 'Le bon de commande est annulé.',
     ],
 
+    'next_step' => [
+        'draft' => 'Envoyer à la boutique',
+        'sent' => 'Enregistrer la réception',
+        'partially_received' => 'Enregistrer la suite de la réception',
+        'received' => 'Terminé',
+        'cancelled' => 'Aucune',
+    ],
+
     'statuses' => [
         'draft' => 'Brouillon',
         'sent' => 'Envoyé',
@@ -47,6 +55,7 @@ return [
         'confirm_title' => 'Préparer les bons de commande de cette semaine ?',
         'confirm_body' => 'Un bon de commande est créé pour chaque boutique à partir des commandes dont l\'avance est payée. Vérifiez la semaine choisie avant de continuer.',
         'pending' => ':count ligne(s) à acheter',
+        'nothing_pending' => 'Tout est déjà dans des bons de commande : voir la liste ci-dessous.',
         'unassigned' => ':count ligne(s) ne peuvent pas être achetées : le produit n\'a pas de boutique',
     ],
 
@@ -65,6 +74,7 @@ return [
         'status' => 'Statut',
         'expected' => 'Prévu',
         'actual' => 'Valeur reçue',
+        'next' => 'Prochaine étape',
     ],
 
     'summary' => [
@@ -73,8 +83,10 @@ return [
         'advances' => 'Avances reçues',
         'purchase' => 'Achat',
         'allocated' => 'Avance affectée',
-        'to_finance' => 'À financer',
-        'to_finance_help' => 'Un montant négatif signifie que les avances couvrent plus que l\'achat.',
+        'to_finance' => 'Reste à payer aux boutiques',
+        'to_finance_help' => 'Les avances reçues des clients servent d\'abord à payer les boutiques. « Avance en excédent » veut dire que les avances couvrent déjà plus que l\'achat : rien à ajouter.',
+        'surplus' => 'Avance en excédent : :amount',
+        'covered' => 'Couvert',
     ],
 
     'accounts' => [

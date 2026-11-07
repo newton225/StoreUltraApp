@@ -40,6 +40,8 @@ return [
         'leave' => 'Vous avez des modifications non enregistrées. Quitter cette page les perdra. Quitter quand même ?',
     ],
 
+    'week_of' => 'Semaine du :date',
+    'all_weeks' => 'Toutes les semaines',
     'language' => [
         'label' => 'Langue',
         'fr' => 'Français',

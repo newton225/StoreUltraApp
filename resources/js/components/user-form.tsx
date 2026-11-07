@@ -98,6 +98,7 @@ export default function UserForm({
                             </FieldLabel>
                             <SelectField
                                 id="profile_id"
+                                searchable
                                 name="profile_id"
                                 required
                                 defaultValue={profileId}

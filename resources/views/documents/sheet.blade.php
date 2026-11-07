@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <title>{{ $number }}</title>
     <style>
-        @page { margin: 26px 30px 40px 30px; }
+        @page { margin: 26px 30px 66px 30px; }
         body { font-family: 'DejaVu Sans', sans-serif; font-size: 10px; color: #111827; }
         table { border-collapse: collapse; }
         .center { text-align: center; }
@@ -45,11 +45,12 @@
         .signatures td { width: 33%; vertical-align: top; text-align: center; height: 70px; }
         .signatures .role { font-weight: bold; text-decoration: underline; font-size: 10.5px; }
         .signatures .name { margin-top: 8px; font-size: 9.5px; }
-        .footer { position: fixed; bottom: -22px; right: 0; text-align: right; font-size: 7.5px; color: #9ca3af; }
     </style>
 </head>
 <body>
     @include('documents.watermark', ['watermark' => $company['name']])
+
+    @include('documents.letterhead')
 
     @if ($projectTitle)
         <p class="project">{{ $projectTitle }}</p>
@@ -280,12 +281,6 @@
         </table>
     @endif
 
-    <div class="footer">
-        @if ($company['address'] || count($company['identifiers']) > 0)
-            {{ implode(' · ', array_filter([$company['address'], ...$company['identifiers']])) }}<br>
-        @endif
-        {{ $company['name'] ?: config('app.name') }} | {{ __("documents.{$kind}.title") }}@if ($subtitle) - {{ $subtitle }}@endif {{ __('documents.sheet.number_short') }} {{ $number }}
-        @if (count($sheet['zones']) > 0)<br>{{ __('documents.sheet.zone_footer') }} : {{ implode(' • ', $sheet['zones']) }}@endif
-    </div>
+    @include('documents.company_footer', ['extra' => __("documents.{$kind}.title").($subtitle ? ' - '.$subtitle : '').' '.__('documents.sheet.number_short').' '.$number.(count($sheet['zones']) > 0 ? ' · '.__('documents.sheet.zone_footer').' : '.implode(' • ', $sheet['zones']) : '')])
 </body>
 </html>

@@ -209,6 +209,7 @@ export default function OrderAdvancePayments({
                                 </Label>
                                 <SelectField
                                     id="collect-zone"
+                                    searchable
                                     name="zone_id"
                                     required
                                     onChange={(value) => {
@@ -301,6 +302,7 @@ export default function OrderAdvancePayments({
                                 </FieldLabel>
                                 <SelectField
                                     id="collect-collector"
+                                    searchable
                                     name="collected_by"
                                     defaultValue={me}
                                     onChange={setDefaultCollector}
@@ -458,6 +460,7 @@ export default function OrderAdvancePayments({
                                                 >
                                                     <SelectField
                                                         id={`${id}-collector`}
+                                                        searchable
                                                         name={`collector-${order.id}`}
                                                         key={row.collector}
                                                         defaultValue={

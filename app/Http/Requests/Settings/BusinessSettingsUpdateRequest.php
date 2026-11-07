@@ -16,7 +16,7 @@ class BusinessSettingsUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        return collect(app(BusinessSettings::class)->definitions())
+        return collect(app(BusinessSettings::class)->parameters())
             ->map(fn (array $definition): array => $this->rulesFor($definition))
             ->all();
     }

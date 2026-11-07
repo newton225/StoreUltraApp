@@ -70,6 +70,7 @@ class PurchaseController extends Controller
         return Inertia::render('purchases/index', [
             'purchaseOrders' => $purchaseOrders,
             'week' => $week->toDateString(),
+            'weeks' => $calendar->known($request->user(), $week),
             'filters' => ['shop' => $shopId, 'status' => $status?->value],
             'statuses' => array_column(PurchaseOrderStatus::cases(), 'value'),
             'shops' => Shop::query()->orderBy('name')->get(['id', 'name']),

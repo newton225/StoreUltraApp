@@ -156,6 +156,7 @@ export default function ProfitsIndex({
                         </Label>
                         <SelectField
                             id="zone"
+                            searchable
                             name="zone"
                             defaultValue={String(filters.zone ?? '')}
                             onChange={(value) => apply({ zone: value })}

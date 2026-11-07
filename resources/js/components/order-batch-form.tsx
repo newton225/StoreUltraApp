@@ -169,6 +169,7 @@ export default function OrderBatchForm({
                     </FieldLabel>
                     <SelectField
                         id="batch-zone"
+                        searchable
                         name="zone_id"
                         required
                         defaultValue={zone}
@@ -196,6 +197,7 @@ export default function OrderBatchForm({
                     </FieldLabel>
                     <SelectField
                         id="batch-kit"
+                        searchable
                         name="kit_id"
                         required
                         onChange={setKitId}

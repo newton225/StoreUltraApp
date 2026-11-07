@@ -9,7 +9,7 @@ import ExportMenu from '@/components/export-menu';
 import InputError from '@/components/input-error';
 import SelectField from '@/components/select-field';
 import ConfirmAction from '@/components/confirm-action';
-import { Input } from '@/components/ui/input';
+import WeekSelect from '@/components/week-select';
 import { Label } from '@/components/ui/label';
 import { useFormat } from '@/hooks/use-format';
 import { useTranslation } from '@/hooks/use-translation';
@@ -30,6 +30,7 @@ type Paginated = { data: Purchase[]; total: number };
 type Props = {
     purchaseOrders: Paginated;
     week: string;
+    weeks: string[];
     filters: { shop: number | null; status: string | null };
     statuses: string[];
     shops: { id: number; name: string }[];
@@ -58,6 +59,7 @@ type Props = {
 export default function PurchasesIndex({
     purchaseOrders,
     week,
+    weeks,
     filters,
     statuses,
     shops,
@@ -101,19 +103,17 @@ export default function PurchasesIndex({
                     <ExportMenu view="purchases" query={{ week, ...filters }} />
                 </div>
 
-                <label className="grid w-fit gap-1">
-                    <span className="text-sm font-medium">
+                <div className="grid w-fit min-w-64 gap-1">
+                    <Label htmlFor="purchases-week">
                         {t('purchases.generate.week')}
-                    </span>
-                    <Input
-                        type="date"
-                        defaultValue={week}
-                        onChange={(event) =>
-                            event.target.value &&
-                            apply({ week: event.target.value })
-                        }
+                    </Label>
+                    <WeekSelect
+                        id="purchases-week"
+                        weeks={weeks}
+                        value={week}
+                        onChange={(value) => apply({ week: value })}
                     />
-                </label>
+                </div>
 
                 <section className="space-y-3 rounded-lg border border-border p-4">
                     <h2 className="text-base font-semibold">
@@ -123,9 +123,11 @@ export default function PurchasesIndex({
                         {t('purchases.generate.description')}
                     </p>
                     <p className="text-sm">
-                        {t('purchases.generate.pending', {
-                            count: pendingLines,
-                        })}
+                        {pendingLines > 0
+                            ? t('purchases.generate.pending', {
+                                  count: pendingLines,
+                              })
+                            : t('purchases.generate.nothing_pending')}
                         {unassignedLines > 0 && (
                             <span className="block text-destructive">
                                 {t('purchases.generate.unassigned', {
@@ -169,6 +171,7 @@ export default function PurchasesIndex({
                             </Label>
                             <SelectField
                                 id="filter-shop"
+                                searchable
                                 name="shop"
                                 defaultValue={String(filters.shop ?? '')}
                                 onChange={(value) => apply({ shop: value })}
@@ -235,6 +238,9 @@ export default function PurchasesIndex({
                                         <th className="px-4 py-2 text-right font-medium">
                                             {t('purchases.columns.actual')}
                                         </th>
+                                        <th className="px-4 py-2 font-medium">
+                                            {t('purchases.columns.next')}
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -265,6 +271,11 @@ export default function PurchasesIndex({
                                             </td>
                                             <td className="px-4 py-2 text-right">
                                                 {money(purchase.actual_total)}
+                                            </td>
+                                            <td className="px-4 py-2">
+                                                {t(
+                                                    `purchases.next_step.${purchase.status}`,
+                                                )}
                                             </td>
                                         </tr>
                                     ))}
@@ -319,7 +330,24 @@ export default function PurchasesIndex({
                                                 {money(row.allocated_advance)}
                                             </td>
                                             <td className="px-4 py-2 text-right">
-                                                {money(row.to_finance)}
+                                                {row.to_finance > 0 ? (
+                                                    money(row.to_finance)
+                                                ) : (
+                                                    <span className="text-success-text">
+                                                        {row.to_finance < 0
+                                                            ? t(
+                                                                  'purchases.summary.surplus',
+                                                                  {
+                                                                      amount: money(
+                                                                          -row.to_finance,
+                                                                      ),
+                                                                  },
+                                                              )
+                                                            : t(
+                                                                  'purchases.summary.covered',
+                                                              )}
+                                                    </span>
+                                                )}
                                             </td>
                                         </tr>
                                     ))}

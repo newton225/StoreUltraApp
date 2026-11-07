@@ -140,6 +140,7 @@ export default function SupplyPlanForm({
                                 </FieldLabel>
                                 <SelectField
                                     id="plan-kit"
+                                    searchable
                                     name="kit_id"
                                     required
                                     options={[

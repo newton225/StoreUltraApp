@@ -3,14 +3,15 @@
 namespace App\Support;
 
 use App\Enums\DocumentType;
+use App\Enums\OrderStatus;
 use App\Models\Document;
 use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -26,6 +27,9 @@ class OrderDocumentArchive
 {
     /** One zip never holds more files than this: each is read from the disk and the user waits for the download. */
     public const MAX_FILES = 200;
+
+    /** How many delivery weeks the download-by-zone form offers. */
+    public const WEEKS = 26;
 
     /**
      * The valid proforma and invoice of each order, to show a download link on every row of a list.
@@ -94,35 +98,67 @@ class OrderDocumentArchive
     }
 
     /**
-     * The zones that have at least one valid document, so the choice only offers what can be downloaded.
+     * What the download-by-zone form offers: the delivery weeks that have orders (newest first, at most
+     * {@see self::WEEKS}) and, for each zone, how many documents of each kind are ready to download and how many
+     * are still to be generated, week by week. A proforma is due for every live order, an invoice once it is delivered.
      *
-     * @return list<array{id: int, name: string}>
+     * @return array{weeks: list<string>, zones: list<array{id: int, name: string, counts: array<string, array{proforma: array{ready: int, missing: int}, invoice: array{ready: int, missing: int}}>}>}
      */
-    public function zones(User $user): array
+    public function choices(User $user): array
     {
-        $rows = Order::query()
+        $weeks = Order::query()
+            ->visibleTo($user)
+            ->where('status', '!=', OrderStatus::Cancelled->value)
+            ->orderByDesc('delivery_week')
+            ->distinct()
+            ->limit(self::WEEKS)
+            ->pluck('delivery_week')
+            ->map(fn (mixed $week): string => CarbonImmutable::parse($week)->toDateString())
+            ->values()
+            ->all();
+
+        if ($weeks === []) {
+            return ['weeks' => [], 'zones' => []];
+        }
+
+        $orders = Order::query()
             ->visibleTo($user)
             ->join('clients', 'clients.id', '=', 'orders.client_id')
             ->join('zones', 'zones.id', '=', 'clients.zone_id')
-            ->where(fn (Builder $query) => $query
-                ->whereExists(fn ($inner) => $inner->select(DB::raw(1))->from('documents')
-                    ->where('documents.type', DocumentType::Proforma->value)
-                    ->where('documents.subject_type', (new Order)->getMorphClass())
-                    ->whereColumn('documents.subject_id', 'orders.id')
-                    ->whereNull('documents.cancelled_at'))
-                ->orWhereExists(fn ($inner) => $inner->select(DB::raw(1))->from('documents')
-                    ->join('invoices', 'invoices.id', '=', 'documents.subject_id')
-                    ->where('documents.type', DocumentType::Invoice->value)
-                    ->where('documents.subject_type', (new Invoice)->getMorphClass())
-                    ->whereColumn('invoices.order_id', 'orders.id')
-                    ->whereNull('documents.cancelled_at')))
-            ->groupBy('zones.id', 'zones.name')
-            ->orderBy('zones.name')
-            ->get(['zones.id as zone_id', 'zones.name as zone_name']);
+            ->where('orders.status', '!=', OrderStatus::Cancelled->value)
+            ->whereDate('orders.delivery_week', '>=', $weeks[count($weeks) - 1])
+            ->get(['orders.id', 'orders.status', 'orders.delivery_week', 'zones.id as zone_id', 'zones.name as zone_name']);
 
-        return array_values($rows
-            ->map(fn ($row): array => ['id' => (int) $row->getAttribute('zone_id'), 'name' => (string) $row->getAttribute('zone_name')])
-            ->all());
+        $documents = $this->idsByOrder($orders->pluck('id')->map(fn (mixed $id): int => (int) $id)->all());
+        $zones = [];
+
+        foreach ($orders as $order) {
+            $zoneId = (int) $order->getAttribute('zone_id');
+            $week = CarbonImmutable::parse($order->getAttribute('delivery_week'))->toDateString();
+            $zones[$zoneId]['name'] = (string) $order->getAttribute('zone_name');
+            $zones[$zoneId]['counts'][$week] ??= ['proforma' => ['ready' => 0, 'missing' => 0], 'invoice' => ['ready' => 0, 'missing' => 0]];
+
+            $id = (int) $order->getKey();
+            $kinds = ['proforma' => true, 'invoice' => in_array($order->status, [OrderStatus::Delivered, OrderStatus::Settled, OrderStatus::Closed], true)];
+
+            foreach ($kinds as $kind => $due) {
+                if (isset($documents[$kind][$id])) {
+                    $zones[$zoneId]['counts'][$week][$kind]['ready']++;
+                } elseif ($due) {
+                    $zones[$zoneId]['counts'][$week][$kind]['missing']++;
+                }
+            }
+        }
+
+        $list = [];
+
+        foreach ($zones as $zoneId => $zone) {
+            $list[] = ['id' => $zoneId, 'name' => $zone['name'], 'counts' => $zone['counts']];
+        }
+
+        usort($list, fn (array $a, array $b): int => strcmp($a['name'], $b['name']));
+
+        return ['weeks' => array_values($weeks), 'zones' => $list];
     }
 
     /**

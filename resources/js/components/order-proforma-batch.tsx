@@ -42,6 +42,7 @@ export default function OrderProformaBatch({
                             </Label>
                             <SelectField
                                 id="proforma-zone"
+                                searchable
                                 name="zone_id"
                                 required
                                 onChange={setZone}

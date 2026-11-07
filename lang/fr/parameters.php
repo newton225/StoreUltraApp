@@ -15,9 +15,6 @@ return [
         'numbering' => 'Numérotation des documents',
         'advanced' => 'Réglages avancés',
         'advanced_help' => 'Ces valeurs changent rarement : elles sont déjà réglées pour un usage courant.',
-        'company' => 'Mon entreprise',
-        'company_help' => 'Votre entreprise : ces informations s\'impriment en haut de vos proformas, factures et bons de livraison. Le registre de commerce et le compte contribuable se saisissent dans les documents administratifs.',
-        'company_link' => 'Ouvrir les documents administratifs',
     ],
 
     'fields' => [
@@ -39,11 +36,6 @@ return [
         'expense_allocation_help' => 'Comment un frais de logistique est réparti entre les commandes qu’il concerne : au prorata des kits de chaque commande, ou à parts égales.',
         'attachment_alert_days_help' => 'Nombre de jours avant la date d’expiration d’un document administratif à partir duquel une alerte est affichée.',
         'blocked_order_days_help' => 'Si une commande n\'est toujours pas livrée ce nombre de jours après la semaine prévue, elle apparaît dans les alertes pour que vous la relanciez. Exemple : avec 7, une commande prévue la semaine du 5 et non livrée le 12 est signalée.',
-        'company_name_help' => 'Nom de l’entreprise, imprimé en en-tête de tous les documents (proforma, facture, bon de livraison…).',
-        'company_address_help' => 'Adresse imprimée en en-tête des documents.',
-        'company_phone_help' => 'Téléphone imprimé en en-tête des documents.',
-        'document_project_title_help' => 'Titre du projet, imprimé en haut de la facture et de la proforma, avec la liste des sous-préfectures. Laissez vide pour ne rien imprimer.',
-        'document_subtitle_help' => 'Catégorie des articles, imprimée en grandes lettres dans le bandeau de la facture et de la proforma (par exemple : Matériaux de construction). Laissez vide pour ne rien imprimer.',
         'kits_per_client' => 'Kits par client et par cycle',
         'advance_amount' => 'Avance par cycle (FCFA)',
         'advance_frequency' => 'Rythme de l\'avance',
@@ -68,11 +60,6 @@ return [
         'expense_allocation' => 'Répartition des frais de logistique',
         'attachment_alert_days' => 'Jours avant expiration pour alerter',
         'blocked_order_days' => 'Jours de retard avant alerte',
-        'company_name' => 'Nom de l\'entreprise',
-        'company_address' => 'Adresse',
-        'company_phone' => 'Téléphone',
-        'document_project_title' => 'Titre du projet (factures et proformas)',
-        'document_subtitle' => 'Catégorie des articles (factures et proformas)',
     ],
 
     'allocations' => [

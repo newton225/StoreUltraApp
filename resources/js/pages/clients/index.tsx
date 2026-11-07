@@ -144,6 +144,7 @@ export default function ClientsIndex({
                     </div>
                     <SelectField
                         id="filter-zone"
+                        searchable
                         name="zone"
                         defaultValue={String(filters.zone ?? '')}
                         onChange={(value) => apply({ zone: value })}

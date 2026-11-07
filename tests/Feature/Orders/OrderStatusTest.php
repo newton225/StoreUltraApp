@@ -192,3 +192,13 @@ test('an order cannot be marked delivered while kits remain, nor settled while m
 
     expect($order->refresh()->status->value)->toBe('delivered');
 });
+
+test('the documents of an order are listed in the order of the process', function () {
+    $order = Order::factory()->create(['status' => 'delivered', 'total_sale' => 100000]);
+    Payment::factory()->for($order)->create(['kind' => 'balance', 'amount' => 60000, 'paid_on' => today()]);
+    Delivery::factory()->for($order)->create(['kits_delivered' => $order->kits_count, 'delivered_on' => today()]);
+    Payment::factory()->for($order)->create(['kind' => 'advance', 'amount' => 40000, 'paid_on' => today()->subDays(3)]);
+
+    $this->actingAs(User::factory()->owner()->create())->get(route('orders.show', $order))->assertInertia(fn ($page) => $page
+        ->where('documents.targets', fn ($targets) => collect($targets)->pluck('type')->all() === ['proforma', 'receipt', 'delivery_note', 'invoice', 'receipt']));
+});

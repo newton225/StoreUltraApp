@@ -29,6 +29,14 @@ return [
         'cancelled' => 'The purchase order is cancelled.',
     ],
 
+    'next_step' => [
+        'draft' => 'Send to the shop',
+        'sent' => 'Record the reception',
+        'partially_received' => 'Record the rest of the reception',
+        'received' => 'Done',
+        'cancelled' => 'None',
+    ],
+
     'statuses' => [
         'draft' => 'Draft',
         'sent' => 'Sent',
@@ -47,6 +55,7 @@ return [
         'confirm_title' => 'Prepare this week\'s purchase orders?',
         'confirm_body' => 'A purchase order is created for each shop from the orders whose advance is paid. Check the chosen week before continuing.',
         'pending' => ':count line(s) waiting to be bought',
+        'nothing_pending' => 'Everything is already in purchase orders: see the list below.',
         'unassigned' => ':count line(s) cannot be bought: the product has no shop',
     ],
 
@@ -65,6 +74,7 @@ return [
         'status' => 'Status',
         'expected' => 'Expected',
         'actual' => 'Received value',
+        'next' => 'Next step',
     ],
 
     'summary' => [
@@ -73,8 +83,10 @@ return [
         'advances' => 'Advances received',
         'purchase' => 'Purchase',
         'allocated' => 'Advance allocated',
-        'to_finance' => 'To finance',
-        'to_finance_help' => 'A negative amount means the advances more than cover the purchase.',
+        'to_finance' => 'Still to pay to the shops',
+        'to_finance_help' => 'Advances received from clients are used first to pay the shops. "Advance surplus" means the advances already cover more than the purchase: nothing to add.',
+        'surplus' => 'Advance surplus: :amount',
+        'covered' => 'Covered',
     ],
 
     'accounts' => [

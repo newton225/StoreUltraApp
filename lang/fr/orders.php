@@ -128,6 +128,8 @@ return [
         'zone' => 'Sous-préfecture',
         'choose' => 'Choisir une sous-préfecture',
         'week' => 'Semaine de livraison',
+        'zone_ready' => ':name (:ready)',
+        'zone_missing' => ':name (:ready) · :missing à générer',
         'download' => 'Télécharger le zip',
         'none' => 'Aucun document valide à télécharger pour ce choix.',
         'too_many' => 'Trop de documents pour un seul zip (200 au plus). Choisissez moins de commandes.',

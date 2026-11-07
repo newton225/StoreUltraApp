@@ -256,6 +256,17 @@ export default function ExpensesIndex({
                                         >
                                             {t('expenses.cancel_confirm')}
                                         </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => {
+                                                setCancelling(null);
+                                                setReason('');
+                                                setErrors({});
+                                            }}
+                                        >
+                                            {t('expenses.keep')}
+                                        </Button>
                                         <InputError message={errors.reason} />
                                     </div>
                                 )}

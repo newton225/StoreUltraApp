@@ -166,6 +166,7 @@ export default function OrderDeliveries({
                                                 </Label>
                                                 <SelectField
                                                     id="agent_id"
+                                                    searchable
                                                     name="agent_id"
                                                     defaultValue=""
                                                     options={[

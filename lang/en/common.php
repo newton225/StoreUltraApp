@@ -40,6 +40,8 @@ return [
         'leave' => 'You have unsaved changes. Leaving this page will lose them. Leave anyway?',
     ],
 
+    'week_of' => 'Week of :date',
+    'all_weeks' => 'All weeks',
     'language' => [
         'label' => 'Language',
         'fr' => 'Français',

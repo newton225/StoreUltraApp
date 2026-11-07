@@ -529,6 +529,7 @@ export default function AttachmentsIndex({
                                                     </FieldLabel>
                                                     <SelectField
                                                         id="owner_id"
+                                                        searchable
                                                         name="owner_id"
                                                         prompt
                                                         defaultValue={String(

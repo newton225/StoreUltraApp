@@ -336,3 +336,28 @@ test('with no client cap there is no client alert, however many clients there ar
     $this->actingAs($this->owner)->get(route('dashboard'))
         ->assertInertia(fn (Assert $page) => $page->where('report.alerts.client_cap', null));
 });
+
+test('the synthesis by shop gives the theoretical and real profit only to who may see the profit', function () {
+    dashboardOrder('settled', paid: 16500);
+    $employee = User::factory()->create();
+
+    $this->actingAs($this->owner)->get(route('dashboard', ['from' => '2026-07-01', 'to' => '2026-07-31']))
+        ->assertInertia(function (Assert $page) {
+            $shops = $page->toArray()['props']['report']['shops'];
+
+            expect($shops['with_profit'])->toBeTrue();
+
+            foreach ($shops['summary'] as $row) {
+                expect($row['theoretical_margin'])->toBe($row['sale'] - $row['purchase']);
+                expect($row)->toHaveKey('real_margin');
+            }
+        });
+
+    $this->actingAs($employee)->get(route('dashboard', ['from' => '2026-07-01', 'to' => '2026-07-31']))
+        ->assertInertia(function (Assert $page) {
+            $shops = $page->toArray()['props']['report']['shops'];
+
+            expect($shops['with_profit'])->toBeFalse();
+            expect($shops['summary'][0])->not->toHaveKey('theoretical_margin')->not->toHaveKey('real_margin');
+        });
+});

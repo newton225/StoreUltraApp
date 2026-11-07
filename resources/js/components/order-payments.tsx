@@ -279,6 +279,7 @@ export default function OrderPayments({ orderId, payments, today }: Props) {
                                             </FieldLabel>
                                             <SelectField
                                                 id="pay-collector"
+                                                searchable
                                                 name="collected_by"
                                                 defaultValue={String(
                                                     payments.current_user_id,

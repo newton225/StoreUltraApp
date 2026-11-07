@@ -15,9 +15,6 @@ return [
         'numbering' => 'Document numbering',
         'advanced' => 'Advanced settings',
         'advanced_help' => 'These values rarely change: they are already set for everyday use.',
-        'company' => 'My company',
-        'company_help' => 'Your company: this is printed at the top of your proformas, invoices and delivery notes. The trade register and taxpayer account are entered in the administrative documents.',
-        'company_link' => 'Open the administrative documents',
     ],
 
     'fields' => [
@@ -39,11 +36,6 @@ return [
         'expense_allocation_help' => 'How a logistics cost is shared between the orders it concerns: in proportion to the kits of each order, or equally.',
         'attachment_alert_days_help' => 'Number of days before the expiry date of an administrative document from which an alert is shown.',
         'blocked_order_days_help' => 'If an order is still not delivered this many days after its planned week, it shows up in the alerts so you can follow it up. Example: with 7, an order planned for the week of the 5th and not delivered by the 12th is flagged.',
-        'company_name_help' => 'Name of the company, printed at the top of every document (proforma, invoice, delivery note…).',
-        'company_address_help' => 'Address printed at the top of the documents.',
-        'company_phone_help' => 'Phone number printed at the top of the documents.',
-        'document_project_title_help' => 'Title of the project, printed at the top of the invoice and the proforma with the list of sub-prefectures. Leave empty to print nothing.',
-        'document_subtitle_help' => 'Category of the goods, printed in large letters in the banner of the invoice and the proforma (for example: Building materials). Leave empty to print nothing.',
         'kits_per_client' => 'Kits per client and per cycle',
         'advance_amount' => 'Advance per cycle (FCFA)',
         'advance_frequency' => 'Advance frequency',
@@ -68,11 +60,6 @@ return [
         'expense_allocation' => 'Sharing of logistics costs',
         'attachment_alert_days' => 'Days before an expiry to raise an alert',
         'blocked_order_days' => 'Days late before an alert',
-        'company_name' => 'Company name',
-        'company_address' => 'Address',
-        'company_phone' => 'Phone',
-        'document_project_title' => 'Project title (invoices and proformas)',
-        'document_subtitle' => 'Category of the goods (invoices and proformas)',
     ],
 
     'allocations' => [

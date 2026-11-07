@@ -177,6 +177,7 @@ export default function CreateExpense({
                                         </Label>
                                         <SelectField
                                             id="order_id"
+                                            searchable
                                             name="order_id"
                                             options={[
                                                 choose(
@@ -199,6 +200,7 @@ export default function CreateExpense({
                                         </Label>
                                         <SelectField
                                             id="delivery_id"
+                                            searchable
                                             name="delivery_id"
                                             options={[
                                                 choose(
@@ -227,6 +229,7 @@ export default function CreateExpense({
                                         </Label>
                                         <SelectField
                                             id="zone_id"
+                                            searchable
                                             name="zone_id"
                                             options={[
                                                 choose(
@@ -249,6 +252,7 @@ export default function CreateExpense({
                                         </Label>
                                         <SelectField
                                             id="shop_id"
+                                            searchable
                                             name="shop_id"
                                             options={[
                                                 choose(

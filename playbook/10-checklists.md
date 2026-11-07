@@ -18,6 +18,12 @@ cochée est un point **supposé faux**.
 
 ## 2. Nouvelle route ou nouveau point d'entrée
 
+- [ ] **Documents émis uniformes** : en-tête et pied de page partagés, alimentés par la page de l'entreprise (nom, logo, contacts, mention) (UI-133).
+- [ ] **Listes de choix qui grandissent** (zones, kits, clients, boutiques, produits, utilisateurs) : cherchables explicitement, filtre sans accents, clavier (UI-134, UI-121).
+- [ ] **Image téléversée** : aperçu avant enregistrement et fenêtre de recadrage, au doigt et à la souris (UI-135).
+- [ ] **Semaine** choisie dans une liste de semaines ayant des données, composant commun, « Toutes les semaines » pour un filtre (UI-132).
+- [ ] **Sortie visible** de tout formulaire ou panneau déplié dans une page : « Garder … » qui referme et efface le champ et les erreurs (UI-131).
+- [ ] **Boutons** : l'action et son objet dans les mots de l'utilisateur, jamais un verbe de jargon seul ; geste définitif répété en contour (UI-130).
 - [ ] **Étape dépendant de faits enregistrés** (livrée, soldée) : refusée côté serveur sans eux, bouton grisé avec la situation réelle et le geste qui manque (UI-129).
 - [ ] **Texte libre (observations, commentaires, notes, motifs) en zone de texte de plusieurs lignes** (UI-128).
 - [ ] **Annulation d’un enregistrement sur lequel de l’argent est encaissé, et étapes critiques d’un cycle de vie (livré, soldé, clôturé)** : mot de passe de la personne connectée, vérifié côté serveur, refus journalisé (SEC-15).

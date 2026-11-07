@@ -6,7 +6,6 @@ use App\Enums\DocumentType;
 use App\Enums\OrderStatus;
 use App\Enums\PurchaseOrderStatus;
 use App\Exceptions\InvalidDocument;
-use App\Models\Attachment;
 use App\Models\AuditLog;
 use App\Models\Delivery;
 use App\Models\Document;
@@ -18,6 +17,7 @@ use App\Models\User;
 use App\Support\AmountInWords;
 use App\Support\BusinessSettings;
 use App\Support\CommercialSheet;
+use App\Support\CompanyProfile;
 use App\Support\DocumentNumbers;
 use App\Support\MoneyFormatter;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -31,7 +31,7 @@ use Illuminate\Support\Facades\Storage;
 
 class DocumentIssuer
 {
-    public function __construct(private DocumentNumbers $numbers, private BusinessSettings $settings) {}
+    public function __construct(private DocumentNumbers $numbers, private BusinessSettings $settings, private CompanyProfile $company) {}
 
     /**
      * Issue a document: number it, write it as a PDF in the chosen language, archive it and attach it
@@ -240,31 +240,6 @@ class DocumentIssuer
     }
 
     /**
-     * The numbers of the company documents meant to be printed (trade register, tax account...), as "label : number".
-     *
-     * @return list<string>
-     */
-    private function companyIdentifiers(string $locale): array
-    {
-        $lines = [];
-
-        $attachments = Attachment::query()
-            ->with('type')
-            ->whereHas('type', fn ($query) => $query->where('applies_to', 'company')->where('on_documents', true)->where('active', true))
-            ->orderBy('attachment_type_id')
-            ->orderByDesc('id')
-            ->get()
-            ->unique('attachment_type_id');
-
-        foreach ($attachments as $attachment) {
-            $label = $locale === 'en' ? $attachment->type->label_en : $attachment->type->label_fr;
-            $lines[] = $label.' : '.$attachment->number;
-        }
-
-        return $lines;
-    }
-
-    /**
      * @return array<string, mixed>
      */
     private function base(string $locale, string $number): array
@@ -273,12 +248,7 @@ class DocumentIssuer
             'locale' => $locale,
             'number' => $number,
             'issuedOn' => now()->format('d/m/Y'),
-            'company' => [
-                'name' => $this->settings->get('company_name'),
-                'address' => $this->settings->get('company_address'),
-                'phone' => $this->settings->get('company_phone'),
-                'identifiers' => $this->companyIdentifiers($locale),
-            ],
+            'company' => $this->company->forDocuments($locale),
             'money' => fn (int $amount): string => MoneyFormatter::format($amount, $locale),
             'plain' => fn (int $amount): string => $locale === 'en' ? number_format($amount, 0, '.', ',') : number_format($amount, 0, ',', ' '),
             'inWords' => fn (int $amount): string => AmountInWords::format($amount, $locale),

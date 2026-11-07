@@ -128,6 +128,8 @@ return [
         'zone' => 'Sub-prefecture',
         'choose' => 'Choose a sub-prefecture',
         'week' => 'Delivery week',
+        'zone_ready' => ':name (:ready)',
+        'zone_missing' => ':name (:ready) · :missing to generate',
         'download' => 'Download the zip',
         'none' => 'No valid document to download for this choice.',
         'too_many' => 'Too many documents for one zip (200 at most). Choose fewer orders.',

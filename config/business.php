@@ -51,11 +51,22 @@ return [
         'attachment_alert_days' => ['type' => 'integer', 'default' => 30, 'min' => 1],
         'blocked_order_days' => ['type' => 'integer', 'default' => 7, 'min' => 1],
         'fne_mode' => ['type' => 'string', 'default' => 'not_required', 'options' => ['not_required', 'required']],
-        'company_name' => ['type' => 'string', 'default' => null],
-        'company_address' => ['type' => 'string', 'default' => null],
-        'company_phone' => ['type' => 'string', 'default' => null],
-        'document_project_title' => ['type' => 'string', 'default' => null],
-        'document_subtitle' => ['type' => 'string', 'default' => null],
+        // The company page (group "company"): who the company is, printed on every document.
+        'company_name' => ['type' => 'string', 'default' => null, 'group' => 'company'],
+        'company_legal_form' => ['type' => 'string', 'default' => null, 'group' => 'company'],
+        'company_capital' => ['type' => 'string', 'default' => null, 'group' => 'company'],
+        'company_tax_office' => ['type' => 'string', 'default' => null, 'group' => 'company'],
+        'company_address' => ['type' => 'string', 'default' => null, 'group' => 'company'],
+        'company_phone' => ['type' => 'string', 'default' => null, 'group' => 'company'],
+        'company_email' => ['type' => 'string', 'default' => null, 'group' => 'company'],
+        'company_website' => ['type' => 'string', 'default' => null, 'group' => 'company'],
+        'company_signatory' => ['type' => 'string', 'default' => null, 'group' => 'company'],
+        'company_signatory_title' => ['type' => 'string', 'default' => null, 'group' => 'company'],
+        'company_footer_note' => ['type' => 'string', 'default' => null, 'group' => 'company'],
+        'document_project_title' => ['type' => 'string', 'default' => null, 'group' => 'company'],
+        'document_subtitle' => ['type' => 'string', 'default' => null, 'group' => 'company'],
+        // The stored path of the logo: set by the upload on the company page, never by the form.
+        'company_logo' => ['type' => 'string', 'default' => null, 'group' => 'company', 'form' => false],
     ],
 
 ];

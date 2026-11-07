@@ -12,13 +12,17 @@ import GuidedTour, { type TourStep } from '@/components/guided-tour';
 import Heading from '@/components/heading';
 import ExportMenu from '@/components/export-menu';
 import OrderAdvancePayments from '@/components/order-advance-payments';
-import OrderDocumentsZip from '@/components/order-documents-zip';
+import OrderDocumentsZip, {
+    type ArchiveChoices,
+} from '@/components/order-documents-zip';
 import OrderProformaBatch from '@/components/order-proforma-batch';
 import Pagination from '@/components/pagination';
 import SelectField from '@/components/select-field';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import WeekSelect from '@/components/week-select';
 import SortHeader, { sortQuery } from '@/components/sort-header';
 import { useFormat } from '@/hooks/use-format';
 import { useTranslation } from '@/hooks/use-translation';
@@ -59,7 +63,8 @@ type Props = {
     statuses: string[];
     canCreate: boolean;
     proformaZones: { id: number; name: string; count: number }[];
-    archiveZones: { id: number; name: string }[];
+    archiveChoices: ArchiveChoices;
+    weeks: string[];
     collectZones: {
         id: number;
         name: string;
@@ -109,7 +114,8 @@ export default function OrdersIndex({
     statuses,
     canCreate,
     proformaZones,
-    archiveZones,
+    archiveChoices,
+    weeks,
     collectZones,
     paymentMethods,
     collectors,
@@ -200,7 +206,7 @@ export default function OrdersIndex({
                     )}
                     <div className="has-[[aria-expanded=true]]:lg:col-span-full">
                         <OrderDocumentsZip
-                            zones={archiveZones}
+                            choices={archiveChoices}
                             week={filters.week}
                         />
                     </div>
@@ -226,20 +232,24 @@ export default function OrdersIndex({
                             {t('orders.filters.apply')}
                         </Button>
                     </div>
-                    <label className="grid gap-1">
-                        <span className="text-xs text-muted-foreground">
+                    <div className="grid gap-1">
+                        <Label
+                            htmlFor="filter-week"
+                            className="text-xs text-muted-foreground"
+                        >
                             {t('orders.filters.week')}
-                        </span>
-                        <Input
-                            type="date"
+                        </Label>
+                        <WeekSelect
+                            id="filter-week"
+                            weeks={weeks}
                             value={week}
-                            onChange={(event) => {
-                                setWeek(event.target.value);
-                                apply({ week: event.target.value });
+                            allowAll
+                            onChange={(value) => {
+                                setWeek(value);
+                                apply({ week: value });
                             }}
-                            aria-label={t('orders.filters.week')}
                         />
-                    </label>
+                    </div>
                     <SelectField
                         id="filter-status"
                         name="status"

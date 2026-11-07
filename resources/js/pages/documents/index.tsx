@@ -351,6 +351,19 @@ export default function DocumentsIndex({
                                                         'documents.ui.cancel_only',
                                                     )}
                                                 </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={() => {
+                                                        setCancelling(null);
+                                                        setReason('');
+                                                        setErrors({});
+                                                    }}
+                                                >
+                                                    {t(
+                                                        'documents.ui.cancel_keep',
+                                                    )}
+                                                </Button>
                                             </div>
                                         </div>
                                     )}

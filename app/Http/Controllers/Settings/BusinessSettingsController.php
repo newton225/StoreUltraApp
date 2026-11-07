@@ -17,8 +17,8 @@ class BusinessSettingsController extends Controller
     public function edit(BusinessSettings $settings): Response
     {
         return Inertia::render('parameters/edit', [
-            'values' => $settings->all(),
-            'definitions' => collect($settings->definitions())
+            'values' => array_intersect_key($settings->all(), $settings->parameters()),
+            'definitions' => collect($settings->parameters())
                 ->map(fn (array $definition): array => [
                     'type' => $definition['type'],
                     'options' => $definition['options'] ?? null,

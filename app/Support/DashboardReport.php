@@ -48,7 +48,7 @@ class DashboardReport
 
         return [
             'indicators' => $this->indicators($user, $filters, $orders, $live),
-            'shops' => $canManage ? $this->shops($live, $filters['shop']) : null,
+            'shops' => $canManage ? $this->shops($live, $filters['shop'], $canViewProfit) : null,
             'profit' => $canViewProfit ? $this->profitOf($live) : null,
             'weekly' => $this->weekly($live, $canViewProfit),
             'alerts' => $this->alerts($user, $filters),
@@ -200,14 +200,15 @@ class DashboardReport
      * @param  EloquentCollection<int, Order>  $live
      * @return array<string, mixed>
      */
-    private function shops(EloquentCollection $live, ?int $shopId): array
+    private function shops(EloquentCollection $live, ?int $shopId, bool $withProfit): array
     {
         $ids = $live->pluck('id')->all();
         $paid = $this->paidByOrder($ids);
 
         $items = OrderItem::query()
             ->whereIn('order_id', $ids)
-            ->get(['order_id', 'shop_id', 'quantity', 'unit_purchase_price', 'line_sale_total'])
+            ->with('purchaseOrder.items')
+            ->get(['order_id', 'shop_id', 'product_id', 'purchase_order_id', 'quantity', 'unit_purchase_price', 'line_sale_total'])
             ->groupBy('order_id');
 
         $rows = [];
@@ -219,6 +220,7 @@ class DashboardReport
                 $key = $line->shop_id ?? 0;
                 $weights[$key] = ($weights[$key] ?? 0) + $line->quantity * $line->unit_purchase_price;
                 $rows[$key]['sale'] = ($rows[$key]['sale'] ?? 0) + (int) $line->line_sale_total;
+                $rows[$key]['actual'] = ($rows[$key]['actual'] ?? 0) + $this->profit->actualCost($line);
             }
 
             $shares = AdvanceAllocation::split(max(0, $paid[$orderId] ?? 0), $weights);
@@ -250,6 +252,11 @@ class DashboardReport
                 'advance' => $row['advance'],
                 'percent' => $purchaseTotal > 0 ? round($row['purchase'] / $purchaseTotal * 100, 1) : 0.0,
                 'balance' => $row['purchase'] - $row['advance'],
+                // The profit of a shop's lines: sale minus what was planned, then minus what was really paid (before logistics).
+                ...($withProfit ? [
+                    'theoretical_margin' => ($row['sale'] ?? 0) - $row['purchase'],
+                    'real_margin' => ($row['sale'] ?? 0) - ($row['actual'] ?? 0),
+                ] : []),
             ];
         }
 
@@ -266,7 +273,7 @@ class DashboardReport
             $debt += max(0, $account['debt']);
         }
 
-        return ['summary' => $summary, 'debts' => $debt];
+        return ['summary' => $summary, 'debts' => $debt, 'with_profit' => $withProfit];
     }
 
     /**

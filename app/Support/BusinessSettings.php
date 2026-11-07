@@ -63,6 +63,26 @@ class BusinessSettings
     }
 
     /**
+     * The settings that the form of the business parameters handles: those of the company page have their own.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public function parameters(): array
+    {
+        return array_filter($this->definitions(), fn (array $definition): bool => ($definition['group'] ?? null) !== 'company');
+    }
+
+    /**
+     * The settings of the company page that its form sends (the logo has its own upload).
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public function company(): array
+    {
+        return array_filter($this->definitions(), fn (array $definition): bool => ($definition['group'] ?? null) === 'company' && ($definition['form'] ?? true));
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function definition(string $key): array

@@ -83,6 +83,9 @@ return [
         'advance' => 'Advance allocated',
         'percent' => 'Share',
         'balance' => 'Balance after advance',
+        'theoretical_margin' => 'Theoretical profit',
+        'real_margin' => 'Real profit',
+        'margin_help' => 'Theoretical profit: sale price minus the planned purchase price. Real profit: sale price minus what was really paid to the shop (the real price when known, else the planned one), before logistics costs. The Profit page gives the detail with the money collected and logistics.',
         'total' => 'Total',
     ],
 

@@ -60,6 +60,10 @@
                 <th class="num">{{ __('dashboard.shops.advance') }}</th>
                 <th class="num">{{ __('dashboard.shops.percent') }}</th>
                 <th class="num">{{ __('dashboard.shops.balance') }}</th>
+                @if ($report['shops']['with_profit'])
+                    <th class="num">{{ __('dashboard.shops.theoretical_margin') }}</th>
+                    <th class="num">{{ __('dashboard.shops.real_margin') }}</th>
+                @endif
             </tr>
             @foreach ($report['shops']['summary'] as $row)
                 <tr>
@@ -69,6 +73,10 @@
                     <td class="num">{{ $money($row['advance']) }}</td>
                     <td class="num">{{ $row['percent'] }} %</td>
                     <td class="num">{{ $money($row['balance']) }}</td>
+                    @if ($report['shops']['with_profit'])
+                        <td class="num">{{ $money($row['theoretical_margin']) }}</td>
+                        <td class="num">{{ $money($row['real_margin']) }}</td>
+                    @endif
                 </tr>
             @endforeach
         </table>

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>{{ $number }}</title>
     <style>
-        @page { margin: 28px 34px; }
+        @page { margin: 28px 34px 66px 34px; }
         body { font-family: 'DejaVu Sans', sans-serif; font-size: 11px; color: #111827; }
         h1 { font-size: 18px; margin: 0 0 4px 0; text-transform: uppercase; }
         .muted { color: #6b7280; }
@@ -26,16 +26,10 @@
 </head>
 <body>
     @include('documents.watermark', ['watermark' => $company['name']])
+    @include('documents.letterhead')
     <table class="header">
         <tr>
-            <td>
-                <strong>{{ $company['name'] ?: config('app.name') }}</strong><br>
-                @if ($company['address']) {{ $company['address'] }}<br> @endif
-                @if ($company['phone']) {{ $company['phone'] }}<br> @endif
-                @foreach ($company['identifiers'] as $identifier)
-                    <span class="muted">{{ $identifier }}</span><br>
-                @endforeach
-            </td>
+            <td></td>
             <td class="right">
                 <h1>@yield('title')</h1>
                 <strong>{{ $number }}</strong><br>
@@ -46,6 +40,6 @@
 
     @yield('content')
 
-    <div class="footer">{{ $company['name'] ?: config('app.name') }} · {{ $number }}</div>
+    @include('documents.company_footer', ['extra' => $number])
 </body>
 </html>

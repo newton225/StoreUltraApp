@@ -107,6 +107,7 @@ export default function AccessLogIndex({
                 >
                     <SelectField
                         id="access-user"
+                        searchable
                         name="user"
                         defaultValue={filters.user ? String(filters.user) : ''}
                         onChange={(value) => apply({ user: value })}

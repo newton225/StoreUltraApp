@@ -206,7 +206,9 @@ export default function ShowPurchase({ purchase, methods, today }: Props) {
                         <ConfirmAction
                             variant="outline"
                             size="sm"
-                            label={`${t('documents.ui.panel.issue')} : ${t('documents.ui.types.purchase_order')}`}
+                            label={t(
+                                'documents.ui.panel.generate.purchase_order',
+                            )}
                             title={t('documents.ui.panel.confirm_title', {
                                 document: t(
                                     'documents.ui.types.purchase_order',

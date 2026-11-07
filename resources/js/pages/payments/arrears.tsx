@@ -58,6 +58,7 @@ export default function Arrears({
                     <div className="max-w-xs flex-1">
                         <SelectField
                             id="filter-zone"
+                            searchable
                             name="zone"
                             defaultValue={String(filters.zone ?? '')}
                             onChange={(value) =>

@@ -13,6 +13,7 @@ import {
     Landmark,
     Wallet,
     Banknote,
+    Building2,
     Footprints,
     History,
     LayoutGrid,
@@ -62,6 +63,7 @@ import {
 } from '@/components/ui/sidebar';
 import { useTranslation } from '@/hooks/use-translation';
 import { dashboard } from '@/routes';
+import { edit as companyEdit } from '@/routes/company';
 import { edit as parametersEdit } from '@/routes/parameters';
 import type { NavGroup } from '@/types';
 
@@ -233,6 +235,11 @@ export function AppSidebar() {
             tone: 'config',
             items: isOwner
                 ? [
+                      {
+                          title: t('navigation.company'),
+                          href: companyEdit(),
+                          icon: Building2,
+                      },
                       {
                           title: t('navigation.parameters'),
                           href: parametersEdit(),

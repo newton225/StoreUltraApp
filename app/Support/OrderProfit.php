@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\ExpenseAllocation;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Payment;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -85,25 +86,34 @@ class OrderProfit
         $total = 0;
 
         foreach ($order->items as $item) {
-            $unitPrice = $item->unit_purchase_price;
-
-            $purchaseItems = $item->purchase_order_id === null
-                ? []
-                : $item->purchaseOrder->items;
-
-            foreach ($purchaseItems as $purchaseItem) {
-                if ($purchaseItem->product_id === $item->product_id
-                    && $purchaseItem->unit_price_expected === $item->unit_purchase_price
-                    && $purchaseItem->unit_price_actual !== null) {
-                    $unitPrice = $purchaseItem->unit_price_actual;
-
-                    break;
-                }
-            }
-
-            $total += $item->quantity * $unitPrice;
+            $total += $this->actualCost($item);
         }
 
         return $total;
+    }
+
+    /**
+     * What the goods of one line really cost: the price paid to the shop when it is known, else the planned one.
+     * The purchase order of the line (and its items) must be loaded.
+     */
+    public function actualCost(OrderItem $item): int
+    {
+        $unitPrice = $item->unit_purchase_price;
+
+        $purchaseItems = $item->purchase_order_id === null
+            ? []
+            : $item->purchaseOrder->items;
+
+        foreach ($purchaseItems as $purchaseItem) {
+            if ($purchaseItem->product_id === $item->product_id
+                && $purchaseItem->unit_price_expected === $item->unit_purchase_price
+                && $purchaseItem->unit_price_actual !== null) {
+                $unitPrice = $purchaseItem->unit_price_actual;
+
+                break;
+            }
+        }
+
+        return $item->quantity * $unitPrice;
     }
 }

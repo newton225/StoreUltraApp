@@ -36,6 +36,6 @@
     </table>
 
     <table class="signatures">
-        <tr><td>{{ __('documents.purchase_order.signature') }}</td><td></td></tr>
+        <tr><td>{{ __('documents.purchase_order.signature') }}@if ($company['signatory'])<br><strong>{{ $company['signatory'] }}</strong>@if ($company['signatory_title'])<br>{{ $company['signatory_title'] }}@endif @endif</td><td></td></tr>
     </table>
 @endsection

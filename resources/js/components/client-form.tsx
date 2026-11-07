@@ -120,6 +120,7 @@ export default function ClientForm({
                                     <SelectField
                                         key={`${zoneId}-${zoneList.length}`}
                                         id="zone_id"
+                                        searchable
                                         name="zone_id"
                                         required
                                         defaultValue={zoneId}

@@ -45,6 +45,7 @@ return [
     'cancel' => 'Cancel',
     'cancel_reason' => 'Reason',
     'cancel_confirm' => 'Confirm',
+    'keep' => 'Keep the expense',
     'state_cancelled' => 'Cancelled',
     'from_cash' => 'Cash box',
 

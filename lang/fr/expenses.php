@@ -45,6 +45,7 @@ return [
     'cancel' => 'Annuler',
     'cancel_reason' => 'Motif',
     'cancel_confirm' => 'Confirmer',
+    'keep' => 'Garder le frais',
     'state_cancelled' => 'Annulé',
     'from_cash' => 'Caisse',
 

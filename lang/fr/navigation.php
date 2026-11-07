@@ -42,6 +42,7 @@ return [
     'users' => 'Utilisateurs',
     'profiles' => 'Profils',
     'parameters' => 'Paramètres',
+    'company' => 'Mon entreprise',
 
     'breadcrumbs' => [
         'profile' => 'Paramètres du profil',
