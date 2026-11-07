@@ -38,15 +38,6 @@ return [
         'description' => 'En tant que propriétaire, vous voyez les bénéfices, créez les utilisateurs et modifiez les paramètres. Tant que vous n\'avez pas activé la double authentification ci-dessous, le reste de l\'application reste fermé.',
     ],
 
-    'delete' => [
-        'title' => 'Supprimer le compte',
-        'description' => 'Supprimez votre compte et toutes ses données',
-        'warning' => 'Attention',
-        'warning_text' => 'Cette action est irréversible, procédez avec prudence.',
-        'dialog_title' => 'Voulez-vous vraiment supprimer votre compte ?',
-        'dialog_description' => 'Une fois votre compte supprimé, toutes ses données seront définitivement effacées. Saisissez votre mot de passe pour confirmer la suppression définitive de votre compte.',
-    ],
-
     'two_factor' => [
         'title' => 'Double authentification',
         'description' => 'Gérez les paramètres de votre double authentification',

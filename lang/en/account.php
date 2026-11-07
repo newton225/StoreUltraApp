@@ -38,15 +38,6 @@ return [
         'description' => 'As the owner, you see the profit, create the users and change the settings. Until you turn on two-factor authentication below, the rest of the application stays closed.',
     ],
 
-    'delete' => [
-        'title' => 'Delete account',
-        'description' => 'Delete your account and all of its resources',
-        'warning' => 'Warning',
-        'warning_text' => 'Please proceed with caution, this cannot be undone.',
-        'dialog_title' => 'Are you sure you want to delete your account?',
-        'dialog_description' => 'Once your account is deleted, all of its resources and data will also be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.',
-    ],
-
     'two_factor' => [
         'title' => 'Two-factor authentication',
         'description' => 'Manage your two-factor authentication settings',
