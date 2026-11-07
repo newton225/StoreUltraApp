@@ -50,6 +50,12 @@
     --color-warning-text: var(--warning-text);
     --color-info-text: var(--info-text);
     --color-destructive-text: var(--destructive-text);
+    --color-teal: var(--teal);
+    --color-violet: var(--violet);
+    --color-orange: var(--orange);
+    --color-teal-text: var(--teal-text);
+    --color-violet-text: var(--violet-text);
+    --color-orange-text: var(--orange-text);
     --color-nav-dashboard: var(--nav-dashboard);
     --color-nav-sales: var(--nav-sales);
     --color-nav-supply: var(--nav-supply);
@@ -104,6 +110,12 @@
     --warning-text: oklch(0.48 0.12 65);
     --info-text: oklch(0.46 0.19 259);
     --destructive-text: oklch(0.5 0.2 27);
+    --teal: oklch(0.6 0.11 190);
+    --violet: oklch(0.55 0.2 295);
+    --orange: oklch(0.68 0.19 45);
+    --teal-text: oklch(0.45 0.09 190);
+    --violet-text: oklch(0.46 0.2 295);
+    --orange-text: oklch(0.52 0.16 40);
     --border: oklch(0.922 0 0);
     --input: oklch(0.66 0 0);
     --ring: oklch(0.87 0 0);
@@ -158,6 +170,12 @@
     --warning-text: oklch(0.84 0.14 80);
     --info-text: oklch(0.78 0.12 255);
     --destructive-text: oklch(0.75 0.17 25);
+    --teal: oklch(0.6 0.11 190);
+    --violet: oklch(0.55 0.2 295);
+    --orange: oklch(0.68 0.19 45);
+    --teal-text: oklch(0.8 0.11 190);
+    --violet-text: oklch(0.8 0.12 300);
+    --orange-text: oklch(0.82 0.13 55);
     --border: oklch(0.269 0 0);
     --input: oklch(0.5 0 0);
     --ring: oklch(0.439 0 0);

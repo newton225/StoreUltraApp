@@ -156,7 +156,12 @@ return [
         'week' => 'Week of',
         'kits' => 'Kits',
         'total' => 'Total',
+        'advance' => 'Advance received',
         'status' => 'Status',
+    ],
+    'advance_cell' => [
+        'none' => 'Nothing received',
+        'of' => 'of :due',
     ],
 
     'status_help' => [

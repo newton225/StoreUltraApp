@@ -64,8 +64,15 @@ class OrderController extends Controller
             ->withQueryString();
 
         $documents = $archive->idsByOrder($orders->getCollection()->pluck('id')->map(fn (mixed $id): int => (int) $id)->values()->all());
+        $paid = Payment::query()
+            ->whereIn('order_id', $orders->getCollection()->pluck('id'))
+            ->selectRaw("order_id, coalesce(sum(case when kind = 'refund' then -amount else amount end), 0) as total")
+            ->groupBy('order_id')
+            ->pluck('total', 'order_id');
         $orders->through(fn (Order $order): array => [
             ...$this->listed($order),
+            'advance_due' => $order->advance_due,
+            'advance_paid' => min((int) $paid->get($order->id, 0), $order->advance_due),
             'proforma_document' => $documents['proforma'][$order->id] ?? null,
             'invoice_document' => $documents['invoice'][$order->id] ?? null,
         ]);

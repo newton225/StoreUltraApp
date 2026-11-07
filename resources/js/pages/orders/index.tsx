@@ -32,6 +32,8 @@ type ListedOrder = {
     status: string;
     kits_count: number;
     total_sale: number;
+    advance_due: number;
+    advance_paid: number;
     proforma_document: number | null;
     invoice_document: number | null;
 };
@@ -380,6 +382,9 @@ export default function OrdersIndex({
                                     >
                                         {t('orders.columns.total')}
                                     </SortHeader>
+                                    <th className="px-4 py-2 text-right whitespace-nowrap">
+                                        {t('orders.columns.advance')}
+                                    </th>
                                     <SortHeader column="status" state={filters}>
                                         {t('orders.columns.status')}
                                     </SortHeader>
@@ -430,6 +435,40 @@ export default function OrdersIndex({
                                         </td>
                                         <td className="px-4 py-2 text-right whitespace-nowrap">
                                             {money(order.total_sale)}
+                                        </td>
+                                        <td className="px-4 py-2 text-right whitespace-nowrap">
+                                            {order.advance_due === 0 ? (
+                                                <span className="text-muted-foreground">
+                                                    —
+                                                </span>
+                                            ) : order.advance_paid >=
+                                              order.advance_due ? (
+                                                <span className="font-medium text-success-text">
+                                                    {money(order.advance_paid)}
+                                                </span>
+                                            ) : order.advance_paid > 0 ? (
+                                                <span className="text-warning-text">
+                                                    <span className="font-medium">
+                                                        {money(
+                                                            order.advance_paid,
+                                                        )}
+                                                    </span>{' '}
+                                                    {t(
+                                                        'orders.advance_cell.of',
+                                                        {
+                                                            due: money(
+                                                                order.advance_due,
+                                                            ),
+                                                        },
+                                                    )}
+                                                </span>
+                                            ) : (
+                                                <span className="text-muted-foreground">
+                                                    {t(
+                                                        'orders.advance_cell.none',
+                                                    )}
+                                                </span>
+                                            )}
                                         </td>
                                         <td className="px-4 py-2">
                                             <StatusBadge

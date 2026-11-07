@@ -21,6 +21,12 @@ const badgeVariants = cva(
           "border-warning/40 bg-warning/15 text-warning-text",
         info:
           "border-info/30 bg-info/10 text-info-text",
+        teal:
+          "border-teal/30 bg-teal/12 text-teal-text",
+        violet:
+          "border-violet/30 bg-violet/10 text-violet-text",
+        orange:
+          "border-orange/35 bg-orange/12 text-orange-text",
         danger:
           "border-destructive/30 bg-destructive/10 text-destructive-text",
         neutral:

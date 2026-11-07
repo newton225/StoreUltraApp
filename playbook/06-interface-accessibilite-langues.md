@@ -545,7 +545,12 @@ Chaque vue prévoit ses états, tous :
   en pause, partiel, à surveiller), **vert** (fait, en vigueur, actif, payé), **rouge** (annulé, refusé, contre-passé, danger). (1) Un
   **badge d'état** est **teinté** (fond léger, texte et bordure du ton), jamais plein ni gris par défaut ; le ton d'un état vient
   d'**une seule table** du composant d'état (un état a la même couleur dans la liste, la fiche et le tableau de bord), et le
-  libellé est toujours écrit (UI-52). Un badge de **catégorie** sans état (type de document, droit) reste neutre. (2) Un **bouton**
+  libellé est toujours écrit (UI-52). **Dans un cycle de vie à plusieurs étapes, chaque étape a sa propre couleur** (deux étapes
+  voisines ne partagent jamais un ton, sinon on ne les distingue pas dans une liste) : aux cinq tons s'ajoutent **sarcelle, violet et
+  orange**, avec leurs jetons à deux valeurs, et la **suite de couleurs raconte la progression** (attente d'argent en ambre, argent
+  reçu en sarcelle, en cours en bleu, matériel reçu en violet, livré mais à solder en orange, soldé en vert, annulé en rouge). Quand
+  un état dépend d'un montant (avance perçue), **la liste montre le montant** perçu sur le montant dû, en couleur d'avancement (rien :
+  gris, partiel : ambre, soldé : vert), sans ouvrir la fiche. Un badge de **catégorie** sans état (type de document, droit) reste neutre. (2) Un **bouton**
   prend la variante de sa nature (UI-16) : aucun bouton ne garde la variante « principal » neutre par habitude ; une page qui
   n'aurait que des boutons gris et blancs est un défaut à reprendre. (3) Les **tons** servent à un seul sens chacun : pas de rouge
   pour une simple mise en garde, pas de vert pour une information. (4) Vérification : parcourir les écrans en clair et en sombre et

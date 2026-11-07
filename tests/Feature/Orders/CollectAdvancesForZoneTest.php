@@ -235,3 +235,14 @@ test('an amount above what is still due on the advance is refused, even when the
 
     expect($order->refresh()->status->value)->toBe('advance_received')->and($order->netPaid())->toBe(40000);
 });
+
+test('the order list shows how much of the advance was received, never more than it asks', function () {
+    $order = waitingOrder('Fronan', 40000);
+    Payment::factory()->for($order)->create(['kind' => 'advance', 'amount' => 15000]);
+    $none = waitingOrder('Fronan', 30000);
+
+    $this->actingAs($this->owner)->get(route('orders.index'))->assertInertia(fn (Assert $page) => $page
+        ->where('orders.data', fn ($rows) => collect($rows)->firstWhere('id', $order->id)['advance_paid'] === 15000
+            && collect($rows)->firstWhere('id', $order->id)['advance_due'] === 40000
+            && collect($rows)->firstWhere('id', $none->id)['advance_paid'] === 0));
+});

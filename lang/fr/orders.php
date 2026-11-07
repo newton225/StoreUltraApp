@@ -156,7 +156,12 @@ return [
         'week' => 'Semaine du',
         'kits' => 'Kits',
         'total' => 'Total',
+        'advance' => 'Avance perçue',
         'status' => 'Statut',
+    ],
+    'advance_cell' => [
+        'none' => 'Rien perçu',
+        'of' => 'sur :due',
     ],
 
     'status_help' => [

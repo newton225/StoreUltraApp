@@ -13,11 +13,11 @@ type Tone = NonNullable<ComponentProps<typeof Badge>['variant']>;
 const TONES: Record<StatusGroup, Record<string, Tone>> = {
     orders: {
         draft: 'neutral',
-        proforma_issued: 'info',
-        advance_received: 'info',
-        ordered: 'warning',
-        received: 'warning',
-        delivered: 'success',
+        proforma_issued: 'warning',
+        advance_received: 'teal',
+        ordered: 'info',
+        received: 'violet',
+        delivered: 'orange',
         settled: 'success',
         closed: 'neutral',
         cancelled: 'danger',
