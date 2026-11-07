@@ -217,8 +217,13 @@ export default function ProductsIndex({
                                                 </Button>
                                                 <Button
                                                     disabled={busy}
-                                                    variant="ghost"
+                                                    variant="outline"
                                                     size="sm"
+                                                    className={
+                                                        product.archived_at
+                                                            ? 'border-success/40 text-success-text hover:bg-success/10 hover:text-success-text'
+                                                            : 'border-orange/40 text-orange-text hover:bg-orange/10 hover:text-orange-text'
+                                                    }
                                                     onClick={() =>
                                                         router.patch(
                                                             (product.archived_at
