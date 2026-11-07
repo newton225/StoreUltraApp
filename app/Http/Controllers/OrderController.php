@@ -302,6 +302,7 @@ class OrderController extends Controller
     private function documentsFor(Order $order, BusinessSettings $settings): array
     {
         $canManage = request()->user()->can('manage-orders');
+        $canIssue = Gate::allows('orders.issue_documents');
         $invoice = Invoice::query()->where('order_id', $order->id)->whereNull('cancelled_at')->first();
 
         $subjects = [
@@ -335,14 +336,14 @@ class OrderController extends Controller
                 'subject_id' => $order->id,
                 'label' => null,
                 'document' => $find('proforma', Order::class, $order->id),
-                'can_issue' => $canManage && $order->status !== OrderStatus::Cancelled,
+                'can_issue' => $canIssue && $order->status !== OrderStatus::Cancelled,
             ]],
             [40, '', 0, [
                 'type' => 'invoice',
                 'subject_id' => $order->id,
                 'label' => null,
                 'document' => $find('invoice', Invoice::class, $invoice?->id),
-                'can_issue' => $canManage && $invoiceable && $invoice === null,
+                'can_issue' => $canIssue && $invoiceable && $invoice === null,
             ]],
         ];
 
@@ -353,7 +354,7 @@ class OrderController extends Controller
                 'label' => $payment->receipt_number,
                 'detail' => ['kind' => $payment->kind->value, 'amount' => $payment->amount, 'on' => $payment->paid_on->toDateString()],
                 'document' => $find('receipt', Payment::class, $payment->id),
-                'can_issue' => true,
+                'can_issue' => $canIssue,
             ]];
         }
 
@@ -364,7 +365,7 @@ class OrderController extends Controller
                 'label' => $delivery->reference,
                 'detail' => ['kits' => $delivery->kits_delivered, 'on' => $delivery->delivered_on->toDateString()],
                 'document' => $find('delivery_note', Delivery::class, $delivery->id),
-                'can_issue' => true,
+                'can_issue' => $canIssue,
             ]];
         }
 
