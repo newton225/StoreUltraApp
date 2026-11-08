@@ -23,7 +23,9 @@ class InviteUser
     {
         $token = Password::broker(self::BROKER)->createToken($user);
 
-        return route('invitation.show', ['token' => $token, 'email' => $user->email]);
+        // Always the public address of the application (APP_URL), never the address of the request: the owner may be
+        // working on http://localhost:8000 while the person opens the link from elsewhere.
+        return rtrim((string) config('app.url'), '/').route('invitation.show', ['token' => $token, 'email' => $user->email], absolute: false);
     }
 
     /**
@@ -31,6 +33,11 @@ class InviteUser
      */
     public function sendByMail(User $user, User $by): bool
     {
+        // The "log" mailer only writes the message to a file: nothing leaves, so it is not a sent invitation.
+        if (! $this->mailIsReal()) {
+            return false;
+        }
+
         try {
             $user->notify(new AccountInvitation($this->link($user), $this->validHours()));
         } catch (Throwable $exception) {
@@ -56,6 +63,14 @@ class InviteUser
         AuditLog::record('user.invitation_link_shown', $user, [], ['channel' => 'link'], $by);
 
         return $url;
+    }
+
+    /**
+     * False when the application is set to write e-mails to a file instead of sending them (MAIL_MAILER=log).
+     */
+    public function mailIsReal(): bool
+    {
+        return config('mail.default') !== 'log';
     }
 
     public function validHours(): int

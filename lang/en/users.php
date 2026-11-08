@@ -12,6 +12,7 @@ return [
     'updated' => 'User updated.',
     'created_invited' => 'User created. An invitation e-mail was sent to :email.',
     'created_not_sent' => 'User created, but the e-mail could not be sent. Show the link below to hand it over.',
+    'mail_test_mode' => 'No e-mail is really sent: mail is in test mode (MAIL_MAILER=log). Set up the mail in the .env file, or show the link to hand it over.',
     'invitation_sent' => 'E-mail sent to :email.',
     'invitation_not_sent' => 'The e-mail could not be sent. Show the link to hand it over yourself.',
 

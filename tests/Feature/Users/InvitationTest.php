@@ -222,3 +222,26 @@ test('the date of the last invitation e-mail is kept and shown to the owner, and
         ->assertInertia(fn (Assert $page) => $page->where('editedUser.invitation_sent_at', fn ($date) => $date !== null));
     expect($user->refresh()->invitation_sent_at)->not->toBeNull();
 });
+
+test('the link always carries the public address of the application, not the one the owner works on', function () {
+    config(['app.url' => 'https://app.example.test']);
+    Notification::fake();
+    $user = pendingUser();
+
+    $this->actingAs($this->owner)->withServerVariables(['HTTP_HOST' => 'localhost:8000'])
+        ->post(route('users.invitation', $user))->assertRedirect();
+
+    Notification::assertSentTo($user, AccountInvitation::class, fn (AccountInvitation $mail) => str_starts_with($mail->url, 'https://app.example.test/invitation/'));
+});
+
+test('with the log mailer nothing is sent, so the invitation is not said to be sent and no date is kept', function () {
+    config(['mail.default' => 'log']);
+    Notification::fake();
+    $user = pendingUser();
+
+    $this->actingAs($this->owner)->post(route('users.invitation', $user))->assertRedirect();
+
+    Notification::assertNothingSent();
+    expect($user->refresh()->invitation_sent_at)->toBeNull();
+    expect(AuditLog::where('action', 'user.invited')->count())->toBe(0);
+});

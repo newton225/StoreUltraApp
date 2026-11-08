@@ -12,6 +12,7 @@ return [
     'updated' => 'Utilisateur mis à jour.',
     'created_invited' => 'Utilisateur créé. Un e-mail d\'invitation a été envoyé à :email.',
     'created_not_sent' => 'Utilisateur créé, mais l\'e-mail n\'a pas pu partir. Affichez le lien ci-dessous pour le lui transmettre.',
+    'mail_test_mode' => 'Aucun e-mail n\'est réellement envoyé : le courrier est en mode test (MAIL_MAILER=log). Réglez la messagerie dans le fichier .env, ou affichez le lien pour le transmettre.',
     'invitation_sent' => 'E-mail envoyé à :email.',
     'invitation_not_sent' => 'L\'e-mail n\'a pas pu partir. Affichez le lien pour le transmettre vous-même.',
 

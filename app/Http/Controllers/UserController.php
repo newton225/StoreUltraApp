@@ -91,7 +91,7 @@ class UserController extends Controller
 
         Inertia::flash('toast', $sent
             ? ['type' => 'success', 'message' => __('users.created_invited', ['email' => $user->email])]
-            : ['type' => 'warning', 'message' => __('users.created_not_sent')]);
+            : ['type' => 'warning', 'message' => __($invitations->mailIsReal() ? 'users.created_not_sent' : 'users.mail_test_mode')]);
 
         return $sent ? to_route('users.index') : to_route('users.edit', $user);
     }
@@ -108,7 +108,7 @@ class UserController extends Controller
 
         Inertia::flash('toast', $sent
             ? ['type' => 'success', 'message' => __('users.invitation_sent', ['email' => $user->email])]
-            : ['type' => 'error', 'message' => __('users.invitation_not_sent')]);
+            : ['type' => 'error', 'message' => __($invitations->mailIsReal() ? 'users.invitation_not_sent' : 'users.mail_test_mode')]);
 
         return back();
     }

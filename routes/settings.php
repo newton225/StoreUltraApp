@@ -4,11 +4,14 @@ use App\Http\Controllers\Settings\AppearanceController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
 use Illuminate\Auth\Middleware\RequirePassword;
+use Illuminate\Routing\RedirectController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth'])->group(function () {
-    Route::redirect('settings', '/settings/profile');
-    Route::redirect('settings/appearance', '/settings/profile');
+    // GET only (Route::redirect answers every verb and would swallow the PATCH of settings/appearance below).
+    foreach (['settings', 'settings/appearance'] as $uri) {
+        Route::match(['get', 'head'], $uri, RedirectController::class)->defaults('destination', '/settings/profile')->defaults('status', 302);
+    }
 
     Route::get('settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('settings/profile', [ProfileController::class, 'update'])->name('profile.update');
