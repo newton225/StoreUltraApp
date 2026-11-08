@@ -109,7 +109,11 @@ test('an unsafe configuration stops the server and says what to change', functio
 
 test('the command fails on a dangerous setting and passes on a safe configuration', function () {
     // The role of the connection is read from the real database (a super-user on a developer machine): not what this test is about.
-    $this->partialMock(ProductionCheck::class, fn ($mock) => $mock->shouldReceive('databaseRole')->andReturn(['errors' => [], 'warnings' => []]));
+    $this->partialMock(ProductionCheck::class, function ($mock): void {
+        $mock->shouldReceive('databaseRole')->andReturn(['errors' => [], 'warnings' => []]);
+        // The company page of the test database is empty: what it leaves blank in the legal texts is not what this test is about.
+        $mock->shouldReceive('legalIdentityBlanks')->andReturn([]);
+    });
 
     $this->artisan('app:check-production')->assertSuccessful();
 
