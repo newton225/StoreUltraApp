@@ -89,49 +89,51 @@ export default function CompanyEdit({ values, hasLogo, identifiers }: Props) {
                         {t('company.logo.help')}
                     </p>
 
-                    <div className="flex flex-wrap items-start gap-x-10 gap-y-4">
-                        <div className="flex flex-wrap items-center gap-4">
-                            {preview !== null && chosen !== null && cropping ? (
-                                <LogoCropper
-                                    src={preview}
-                                    name={chosen.name}
-                                    onCancel={() => {
-                                        replaceFile(null);
-                                        setCropping(false);
-                                    }}
-                                    onCropped={(file) => {
-                                        replaceFile(file);
-                                        setCropping(false);
-                                    }}
-                                />
-                            ) : preview !== null ? (
-                                <div className="grid gap-1">
+                    {preview !== null && chosen !== null && cropping && (
+                        <LogoCropper
+                            src={preview}
+                            name={chosen.name}
+                            onCancel={() => {
+                                replaceFile(null);
+                                setCropping(false);
+                            }}
+                            onCropped={(file) => {
+                                replaceFile(file);
+                                setCropping(false);
+                            }}
+                        />
+                    )}
+
+                    <div
+                        className={
+                            cropping
+                                ? 'hidden'
+                                : 'grid items-start gap-x-8 gap-y-4 sm:grid-cols-[14rem_minmax(0,1fr)]'
+                        }
+                    >
+                        <div className="grid gap-2">
+                            <div className="flex h-40 items-center justify-center overflow-hidden rounded-md border border-border bg-muted/30">
+                                {preview !== null ? (
                                     <img
                                         src={preview}
                                         alt={t('company.logo.preview_alt')}
-                                        className="bg-checkerboard max-h-40 max-w-64 rounded-md border border-border object-contain"
+                                        className="bg-checkerboard max-h-full max-w-full object-contain"
                                     />
-                                    <p className="text-xs text-muted-foreground">
-                                        {t('company.logo.preview')}
+                                ) : hasLogo ? (
+                                    <img
+                                        src={`${logo.url()}?v=${stamp}`}
+                                        alt={t('company.logo.alt')}
+                                        className="max-h-full max-w-full bg-white object-contain p-2"
+                                    />
+                                ) : (
+                                    <p className="px-3 text-center text-sm text-muted-foreground">
+                                        {t('company.logo.none')}
                                     </p>
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        className="w-fit"
-                                        onClick={() => setCropping(true)}
-                                    >
-                                        {t('company.logo.crop')}
-                                    </Button>
-                                </div>
-                            ) : hasLogo ? (
-                                <img
-                                    src={`${logo.url()}?v=${stamp}`}
-                                    alt={t('company.logo.alt')}
-                                    className="max-h-40 max-w-64 rounded-md border border-border bg-white object-contain p-2"
-                                />
-                            ) : (
-                                <p className="text-sm text-muted-foreground">
-                                    {t('company.logo.none')}
+                                )}
+                            </div>
+                            {preview !== null && (
+                                <p className="text-xs text-muted-foreground">
+                                    {t('company.logo.preview')}
                                 </p>
                             )}
                         </div>
@@ -145,7 +147,7 @@ export default function CompanyEdit({ values, hasLogo, identifiers }: Props) {
                                 setChosen(null);
                                 setCropping(false);
                             }}
-                            className={`flex flex-wrap items-start gap-3 ${cropping ? 'hidden' : ''}`}
+                            className="grid max-w-md gap-4"
                         >
                             {({ errors, processing }) => (
                                 <>
@@ -169,40 +171,53 @@ export default function CompanyEdit({ values, hasLogo, identifiers }: Props) {
                                         />
                                         <InputError message={errors.logo} />
                                     </div>
-                                    <Button
-                                        type="submit"
-                                        variant="success"
-                                        className="mt-7"
-                                        disabled={chosen === null || processing}
-                                    >
-                                        {t('company.logo.upload')}
-                                    </Button>
-                                    {hasLogo && (
-                                        <ConfirmAction
-                                            label={t('company.logo.remove')}
-                                            title={t(
-                                                'company.logo.remove_title',
-                                            )}
-                                            description={t(
-                                                'company.logo.remove_body',
-                                            )}
-                                            variant="ghostDanger"
-                                            destructive
-                                            className="mt-7"
-                                            onConfirm={() =>
-                                                router.delete(
-                                                    destroyLogo.url(),
-                                                    {
-                                                        preserveScroll: true,
-                                                        onSuccess: () =>
-                                                            setStamp(
-                                                                Date.now(),
-                                                            ),
-                                                    },
-                                                )
+                                    <div className="flex flex-wrap items-center gap-3">
+                                        <Button
+                                            type="submit"
+                                            variant="success"
+                                            disabled={
+                                                chosen === null || processing
                                             }
-                                        />
-                                    )}
+                                        >
+                                            {t('company.logo.upload')}
+                                        </Button>
+                                        {preview !== null && (
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() =>
+                                                    setCropping(true)
+                                                }
+                                            >
+                                                {t('company.logo.crop')}
+                                            </Button>
+                                        )}
+                                        {hasLogo && preview === null && (
+                                            <ConfirmAction
+                                                label={t('company.logo.remove')}
+                                                title={t(
+                                                    'company.logo.remove_title',
+                                                )}
+                                                description={t(
+                                                    'company.logo.remove_body',
+                                                )}
+                                                variant="ghostDanger"
+                                                destructive
+                                                onConfirm={() =>
+                                                    router.delete(
+                                                        destroyLogo.url(),
+                                                        {
+                                                            preserveScroll: true,
+                                                            onSuccess: () =>
+                                                                setStamp(
+                                                                    Date.now(),
+                                                                ),
+                                                        },
+                                                    )
+                                                }
+                                            />
+                                        )}
+                                    </div>
                                 </>
                             )}
                         </Form>
