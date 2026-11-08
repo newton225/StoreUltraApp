@@ -56,7 +56,7 @@
         <p class="project">{{ $projectTitle }}</p>
     @endif
     @if (count($sheet['zones']) > 0)
-        <p class="zones">{{ __('documents.sheet.zones') }} : @foreach ($sheet['zones'] as $zoneName)• {{ $zoneName }} @endforeach</p>
+        <p class="zones">{{ __('documents.sheet.zones') }} : {{ implode(' • ', $sheet['zones']) }}</p>
     @endif
 
     <table class="banner">

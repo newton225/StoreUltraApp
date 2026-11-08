@@ -106,6 +106,9 @@ class AppServiceProvider extends ServiceProvider
     {
         Date::use(CarbonImmutable::class);
 
+        // PDF files only carry the characters they use, not the whole font: a one page document is not megabytes.
+        config(['dompdf.options.enable_font_subsetting' => true]);
+
         DB::prohibitDestructiveCommands(
             app()->isProduction(),
         );
