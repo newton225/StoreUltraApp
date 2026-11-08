@@ -85,6 +85,16 @@ class ProductionCheck
             $warnings[] = 'The application connects to the database as a super-user: give it a role of its own.';
         }
 
+        $legalBlanks = app(LegalTexts::class)->missingFromConfig();
+
+        if ($legalBlanks !== []) {
+            $errors[] = 'The legal texts still have blanks in the settings ('.implode(', ', array_map(fn (string $key): string => 'LEGAL_'.strtoupper($key), $legalBlanks)).'): fill them in the .env file.';
+        }
+
+        if (! app(LegalTexts::class)->reviewConfirmed()) {
+            $errors[] = 'The legal texts were not confirmed by a legal review: set LEGAL_REVIEWED_VERSION to the version a lawyer approved (config/legal.php, "version").';
+        }
+
         if ((string) config('backup.password') === '') {
             $warnings[] = 'BACKUP_PASSWORD is empty: app:backup refuses to run, so nothing is backed up.';
         } elseif (config('filesystems.disks.'.config('backup.disk').'.driver') === 'local') {
@@ -151,6 +161,23 @@ class ProductionCheck
         }
 
         return ['errors' => $errors, 'warnings' => $warnings];
+    }
+
+    /**
+     * The blanks of the legal texts that come from the "Mon entreprise" page (the name, the address, the e-mail and
+     * the signatory): they need the database, so only the command asks it.
+     *
+     * @return list<string>
+     */
+    public function legalIdentityBlanks(): array
+    {
+        try {
+            $blanks = array_values(array_intersect(app(LegalTexts::class)->missing(), ['company', 'address', 'email', 'director', 'privacy_email']));
+        } catch (Throwable) {
+            return [];
+        }
+
+        return $blanks === [] ? [] : ['The legal texts print "[à compléter]" for what the "Mon entreprise" page does not give yet ('.implode(', ', $blanks).'): fill that page.'];
     }
 
     /**

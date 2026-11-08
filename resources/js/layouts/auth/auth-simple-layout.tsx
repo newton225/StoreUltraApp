@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 import AppLogoIcon from '@/components/app-logo-icon';
 import LanguageSwitcher from '@/components/language-switcher';
+import LegalLinks from '@/components/legal-links';
 import { home } from '@/routes';
 import type { AuthLayoutProps } from '@/types';
 
@@ -33,6 +34,7 @@ export default function AuthSimpleLayout({
                         </div>
                     </div>
                     {children}
+                    <LegalLinks className="justify-center" />
                 </div>
             </div>
         </div>

@@ -28,7 +28,7 @@ class CheckProduction extends Command
     {
         $result = $check->run();
         $role = $check->databaseRole();
-        $result = ['errors' => [...$result['errors'], ...$role['errors'], ...$check->pendingMigrations()], 'warnings' => [...$result['warnings'], ...$role['warnings']]];
+        $result = ['errors' => [...$result['errors'], ...$role['errors'], ...$check->pendingMigrations(), ...$check->legalIdentityBlanks()], 'warnings' => [...$result['warnings'], ...$role['warnings']]];
 
         foreach ($result['errors'] as $error) {
             $this->components->error($error);

@@ -26,6 +26,13 @@ return [
     'cash' => 'Cash box',
     'access' => 'Access journal',
     'health' => 'System health',
+    'legal' => [
+        'notice' => 'Legal notice',
+        'privacy' => 'Privacy',
+        'terms' => 'Terms of use',
+        'back' => 'Back',
+        'version' => 'Version of :version',
+    ],
     'expense_types' => 'Kinds of cost',
     'attachments' => 'Administrative documents',
     'attachment_types' => 'Administrative document types',

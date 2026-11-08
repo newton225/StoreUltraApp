@@ -77,6 +77,13 @@ return [
             'unknown' => 'The disk space could not be measured.',
             'todo' => 'Free some space or enlarge the disk; check that the backups really leave the server.',
         ],
+        'legal' => [
+            'title' => 'Legal texts',
+            'ok' => 'The legal notice, the privacy policy and the terms of use are complete and reviewed.',
+            'blanks' => ':count piece(s) of information are still missing in the legal texts, which show "[to be completed]".',
+            'not_reviewed' => 'The legal texts are complete but their review by a lawyer is not confirmed.',
+            'todo' => 'Fill in the "Mon entreprise" page and the LEGAL_* settings of the .env file, have the texts read by a lawyer, then set LEGAL_REVIEWED_VERSION.',
+        ],
         'mail' => [
             'title' => 'Mail',
             'ok' => 'Sending mail is set up.',

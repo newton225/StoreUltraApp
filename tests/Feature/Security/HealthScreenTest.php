@@ -26,7 +26,7 @@ test('only the owner opens the health screen', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('health/index')
-            ->has('checks', 8)
+            ->has('checks', 9)
             ->has('summary.errors')
             ->has('summary.warnings'));
 });

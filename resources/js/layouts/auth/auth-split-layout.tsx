@@ -1,5 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import AppLogoIcon from '@/components/app-logo-icon';
+import LegalLinks from '@/components/legal-links';
 import { home } from '@/routes';
 import type { AuthLayoutProps } from '@/types';
 
@@ -37,6 +38,7 @@ export default function AuthSplitLayout({
                         </p>
                     </div>
                     {children}
+                    <LegalLinks className="justify-center" />
                 </div>
             </div>
         </div>

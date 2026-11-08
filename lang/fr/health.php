@@ -77,6 +77,13 @@ return [
             'unknown' => 'L\'espace disque n\'a pas pu être mesuré.',
             'todo' => 'Libérer de la place ou agrandir le disque ; vérifier que les sauvegardes partent bien hors du serveur.',
         ],
+        'legal' => [
+            'title' => 'Textes légaux',
+            'ok' => 'Les mentions légales, la politique de confidentialité et les conditions d\'utilisation sont complètes et relues.',
+            'blanks' => ':count information(s) manquent encore dans les textes légaux, qui affichent « [à compléter] ».',
+            'not_reviewed' => 'Les textes légaux sont complets mais leur relecture par un juriste n\'est pas confirmée.',
+            'todo' => 'Compléter la page « Mon entreprise » et les réglages LEGAL_* du fichier .env, faire relire les textes par un juriste, puis renseigner LEGAL_REVIEWED_VERSION.',
+        ],
         'mail' => [
             'title' => 'Courriel',
             'ok' => 'L\'envoi de courriels est configuré.',

@@ -18,6 +18,7 @@ use App\Http\Controllers\HealthController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\KitController;
 use App\Http\Controllers\KitVersionController;
+use App\Http\Controllers\LegalController;
 use App\Http\Controllers\ListExportController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\OrderAdvancePaymentController;
@@ -40,9 +41,11 @@ use App\Http\Controllers\SupplyPlanController;
 use App\Http\Controllers\TourController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ZoneController;
+use App\Support\LegalTexts;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
+Route::get('legal/{document}', [LegalController::class, 'show'])->whereIn('document', LegalTexts::DOCUMENTS)->name('legal.show');
 
 Route::post('locale', [LocaleController::class, 'update'])
     ->middleware('throttle:20,1')

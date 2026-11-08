@@ -16,6 +16,7 @@ import {
 import AppearanceTabs from '@/components/appearance-tabs';
 import AppLogoIcon from '@/components/app-logo-icon';
 import LanguageSwitcher from '@/components/language-switcher';
+import LegalLinks from '@/components/legal-links';
 import Reveal from '@/components/reveal';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/hooks/use-translation';
@@ -300,6 +301,7 @@ export default function Welcome() {
                             © {new Date().getFullYear()} {name}.{' '}
                             {t('welcome.footer.rights')}
                         </p>
+                        <LegalLinks />
                         <AppearanceTabs />
                     </div>
                 </footer>

@@ -26,6 +26,13 @@ return [
     'cash' => 'Caisse',
     'access' => 'Journal d\'accès',
     'health' => 'Santé du système',
+    'legal' => [
+        'notice' => 'Mentions légales',
+        'privacy' => 'Confidentialité',
+        'terms' => 'Conditions d\'utilisation',
+        'back' => 'Retour',
+        'version' => 'Version du :version',
+    ],
     'attachments' => 'Documents administratifs',
     'attachment_types' => 'Types de documents administratifs',
     'expense_types' => 'Types de frais',

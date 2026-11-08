@@ -37,6 +37,7 @@ class HealthReport
             $this->configuration(),
             $this->disk(),
             $this->mail(),
+            $this->legal(),
         ];
     }
 
@@ -230,6 +231,23 @@ class HealthReport
         return in_array(config('mail.default'), ['log', 'array'], true)
             ? $this->item('mail', 'warning', 'not_sending')
             : $this->item('mail', 'ok', 'ok');
+    }
+
+    /**
+     * The legal texts: blanks they still print and whether a lawyer approved the current version.
+     *
+     * @return array{key: string, status: string, detail: string, params: array<string, string|int>, lines: list<string>}
+     */
+    private function legal(): array
+    {
+        $texts = app(LegalTexts::class);
+        $blanks = array_values(array_unique([...$texts->missing()]));
+
+        return match (true) {
+            $blanks !== [] => $this->item('legal', 'warning', 'blanks', ['count' => count($blanks)], $blanks),
+            ! $texts->reviewConfirmed() => $this->item('legal', 'warning', 'not_reviewed'),
+            default => $this->item('legal', 'ok', 'ok'),
+        };
     }
 
     /**

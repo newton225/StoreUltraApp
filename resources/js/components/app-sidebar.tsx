@@ -63,6 +63,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import LegalLinks from '@/components/legal-links';
 import { useTranslation } from '@/hooks/use-translation';
 import { dashboard } from '@/routes';
 import { edit as companyEdit } from '@/routes/company';
@@ -312,6 +313,7 @@ export function AppSidebar() {
 
             <SidebarFooter>
                 <NavUser />
+                <LegalLinks className="px-2 group-data-[collapsible=icon]:hidden" />
             </SidebarFooter>
         </Sidebar>
     );
