@@ -620,6 +620,16 @@ Chaque vue prévoit ses états, tous :
   suivante remplace la liste, et le vrai `select` caché le contient pour que le formulaire l'envoie ; (4) « Recherche… » pendant
   l'attente, « Aucun résultat » sinon ; (5) un test fixe la **borne** et les droits, et un parcours de bout en bout cherche un
   élément **au-delà des premiers**.
+- **UI-137.** **Un écran se vérifie à 320, 360, 390 et 768 pixels, sans défilement horizontal de la page.** (1) Une mesure
+  automatique ouvre chaque écran à ces largeurs et compare la largeur du document à celle de la fenêtre : tout dépassement est
+  un défaut, listé avec l'élément qui dépasse. (2) **L'en-tête d'un écran** (titre, description, boutons d'action) s'**empile**
+  sur téléphone — titre au-dessus, boutons dessous, qui passent à la ligne — et ne se met sur une seule ligne qu'à partir de la
+  tablette : un titre jamais écrasé en colonne étroite, un bouton jamais coupé. (3) **Un tableau large** n'est lu que si ses
+  colonnes essentielles restent visibles : sur téléphone, les colonnes secondaires (adresse e-mail, profil…) passent **sous le
+  nom** de la ligne, le nom ouvre la fiche, et le bouton « Modifier » cède sa colonne ; le défilement horizontal dans son cadre
+  n'est qu'un dernier recours. (4) Un **bloc qui apparaît au défilement** (UI-71) reste visible à l'impression et à
+  l'enregistrement en PDF. (5) Une capture se prend **après** avoir défilé la page : sinon les blocs encore cachés passent pour
+  des trous.
 - **UI-113.** **Dans tous les formulaires, un champ obligatoire porte un astérisque rouge (`*`) après son
   libellé**, toujours, sans exception d'écran. Le marquage est produit **une seule fois** par le composant
   `Label`, qui lit l'attribut `required` du champ qu'il désigne (`htmlFor` = `id` du champ) : on ne l'écrit donc

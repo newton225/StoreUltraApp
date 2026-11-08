@@ -70,13 +70,13 @@ export default function Welcome() {
             <Head title={name} />
             <div className="min-h-svh bg-background text-foreground">
                 <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur">
-                    <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+                    <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-3 sm:gap-4 sm:px-6">
                         <a
                             href="#top"
                             className="flex items-center gap-2 font-semibold"
                         >
                             <AppLogoIcon className="size-8" />
-                            {name}
+                            <span className="max-[480px]:sr-only">{name}</span>
                         </a>
                         <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
                             <a
@@ -98,9 +98,9 @@ export default function Welcome() {
                                 {t('welcome.nav.roles')}
                             </a>
                         </nav>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1 sm:gap-2">
                             <LanguageSwitcher />
-                            <Button asChild size="sm">
+                            <Button asChild size="sm" className="max-[360px]:px-2">
                                 <Link href={entry}>{entryLabel}</Link>
                             </Button>
                         </div>

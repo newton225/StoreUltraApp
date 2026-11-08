@@ -90,7 +90,7 @@ export default function UsersIndex({
             <GuidedTour tour="users" steps={USERS_TOUR} />
 
             <div className="space-y-6 p-4">
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <Heading
                         title={t('users.title')}
                         description={t('users.description')}
@@ -173,16 +173,16 @@ export default function UsersIndex({
                                     <th className="px-4 py-2 font-medium">
                                         {t('users.columns.name')}
                                     </th>
-                                    <th className="px-4 py-2 font-medium">
+                                    <th className="hidden px-4 py-2 font-medium sm:table-cell">
                                         {t('users.columns.email')}
                                     </th>
-                                    <th className="px-4 py-2 font-medium">
+                                    <th className="hidden px-4 py-2 font-medium sm:table-cell">
                                         {t('users.columns.profile')}
                                     </th>
                                     <th className="px-4 py-2 font-medium">
                                         {t('users.columns.status')}
                                     </th>
-                                    <th className="px-4 py-2" />
+                                    <th className="hidden px-4 py-2 sm:table-cell" />
                                 </tr>
                             </thead>
                             <tbody>
@@ -192,12 +192,23 @@ export default function UsersIndex({
                                         className="border-t border-border"
                                     >
                                         <td className="px-4 py-2 font-medium">
-                                            {user.name}
+                                            <Link
+                                                href={edit(user.id)}
+                                                className="underline-offset-4 hover:underline sm:no-underline sm:hover:no-underline"
+                                            >
+                                                {user.name}
+                                            </Link>
+                                            <span className="block text-xs font-normal break-all text-muted-foreground sm:hidden">
+                                                {user.email}
+                                            </span>
+                                            <span className="block text-xs font-normal text-muted-foreground sm:hidden">
+                                                {user.profile}
+                                            </span>
                                         </td>
-                                        <td className="px-4 py-2">
+                                        <td className="hidden px-4 py-2 sm:table-cell">
                                             {user.email}
                                         </td>
-                                        <td className="px-4 py-2">
+                                        <td className="hidden px-4 py-2 sm:table-cell">
                                             {user.profile}
                                         </td>
                                         <td className="px-4 py-2">
@@ -224,7 +235,7 @@ export default function UsersIndex({
                                                 </Badge>
                                             )}
                                         </td>
-                                        <td className="px-4 py-2 text-right">
+                                        <td className="hidden px-4 py-2 text-right sm:table-cell">
                                             <Button
                                                 asChild
                                                 variant="ghost"

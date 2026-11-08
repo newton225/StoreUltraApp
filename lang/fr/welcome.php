@@ -97,11 +97,11 @@ return [
 
     'roles' => [
         'title' => 'Chacun voit ce qui le concerne',
-        'subtitle' => 'Trois profils, des accès adaptés.',
+        'subtitle' => 'Trois profils prêts à l\'emploi, et des profils sur mesure réglés menu par menu et action par action.',
         'items' => [
             'owner' => [
                 'title' => 'Propriétaire',
-                'text' => 'Accès complet : paramètres, utilisateurs, bénéfices, documents administratifs.',
+                'text' => 'Accès complet : paramètres, utilisateurs et profils, bénéfices, documents administratifs.',
             ],
             'employee' => [
                 'title' => 'Employé',
@@ -116,7 +116,7 @@ return [
 
     'cta' => [
         'title' => 'Prêt à suivre vos kits de bout en bout ?',
-        'text' => 'L\'accès se fait sur invitation du propriétaire.',
+        'text' => 'L\'accès se fait sur invitation du propriétaire : vous recevez un e-mail et choisissez vous-même votre mot de passe.',
     ],
 
     'footer' => [

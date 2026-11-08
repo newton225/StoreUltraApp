@@ -71,12 +71,12 @@ export default function ProductsIndex({
             <Head title={t('catalog.products.head')} />
 
             <div className="space-y-6 p-4">
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <Heading
                         title={t('catalog.products.title')}
                         description={t('catalog.products.description')}
                     />
-                    <div className="flex shrink-0 items-center gap-2">
+                    <div className="flex shrink-0 flex-wrap items-center gap-2">
                         <ExportMenu
                             view="products"
                             query={{

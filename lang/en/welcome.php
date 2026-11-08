@@ -97,11 +97,11 @@ return [
 
     'roles' => [
         'title' => 'Everyone sees what concerns them',
-        'subtitle' => 'Three profiles, matching access.',
+        'subtitle' => 'Three ready-made profiles, and custom profiles set menu by menu and action by action.',
         'items' => [
             'owner' => [
                 'title' => 'Owner',
-                'text' => 'Full access: settings, users, profit, administrative documents.',
+                'text' => 'Full access: settings, users and profiles, profit, administrative documents.',
             ],
             'employee' => [
                 'title' => 'Employee',
@@ -116,7 +116,7 @@ return [
 
     'cta' => [
         'title' => 'Ready to follow your kits from end to end?',
-        'text' => 'Access is by invitation from the owner.',
+        'text' => 'Access is by invitation from the owner: you receive an e-mail and choose your own password.',
     ],
 
     'footer' => [
