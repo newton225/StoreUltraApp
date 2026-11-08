@@ -102,9 +102,12 @@ test('the seeder creates the usual methods once', function () {
     $this->seed(InitialPaymentMethodsSeeder::class);
     $this->seed(InitialPaymentMethodsSeeder::class);
 
-    expect(PaymentMethod::count())->toBe(3);
+    expect(PaymentMethod::count())->toBe(6);
     expect(PaymentMethod::where('code', 'cash')->sole()->requires_reference)->toBeFalse();
-    expect(PaymentMethod::where('code', 'mobile_money')->sole()->requires_reference)->toBeTrue();
+    foreach (['wave', 'orange_money', 'moov_money', 'mtn_money'] as $operator) {
+        expect(PaymentMethod::where('code', $operator)->sole()->requires_reference)->toBeTrue();
+    }
+    expect(PaymentMethod::where('code', 'mobile_money')->exists())->toBeFalse();
     expect(PaymentMethod::where('code', 'transfer')->sole()->requires_reference)->toBeTrue();
 });
 

@@ -215,7 +215,7 @@ Les **factures restent générées individuellement**.
 - **Avance** : un versement par semaine et par commande, avant la livraison. Le montant, la périodicité et le
   moment sont paramétrables.
 - **Relicat** : encaissé à la livraison, égal au prix de vente moins les avances reçues.
-- **Modes de paiement** : liste paramétrable (espèces, mobile money, virement, chèque, par exemple). Référence de
+- **Modes de paiement** : liste paramétrable (espèces, Wave, Orange Money, Moov Money, MTN Mobile Money, virement, chèque, par exemple). Référence de
   transaction obligatoire pour un mode non espèces **(à confirmer)**.
 - Un **reçu numéroté** est émis pour chaque encaissement (avance ou relicat).
 - Trois personnes sont gardées sur chaque paiement : **qui a payé** (le client par défaut, ou un proche, un
@@ -468,7 +468,7 @@ classeur.
 | Avance avant livraison | Obligatoire | Peut devenir facultative |
 | Plafond de clients | 0 (aucune limite) | Facultatif ; avertissement, jamais de blocage |
 | Sous-préfectures | 5 | Liste extensible, avec agents affectés |
-| Modes de paiement | Espèces, mobile money, virement | Liste libre |
+| Modes de paiement | Espèces, Wave, Orange Money, Moov Money, MTN Mobile Money, virement | Liste libre |
 | Types de frais | Transport, imprévu, autre | Liste libre |
 | Types de documents administratifs | Registre de commerce, FNE, identité | Requises ou non, par objet |
 | Numérotation des documents | Préfixe, année, séquence | Par type de document |

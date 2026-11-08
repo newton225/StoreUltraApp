@@ -14,7 +14,10 @@ class InitialPaymentMethodsSeeder extends Seeder
      */
     private const METHODS = [
         ['cash', 'Espèces', 'Cash', false],
-        ['mobile_money', 'Mobile money', 'Mobile money', true],
+        ['wave', 'Wave', 'Wave', true],
+        ['orange_money', 'Orange Money', 'Orange Money', true],
+        ['moov_money', 'Moov Money', 'Moov Money', true],
+        ['mtn_money', 'MTN Mobile Money', 'MTN Mobile Money', true],
         ['transfer', 'Virement', 'Bank transfer', true],
     ];
 
