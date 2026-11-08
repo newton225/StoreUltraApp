@@ -95,6 +95,21 @@ return [
         ],
     ],
 
+    'users' => [
+        'new' => [
+            'title' => 'Créer un compte',
+            'body' => 'Saisissez le nom, l\'adresse e-mail et le profil : la personne reçoit automatiquement un e-mail pour choisir elle-même son mot de passe, que vous ne connaîtrez pas.',
+        ],
+        'filters' => [
+            'title' => 'Retrouver un compte',
+            'body' => 'Cherchez par nom ou adresse e-mail (sans tenir compte des accents), puis filtrez par profil et par statut : actif, invitation en attente ou désactivé.',
+        ],
+        'table' => [
+            'title' => 'La liste',
+            'body' => '« Invitation en attente » veut dire que la personne n\'a pas encore choisi son mot de passe et ne peut pas se connecter. Ouvrez un compte pour renvoyer l\'e-mail, afficher le lien à transmettre ou désactiver l\'accès.',
+        ],
+    ],
+
     'profits' => [
         'filters' => [
             'title' => 'La période',

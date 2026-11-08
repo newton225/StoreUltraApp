@@ -63,7 +63,6 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import LegalLinks from '@/components/legal-links';
 import { useTranslation } from '@/hooks/use-translation';
 import { dashboard } from '@/routes';
 import { edit as companyEdit } from '@/routes/company';
@@ -71,8 +70,8 @@ import { edit as parametersEdit } from '@/routes/parameters';
 import type { NavGroup } from '@/types';
 
 export function AppSidebar() {
-    const { t } = useTranslation();
-    const { auth } = usePage().props;
+    const { t, locale } = useTranslation();
+    const { auth, appVersion } = usePage().props;
     const can = (permission: string): boolean =>
         auth.permissions.includes(permission);
     const canClients = can('manage_clients');
@@ -313,7 +312,19 @@ export function AppSidebar() {
 
             <SidebarFooter>
                 <NavUser />
-                <LegalLinks className="px-2 group-data-[collapsible=icon]:hidden" />
+                <p
+                    className="px-2 text-xs text-muted-foreground group-data-[collapsible=icon]:hidden"
+                    data-test="app-version"
+                >
+                    {t('navigation.version', {
+                        number: appVersion.number,
+                        date: new Intl.DateTimeFormat(locale, {
+                            dateStyle: 'long',
+                        }).format(
+                            new Date(`${appVersion.released_on}T00:00:00`),
+                        ),
+                    })}
+                </p>
             </SidebarFooter>
         </Sidebar>
     );

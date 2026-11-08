@@ -92,7 +92,7 @@ class ListExports
             'arrears' => $this->arrears($request),
             'closings' => $this->closings($request),
             'attachments' => $this->attachments($request),
-            'users' => $this->users(),
+            'users' => $this->users($request),
             default => $this->documents($request),
         };
 
@@ -287,11 +287,17 @@ class ListExports
      *
      * @return array{0: list<string>, 1: list<list<int|float|string|null>>}
      */
-    private function users(): array
+    private function users(Request $request): array
     {
+        $search = trim($request->string('search')->toString());
+        $profileId = $request->integer('profile') ?: null;
+        $state = in_array($request->string('state')->toString(), User::STATES, true) ? $request->string('state')->toString() : null;
+
         $rows = User::query()
             ->with('profile')
-            ->orderBy('name')->limit(self::MAX_ROWS)->get()
+            ->filteredBy($search, $profileId, $state)
+            ->tap(fn (Builder $query) => Search::orderBy($query, 'name'))
+            ->orderBy('id')->limit(self::MAX_ROWS)->get()
             ->map(fn (User $user): array => [
                 $user->name, $user->email, $user->effectiveProfile()->label,
                 $user->is_active ? $this->t('exports.active') : $this->t('exports.inactive'),

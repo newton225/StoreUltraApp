@@ -39,6 +39,8 @@ class InviteUser
             return false;
         }
 
+        $user->forceFill(['invitation_sent_at' => now()])->save();
+
         AuditLog::record('user.invited', $user, [], ['channel' => 'mail'], $by);
 
         return true;

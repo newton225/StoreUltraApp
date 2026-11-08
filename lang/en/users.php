@@ -15,10 +15,20 @@ return [
     'invitation_sent' => 'E-mail sent to :email.',
     'invitation_not_sent' => 'The e-mail could not be sent. Show the link to hand it over yourself.',
 
+    'filters' => [
+        'search' => 'Search by name or e-mail address',
+        'apply' => 'Search',
+        'all_profiles' => 'All profiles',
+        'all_states' => 'All statuses',
+        'no_match' => 'No user matches these filters',
+    ],
+
     'invitation' => [
         'title' => 'Password',
         'pending' => 'The person has not chosen their password yet: they cannot log in.',
         'done' => 'The person chose their password. You do not know it, and that is intended.',
+        'sent_at' => 'Last e-mail handed to the mail server on :date. If it does not arrive, the person should check their junk folder.',
+        'never_sent' => 'No e-mail has been sent for this account yet.',
         'send' => 'Send an e-mail to choose the password',
         'send_help' => 'A new link, valid for 48 hours. It replaces the previous one. Also useful if the person forgot their password.',
         'show_link' => 'Show the link to hand over',
@@ -54,7 +64,7 @@ return [
         'head' => 'New user',
         'title' => 'New user',
         'description' => 'The person receives an e-mail to choose their own password',
-        'submit' => 'Create user',
+        'submit' => 'Create and send the invitation',
     ],
 
     'form' => [

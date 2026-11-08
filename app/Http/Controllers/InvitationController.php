@@ -42,6 +42,11 @@ class InvitationController extends Controller
             'password' => $this->passwordRules(),
         ]);
 
+        // A deactivated account cannot be opened with a link it received before (same answer as an expired one).
+        if (User::query()->where('email', $credentials['email'])->where('is_active', false)->exists()) {
+            return back()->withErrors(['email' => __('access.invitation.expired')]);
+        }
+
         $accepted = null;
 
         $status = Password::broker(InviteUser::BROKER)->reset(

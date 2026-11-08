@@ -24,12 +24,8 @@ type Props = {
     zones: ZoneOption[];
 };
 
-export default function EditUser({
-    editedUser,
-    profiles,
-    zones,
-}: Props) {
-    const { t } = useTranslation();
+export default function EditUser({ editedUser, profiles, zones }: Props) {
+    const { t, locale } = useTranslation();
     const page = usePage();
     const isSelf = page.props.auth.user.id === editedUser.id;
     // The link is flashed once by the server when the owner asks for it: it is never kept in the page.
@@ -87,7 +83,7 @@ export default function EditUser({
                     submitLabel={t('users.form.submit')}
                 />
 
-                {!isSelf && (
+                {!isSelf && editedUser.is_active && (
                     <section
                         className="space-y-4 rounded-lg border border-border p-4"
                         data-test="invitation-panel"
@@ -102,6 +98,21 @@ export default function EditUser({
                                     : t('users.invitation.done')}
                             </p>
                         </div>
+
+                        <p className="text-sm" data-test="invitation-sent-at">
+                            {editedUser.invitation_sent_at
+                                ? t('users.invitation.sent_at', {
+                                      date: new Intl.DateTimeFormat(locale, {
+                                          dateStyle: 'long',
+                                          timeStyle: 'short',
+                                      }).format(
+                                          new Date(
+                                              editedUser.invitation_sent_at,
+                                          ),
+                                      ),
+                                  })
+                                : t('users.invitation.never_sent')}
+                        </p>
 
                         <div className="flex flex-wrap items-center gap-3">
                             <Button

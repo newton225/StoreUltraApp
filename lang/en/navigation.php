@@ -26,6 +26,8 @@ return [
     'cash' => 'Cash box',
     'access' => 'Access journal',
     'health' => 'System health',
+    'version' => 'Version :number of :date',
+
     'legal' => [
         'notice' => 'Legal notice',
         'privacy' => 'Privacy',

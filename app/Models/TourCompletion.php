@@ -29,7 +29,7 @@ class TourCompletion extends Model
     /**
      * The screens that have a tour. The key is also the one the screen sends, so an unknown one is refused.
      */
-    public const TOURS = ['dashboard', 'orders', 'order-create', 'order-show', 'cash', 'profits'];
+    public const TOURS = ['dashboard', 'orders', 'order-create', 'order-show', 'cash', 'profits', 'users'];
 
     /**
      * @return array<string, string>

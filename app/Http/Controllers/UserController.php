@@ -10,9 +10,11 @@ use App\Models\AuditLog;
 use App\Models\Profile;
 use App\Models\User;
 use App\Models\Zone;
+use App\Support\Search;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -22,12 +24,21 @@ class UserController extends Controller
     /**
      * List every user account with its profile.
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        $search = trim($request->string('search')->toString());
+        $profileId = $request->integer('profile') ?: null;
+        $state = in_array($request->string('state')->toString(), User::STATES, true) ? $request->string('state')->toString() : null;
+
         return Inertia::render('users/index', [
+            'filters' => ['search' => $search, 'profile' => $profileId, 'state' => $state],
+            'profiles' => $this->profiles(),
+            'states' => User::STATES,
             'users' => User::query()
                 ->with('profile')
-                ->orderBy('name')
+                ->filteredBy($search, $profileId, $state)
+                ->tap(fn ($query) => Search::orderBy($query, 'name'))
+                ->orderBy('id')
                 ->get()
                 ->map(fn (User $user): array => [
                     'id' => $user->id,
@@ -91,6 +102,7 @@ class UserController extends Controller
     public function invite(Request $request, User $user, InviteUser $invitations): RedirectResponse
     {
         abort_if($user->is($request->user()), 403);
+        abort_unless($user->is_active, 422);
 
         $sent = $invitations->sendByMail($user, $request->user());
 
@@ -108,6 +120,7 @@ class UserController extends Controller
     public function invitationLink(Request $request, User $user, InviteUser $invitations): RedirectResponse
     {
         abort_if($user->is($request->user()), 403);
+        abort_unless($user->is_active, 422);
 
         Inertia::flash('invitation_link', $invitations->linkToHandOver($user, $request->user()));
 
@@ -125,6 +138,7 @@ class UserController extends Controller
                 'profile_id' => $user->effectiveProfile()->id,
                 'zone_ids' => $user->zones()->pluck('zones.id')->all(),
                 'invitation_pending' => $user->password_set_at === null,
+                'invitation_sent_at' => $user->invitation_sent_at?->toIso8601String(),
             ],
             'profiles' => $this->profiles(),
             'zones' => $this->zones(),
@@ -148,6 +162,11 @@ class UserController extends Controller
         $user->setRelation('profile', $profile);
 
         $user->save();
+
+        // A deactivated account keeps no link that could still set its password (invitation or forgotten password).
+        if ($before['is_active'] && ! $user->is_active) {
+            Password::deleteToken($user);
+        }
 
         $this->syncZones($user, $request->validated('zone_ids'));
 

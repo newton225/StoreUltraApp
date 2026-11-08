@@ -41,6 +41,7 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('app.name'),
+            'appVersion' => ['number' => config('app.version'), 'released_on' => config('app.released_on')],
             'auth' => [
                 'user' => $request->user(),
                 'canViewProfit' => $request->user()?->can('view-profit') ?? false,

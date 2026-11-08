@@ -38,7 +38,7 @@ test('every screen with a tour has its texts in both languages', function () {
     foreach (['fr', 'en'] as $locale) {
         $texts = trans('tours', [], $locale);
 
-        foreach (['dashboard', 'orders', 'order_create', 'order_show', 'cash', 'profits'] as $screen) {
+        foreach (['dashboard', 'orders', 'order_create', 'order_show', 'cash', 'profits', 'users'] as $screen) {
             expect($texts[$screen])->toBeArray()->not->toBeEmpty();
 
             foreach ($texts[$screen] as $step) {

@@ -26,6 +26,8 @@ return [
     'cash' => 'Caisse',
     'access' => 'Journal d\'accès',
     'health' => 'Santé du système',
+    'version' => 'Version :number du :date',
+
     'legal' => [
         'notice' => 'Mentions légales',
         'privacy' => 'Confidentialité',

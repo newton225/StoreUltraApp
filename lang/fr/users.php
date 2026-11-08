@@ -15,10 +15,20 @@ return [
     'invitation_sent' => 'E-mail envoyé à :email.',
     'invitation_not_sent' => 'L\'e-mail n\'a pas pu partir. Affichez le lien pour le transmettre vous-même.',
 
+    'filters' => [
+        'search' => 'Rechercher par nom ou adresse e-mail',
+        'apply' => 'Rechercher',
+        'all_profiles' => 'Tous les profils',
+        'all_states' => 'Tous les statuts',
+        'no_match' => 'Aucun utilisateur ne correspond à ces filtres',
+    ],
+
     'invitation' => [
         'title' => 'Mot de passe',
         'pending' => 'La personne n\'a pas encore choisi son mot de passe : elle ne peut pas se connecter.',
         'done' => 'La personne a choisi son mot de passe. Vous ne le connaissez pas, et c\'est voulu.',
+        'sent_at' => 'Dernier e-mail remis au serveur de messagerie le :date. S\'il n\'arrive pas, la personne doit regarder ses courriers indésirables.',
+        'never_sent' => 'Aucun e-mail n\'est encore parti pour ce compte.',
         'send' => 'Envoyer un e-mail pour choisir le mot de passe',
         'send_help' => 'Un nouveau lien, valable 48 heures. Il remplace le précédent. Utile aussi si la personne a oublié son mot de passe.',
         'show_link' => 'Afficher le lien à transmettre',
@@ -54,7 +64,7 @@ return [
         'head' => 'Nouvel utilisateur',
         'title' => 'Nouvel utilisateur',
         'description' => 'La personne reçoit un e-mail pour choisir elle-même son mot de passe',
-        'submit' => 'Créer l\'utilisateur',
+        'submit' => 'Créer et envoyer l\'invitation',
     ],
 
     'form' => [

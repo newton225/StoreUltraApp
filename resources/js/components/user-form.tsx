@@ -1,4 +1,5 @@
 import { Form } from '@inertiajs/react';
+import { Mail } from 'lucide-react';
 import { useState } from 'react';
 import InputError from '@/components/input-error';
 import SelectField from '@/components/select-field';
@@ -18,6 +19,7 @@ export type EditableUser = {
     is_active: boolean;
     zone_ids?: number[];
     invitation_pending?: boolean;
+    invitation_sent_at?: string | null;
 };
 
 export type ZoneOption = { id: number; name: string; active: boolean };
@@ -87,7 +89,7 @@ export default function UserForm({
                             <InputError message={errors.email} />
                         </div>
 
-                        <div className="grid gap-2 md:col-span-2">
+                        <div className="col-span-full grid gap-2">
                             <FieldLabel
                                 htmlFor="profile_id"
                                 help={t('users.form.role_help')}
@@ -147,14 +149,8 @@ export default function UserForm({
                             </fieldset>
                         )}
 
-                        {!isEdit && (
-                            <p className="self-end pb-2 text-sm text-muted-foreground md:col-span-4">
-                                {t('users.form.invitation_note')}
-                            </p>
-                        )}
-
                         {isEdit && (
-                            <div className="grid gap-2 self-end md:col-span-4">
+                            <div className="col-span-full grid gap-2">
                                 <div className="flex items-center space-x-3">
                                     <input
                                         type="hidden"
@@ -177,6 +173,16 @@ export default function UserForm({
                                 </p>
                                 <InputError message={errors.is_active} />
                             </div>
+                        )}
+
+                        {!isEdit && (
+                            <p className="order-last col-span-full flex items-start gap-3 rounded-md border border-border bg-muted/40 p-3 text-sm text-muted-foreground">
+                                <Mail
+                                    className="mt-0.5 size-4 shrink-0"
+                                    aria-hidden="true"
+                                />
+                                {t('users.form.invitation_note')}
+                            </p>
                         )}
 
                         <SaveBar

@@ -17,6 +17,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Application version
+    |--------------------------------------------------------------------------
+    |
+    | The version of the application and the date it was released, shown at the foot of the menu. Written in the
+    | code, not in the environment: it goes up with the release itself (a new version = a new number and its date,
+    | in the same commit). It is not a setting.
+    |
+    */
+
+    'version' => '1.0.0',
+
+    'released_on' => '2026-11-08',
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
     |

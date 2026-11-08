@@ -15,6 +15,8 @@ use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
+use Laravel\Passkeys\Contracts\PasskeyUser;
+use Laravel\Passkeys\Passkeys;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -53,6 +55,9 @@ class FortifyServiceProvider extends ServiceProvider
 
             return null;
         });
+
+        // A passkey does not go through the check above: a deactivated account must not open a session this way either.
+        Passkeys::authorizeLoginUsing(fn (Request $request, PasskeyUser $user): bool => $user instanceof User && $user->is_active);
     }
 
     /**

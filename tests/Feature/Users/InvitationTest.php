@@ -208,3 +208,17 @@ test('the list says who has not chosen a password yet', function () {
     $this->actingAs($this->owner)->get(route('users.index'))
         ->assertInertia(fn (Assert $page) => $page->where('users', fn ($users) => collect($users)->contains('invitation_pending', true)));
 });
+
+test('the date of the last invitation e-mail is kept and shown to the owner, and stays empty when nothing left', function () {
+    Notification::fake();
+    $user = pendingUser();
+
+    $this->actingAs($this->owner)->get(route('users.edit', $user))
+        ->assertInertia(fn (Assert $page) => $page->where('editedUser.invitation_sent_at', null));
+
+    $this->post(route('users.invitation', $user))->assertRedirect();
+
+    $this->get(route('users.edit', $user))
+        ->assertInertia(fn (Assert $page) => $page->where('editedUser.invitation_sent_at', fn ($date) => $date !== null));
+    expect($user->refresh()->invitation_sent_at)->not->toBeNull();
+});

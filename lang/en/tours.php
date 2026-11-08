@@ -95,6 +95,21 @@ return [
         ],
     ],
 
+    'users' => [
+        'new' => [
+            'title' => 'Create an account',
+            'body' => 'Enter the name, the e-mail address and the profile: the person automatically receives an e-mail to choose their own password, which you will not know.',
+        ],
+        'filters' => [
+            'title' => 'Find an account',
+            'body' => 'Search by name or e-mail address (accents ignored), then filter by profile and by status: active, invitation pending or deactivated.',
+        ],
+        'table' => [
+            'title' => 'The list',
+            'body' => '"Invitation pending" means the person has not chosen their password yet and cannot sign in. Open an account to send the e-mail again, show the link to hand over, or deactivate the access.',
+        ],
+    ],
+
     'profits' => [
         'filters' => [
             'title' => 'The period',
