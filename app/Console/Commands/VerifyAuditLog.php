@@ -4,7 +4,9 @@ namespace App\Console\Commands;
 
 use App\Models\AuditLog;
 use App\Support\AuditChain;
+use App\Support\HealthReport;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -59,6 +61,8 @@ class VerifyAuditLog extends Command
         if ($head !== $previous) {
             $problems[] = 'The head of the chain does not match the last entry: entries at the end were removed.';
         }
+
+        Cache::forever(HealthReport::AUDIT_KEY, ['at' => now()->timestamp, 'ok' => $problems === [], 'entries' => $count]);
 
         if ($problems === []) {
             $this->components->info("The audit log is intact ({$count} entries).");

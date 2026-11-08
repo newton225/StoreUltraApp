@@ -25,6 +25,7 @@ return [
     'expenses' => 'Logistics costs',
     'cash' => 'Cash box',
     'access' => 'Access journal',
+    'health' => 'System health',
     'expense_types' => 'Kinds of cost',
     'attachments' => 'Administrative documents',
     'attachment_types' => 'Administrative document types',

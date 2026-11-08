@@ -15,6 +15,7 @@ import {
     Banknote,
     Building2,
     Footprints,
+    HeartPulse,
     History,
     LayoutGrid,
     UserRound,
@@ -37,6 +38,7 @@ import { index as documentsIndex } from '@/actions/App/Http/Controllers/Document
 import { index as deliveriesIndex } from '@/actions/App/Http/Controllers/DeliveryController';
 import { index as accessIndex } from '@/actions/App/Http/Controllers/AccessLogController';
 import { index as auditIndex } from '@/actions/App/Http/Controllers/AuditLogController';
+import { index as healthIndex } from '@/actions/App/Http/Controllers/HealthController';
 import { index as ordersIndex } from '@/actions/App/Http/Controllers/OrderController';
 import {
     arrears as arrearsIndex,
@@ -241,6 +243,11 @@ export function AppSidebar() {
                           title: t('navigation.access'),
                           href: accessIndex(),
                           icon: Footprints,
+                      },
+                      {
+                          title: t('navigation.health'),
+                          href: healthIndex(),
+                          icon: HeartPulse,
                       },
                   ]
                 : [],

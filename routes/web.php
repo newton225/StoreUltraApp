@@ -14,6 +14,7 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ExpenseTypeController;
 use App\Http\Controllers\ExportController;
+use App\Http\Controllers\HealthController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\KitController;
 use App\Http\Controllers\KitVersionController;
@@ -139,6 +140,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('audit-log', [AuditLogController::class, 'index'])->name('audit.index');
         Route::get('audit-log/archives/{month}', [AuditLogController::class, 'download'])->where('month', '[0-9]{4}-[0-9]{2}')->name('audit.archives.download');
         Route::get('access-log', [AccessLogController::class, 'index'])->name('access.index');
+        Route::get('health', [HealthController::class, 'index'])->name('health.index');
         Route::resource('zones', ZoneController::class)->except(['show', 'destroy']);
         Route::get('company', [CompanyController::class, 'edit'])->name('company.edit');
         Route::patch('company', [CompanyController::class, 'update'])->name('company.update');

@@ -25,6 +25,7 @@ return [
     'expenses' => 'Frais de logistique',
     'cash' => 'Caisse',
     'access' => 'Journal d\'accès',
+    'health' => 'Santé du système',
     'attachments' => 'Documents administratifs',
     'attachment_types' => 'Types de documents administratifs',
     'expense_types' => 'Types de frais',

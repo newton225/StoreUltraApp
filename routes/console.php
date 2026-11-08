@@ -1,12 +1,16 @@
 <?php
 
+use App\Support\HealthReport;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
+Schedule::call(fn () => Cache::forever(HealthReport::SCHEDULER_KEY, now()->timestamp))->everyMinute()->name('health-heartbeat')
+    ->description('Leave a sign that the scheduler is running (shown on the health screen)');
 Schedule::command('orders:generate')->dailyAt('01:00')->withoutOverlapping()
     ->description('Create the orders of the automatic deliveries that are due');
 Schedule::command('app:verify-audit-log')->dailyAt('02:00')->withoutOverlapping()
