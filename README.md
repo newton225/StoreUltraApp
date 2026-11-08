@@ -129,6 +129,12 @@ peut rien écrire.
 **Mots de passe de test.** Le mot de passe de `postgres` de la machine de développement a été saisi dans des échanges avec l'assistant : il doit
 être **changé**, et la base de test `storeultra_test` doit avoir son propre rôle (jamais `postgres`).
 
+### Recherche sans accents
+
+Toutes les recherches de texte (clients, produits, commandes, paiements, documents, documents administratifs et leurs exports) ignorent les
+accents et la casse : « eleonore » trouve « Éléonore ». Elles passent par `App\Support\Search`. Sous PostgreSQL elle utilise l'extension
+`unaccent`, créée par la migration `2026_11_08_100000` avec le rôle migrateur ; sous SQLite la fonction est fournie par le code.
+
 ### Sauvegarde et restauration
 
 `php artisan app:backup` (planifiée chaque jour à 01 h 30) fait **une archive unique, chiffrée par mot de passe (AES-256)** : la base de

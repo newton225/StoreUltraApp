@@ -9,6 +9,7 @@ use App\Models\Attachment;
 use App\Models\AttachmentType;
 use App\Models\AuditLog;
 use App\Support\AttachmentAlerts;
+use App\Support\Search;
 use App\Support\UploadedFiles;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -34,8 +35,8 @@ class AttachmentController extends Controller
             ->with('type')
             ->whereHas('type', fn ($query) => $query->where('applies_to', $kind))
             ->when($search !== '', fn ($query) => $query->where(fn ($inner) => $inner
-                ->whereLike('number', '%'.addcslashes($search, '%_\\').'%')
-                ->orWhereLike('notes', '%'.addcslashes($search, '%_\\').'%')))
+                ->tap(fn ($q) => Search::contains($q, 'number', $search))
+                ->tap(fn ($q) => Search::contains($q, 'notes', $search, or: true))))
             ->orderByDesc('id')
             ->paginate(self::PER_PAGE)
             ->withQueryString()

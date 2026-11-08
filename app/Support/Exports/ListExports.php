@@ -27,6 +27,7 @@ use App\Support\AdvanceArrears;
 use App\Support\AttachmentAlerts;
 use App\Support\KitPricing;
 use App\Support\ListSort;
+use App\Support\Search;
 use App\Support\WeekCalendar;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -142,10 +143,11 @@ class ListExports
             ->visibleTo($user)
             ->with('client:id,name,reference')
             ->when($search !== '', fn (Builder $query) => $query->where(function (Builder $inner) use ($search): void {
-                $like = '%'.addcslashes($search, '%_\\').'%';
-
-                $inner->whereLike('reference', $like)
-                    ->orWhereHas('client', fn (Builder $clients) => $clients->whereLike('name', $like)->orWhereLike('reference', $like));
+                Search::contains($inner, 'reference', $search);
+                $inner->orWhereHas('client', function (Builder $clients) use ($search): void {
+                    Search::contains($clients, 'name', $search);
+                    Search::contains($clients, 'reference', $search, or: true);
+                });
             }))
             ->when($status !== null, fn (Builder $query) => $query->where('status', $status->value))
             ->when($week !== null, fn (Builder $query) => $query->whereDate('delivery_week', $this->calendar->startOf($week)))
@@ -173,12 +175,11 @@ class ListExports
         $rows = Payment::query()
             ->with(['order:id,reference,client_id', 'order.client:id,name', 'method', 'collector:id,name', 'recorder:id,name'])
             ->when($search !== '', fn (Builder $query) => $query->where(function (Builder $inner) use ($search): void {
-                $like = '%'.addcslashes($search, '%_\\').'%';
-
-                $inner->whereLike('receipt_number', $like)
-                    ->orWhereHas('order', fn (Builder $orders) => $orders
-                        ->whereLike('reference', $like)
-                        ->orWhereHas('client', fn (Builder $clients) => $clients->whereLike('name', $like)));
+                Search::contains($inner, 'receipt_number', $search);
+                $inner->orWhereHas('order', function (Builder $orders) use ($search): void {
+                    Search::contains($orders, 'reference', $search);
+                    $orders->orWhereHas('client', fn (Builder $clients) => Search::contains($clients, 'name', $search));
+                });
             }))
             ->when($kind !== null, fn (Builder $query) => $query->where('kind', $kind->value))
             ->when($methodId !== null, fn (Builder $query) => $query->where('payment_method_id', $methodId))
@@ -266,8 +267,8 @@ class ListExports
             ->with('type')
             ->whereHas('type', fn (Builder $query) => $query->where('applies_to', $kind))
             ->when($search !== '', fn (Builder $query) => $query->where(fn (Builder $inner) => $inner
-                ->whereLike('number', '%'.addcslashes($search, '%_\\').'%')
-                ->orWhereLike('notes', '%'.addcslashes($search, '%_\\').'%')))
+                ->tap(fn ($q) => Search::contains($q, 'number', $search))
+                ->tap(fn ($q) => Search::contains($q, 'notes', $search, or: true))))
             ->orderByDesc('id')->limit(self::MAX_ROWS)->get()
             ->map(fn (Attachment $attachment): array => [
                 $attachment->type->name, $owners[$kind][$attachment->owner_id ?? 0] ?? '', $attachment->number,
@@ -506,7 +507,7 @@ class ListExports
 
         $rows = Document::query()
             ->when($type !== null, fn (Builder $query) => $query->where('type', $type->value))
-            ->when($search !== '', fn (Builder $query) => $query->whereLike('number', '%'.addcslashes($search, '%_\\').'%'))
+            ->when($search !== '', fn (Builder $query) => $query->tap(fn ($q) => Search::contains($q, 'number', $search)))
             ->when($state === 'valid', fn (Builder $query) => $query->whereNull('cancelled_at'))
             ->when($state === 'cancelled', fn (Builder $query) => $query->whereNotNull('cancelled_at'))
             ->orderByDesc('id')->limit(self::MAX_ROWS)->get()

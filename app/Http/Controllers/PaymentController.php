@@ -12,6 +12,7 @@ use App\Models\PaymentMethod;
 use App\Models\Zone;
 use App\Support\AdvanceArrears;
 use App\Support\ListSort;
+use App\Support\Search;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -37,12 +38,11 @@ class PaymentController extends Controller
 
         $filtered = fn (): Builder => Payment::query()
             ->when($search !== '', fn (Builder $query) => $query->where(function (Builder $inner) use ($search): void {
-                $like = '%'.addcslashes($search, '%_\\').'%';
-
-                $inner->whereLike('receipt_number', $like)
-                    ->orWhereHas('order', fn (Builder $orders) => $orders
-                        ->whereLike('reference', $like)
-                        ->orWhereHas('client', fn (Builder $clients) => $clients->whereLike('name', $like)));
+                Search::contains($inner, 'receipt_number', $search);
+                $inner->orWhereHas('order', function (Builder $orders) use ($search): void {
+                    Search::contains($orders, 'reference', $search);
+                    $orders->orWhereHas('client', fn (Builder $clients) => Search::contains($clients, 'name', $search));
+                });
             }))
             ->when($kind !== null, fn (Builder $query) => $query->where('kind', $kind->value))
             ->when($methodId !== null, fn (Builder $query) => $query->where('payment_method_id', $methodId))

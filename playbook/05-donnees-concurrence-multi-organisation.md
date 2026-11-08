@@ -175,3 +175,12 @@ Avec **une base par client** :
   à la première page ; (3) la **recherche** neutralise les jokers de la base saisis par l'utilisateur et se fait côté
   serveur ; (4) l'**export** de la liste reprend **le même filtre et la même recherche** que l'écran ; (5) la pagination
   est **le composant partagé** de l'interface, à l'apparence définie par UI-47, jamais recopié page par page ; (6) un test fixe le **nombre de requêtes** de la page : il ne dépend pas du nombre de lignes (DATA-71).
+- **DATA-78.** **La recherche sans accents tient en une seule classe, et chaque moteur a son piège.** Tout filtre texte du
+  serveur passe par elle (DATA-13), les listes **et** leurs exports. (1) PostgreSQL : l'extension `unaccent` se crée par
+  **migration** avec le rôle migrateur (jamais à la main) ; la fonction n'est pas indexable, ce qui suffit tant que les listes
+  restent de quelques milliers de lignes. (2) SQLite (tests, poste de développement) : la fonction `unaccent` est enregistrée
+  par le code sur la connexion, sinon la même requête ne tournerait pas. (3) Piège du pilote PDO de PostgreSQL : il lit
+  `'\'` comme un guillemet échappé et **avale le paramètre qui suit** (« parameter was not defined ») ; PostgreSQL échappe déjà
+  par barre oblique inverse, donc n'écrire la clause `escape` que pour SQLite. (4) Le nom de colonne est écrit dans le code
+  (type `literal-string`), jamais construit à partir d'une saisie. (5) Un test cherche « eleonore » pour « Éléonore », dans les
+  deux sens, avec les jokers `%` `_` et `\` saisis, **sur les deux moteurs**.

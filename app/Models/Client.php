@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\ClientStatus;
 use App\Models\Concerns\Audited;
+use App\Support\Search;
 use Database\Factories\ClientFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -131,13 +132,13 @@ class Client extends Model
      */
     public function scopeSearch(Builder $query, string $term): Builder
     {
-        $like = '%'.addcslashes($term, '%_\\').'%';
+        return $query->where(function (Builder $inner) use ($term): void {
+            Search::contains($inner, 'name', $term);
 
-        return $query->where(fn (Builder $inner) => $inner
-            ->whereLike('name', $like)
-            ->orWhereLike('phone', $like)
-            ->orWhereLike('reference', $like)
-            ->orWhereLike('commercial_number', $like));
+            foreach (['phone', 'reference', 'commercial_number'] as $column) {
+                Search::contains($inner, $column, $term, or: true);
+            }
+        });
     }
 
     /**

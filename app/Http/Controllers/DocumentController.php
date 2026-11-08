@@ -13,6 +13,7 @@ use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\PurchaseOrder;
+use App\Support\Search;
 use Illuminate\Contracts\Database\Eloquent\Builder as BuilderContract;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -38,7 +39,7 @@ class DocumentController extends Controller
         $documents = Document::query()
             ->with('subject')
             ->when($type !== null, fn (BuilderContract $query) => $query->where('type', $type->value))
-            ->when($search !== '', fn (BuilderContract $query) => $query->whereLike('number', '%'.addcslashes($search, '%_\\').'%'))
+            ->when($search !== '', fn (BuilderContract $query) => $query->tap(fn ($q) => Search::contains($q, 'number', $search)))
             ->when($state === 'valid', fn (BuilderContract $query) => $query->whereNull('cancelled_at'))
             ->when($state === 'cancelled', fn (BuilderContract $query) => $query->whereNotNull('cancelled_at'))
             ->orderByDesc('id')

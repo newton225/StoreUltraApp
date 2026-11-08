@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\Audited;
+use App\Support\Search;
 use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -101,11 +102,10 @@ class Product extends Model
      */
     public function scopeSearch(Builder $query, string $term): Builder
     {
-        $like = '%'.addcslashes($term, '%_\\').'%';
-
-        return $query->where(fn (Builder $inner) => $inner
-            ->whereLike('name', $like)
-            ->orWhereHas('shop', fn (Builder $shops) => $shops->whereLike('name', $like)));
+        return $query->where(function (Builder $inner) use ($term): void {
+            Search::contains($inner, 'name', $term);
+            $inner->orWhereHas('shop', fn (Builder $shops) => Search::contains($shops, 'name', $term));
+        });
     }
 
     /**

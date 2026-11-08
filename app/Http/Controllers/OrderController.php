@@ -25,6 +25,7 @@ use App\Support\BusinessSettings;
 use App\Support\ListSort;
 use App\Support\OrderDocumentArchive;
 use App\Support\OrderProfit;
+use App\Support\Search;
 use App\Support\WeekCalendar;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
@@ -52,10 +53,11 @@ class OrderController extends Controller
             ->visibleTo($user)
             ->with('client:id,name,reference')
             ->when($search !== '', fn ($query) => $query->where(function ($inner) use ($search): void {
-                $like = '%'.addcslashes($search, '%_\\').'%';
-
-                $inner->whereLike('reference', $like)
-                    ->orWhereHas('client', fn ($clients) => $clients->whereLike('name', $like)->orWhereLike('reference', $like));
+                Search::contains($inner, 'reference', $search);
+                $inner->orWhereHas('client', function ($clients) use ($search): void {
+                    Search::contains($clients, 'name', $search);
+                    Search::contains($clients, 'reference', $search, or: true);
+                });
             }))
             ->when($status !== null, fn ($query) => $query->where('status', $status->value))
             ->when($week !== null, fn ($query) => $query->whereDate('delivery_week', $calendar->startOf($week)))

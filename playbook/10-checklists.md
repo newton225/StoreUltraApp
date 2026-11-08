@@ -132,6 +132,7 @@ Voir `07-livraison-et-exploitation.md` §10. En résumé :
 - [ ] Deux requêtes sur la dernière unité : une seule aboutit ; cent en parallèle : aucune survente (TEST-12).
 - [ ] Action après expiration : refusée ; purge : unités rendues, journal écrit (TEST-15).
 - [ ] Double validation d'un même objet : une seule prise en compte (DATA-23).
+- [ ] **Recherche texte** : par la classe unique, sans accents ni casse, liste et export, testée sur les deux moteurs (DATA-13, DATA-78).
 - [ ] Transition depuis un état inattendu : échec (DATA-24).
 
 **Fichiers déposés.**
