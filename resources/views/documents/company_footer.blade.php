@@ -1,7 +1,7 @@
 {{-- The footer of every document, the same everywhere (playbook UI-133). Needs $company; $extra is the line that is specific to the document. --}}
 @php
     $footerLines = array_filter([
-        implode(' · ', array_filter([$company['name'] ?: config('app.name'), $company['legal_form'], $company['capital'] ? __('documents.common.capital').' '.$company['capital'] : null])),
+        implode(' · ', array_filter([$company['name'], $company['legal_form'], $company['capital'] ? __('documents.common.capital').' '.$company['capital'] : null])),
         implode(' · ', array_filter([$company['address'], $company['phone'], $company['email'], $company['website']])),
         implode(' · ', $company['identifiers']),
         $company['footer_note'],

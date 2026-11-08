@@ -120,6 +120,25 @@ réaliste (par exemple deux mille lignes) contre un plafond écrit.
 - **TEST-55.** Les assertions et fabriques **du framework** plutôt que des vérifications maison sur les mêmes
   faits.
 
+- **TEST-60.** **Un test de bout en bout isole vraiment ses fichiers, et le prouve.** Base, port ET dossier de fichiers sont à
+  part, mais une variable d'environnement n'est pas toujours lue par le serveur de développement du langage (`php -S` laisse
+  `$_ENV` vide : le dossier de fichiers demandé était **ignoré** et les essais ont **écrasé de vrais PDF**). Le lanceur
+  règle ce qu'il faut pour que ce soit lu **et vérifie** qu'une requête écrit bien dans son dossier, sinon il s'arrête avant de
+  tester. Il refuse aussi de tourner si un serveur de développement du front est actif (`public/hot`) : il testerait des
+  scripts rechargés à chaud, pas ceux de la version construite. Les parcours partagent **une seule connexion** par compte
+  (la page de connexion limite les tentatives).
+- **TEST-61.** **Un document imprimé se vérifie sur le vrai PDF, de chaque type, avec des données réalistes.** Une commande vide
+  ne montre ni la longueur réelle d'un tableau ni les champs vides. On ouvre chaque type de document (devis, facture, reçu,
+  bon de livraison, bon de commande, bordereau, synthèse, exports) avec l'identité complète, **dans chaque langue**, et on
+  contrôle : une page quand le contenu est normal (jamais une page qui ne porte que les signatures), aucun libellé sans sa
+  valeur ni répété, le nom de l'organisation et jamais celui du logiciel, des nombres écrits à la locale (virgule en
+  français), un numéro de téléphone jamais coupé. Chaque défaut trouvé devient un **test qui échoue sur l'ancien gabarit**.
+- **TEST-62.** **Ne jamais lancer plusieurs serveurs sur le même port sans les arrêter, et vérifier lequel répond.** Sous
+  Windows plusieurs processus peuvent écouter le même port : une requête arrive au hasard sur un ancien serveur, avec une
+  autre base. Chercher les processus par leur ligne de commande (pas par le mot « LISTEN », traduit selon la langue) et
+  les arrêter en fin d'essai.
+
+
 ## 7. Politique de lancement
 
 À convenir explicitement avec le responsable au début du projet :

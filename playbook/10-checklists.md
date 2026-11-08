@@ -93,6 +93,8 @@ cochée est un point **supposé faux**.
 ## 6. Avant de livrer
 
 - [ ] **Outil de bout en bout** (le meilleur pour le framework, TEST-33) installé et utilisé pour regarder les écrans.
+- [ ] **Parcours de bout en bout** sur une application à part dont le dossier de fichiers est **prouvé** isolé, une connexion par compte, `data-test` (TEST-31, TEST-32, TEST-60).
+- [ ] **PDF contrôlés un à un** (chaque type, chaque langue, données réalistes) : une page, aucun libellé vide ou répété, nom de l'organisation, locale des nombres (TEST-61).
 - [ ] Le code est sur la branche principale distante ; **commit en service noté** (OPS §2).
 - [ ] **Sauvegarde** prise, surtout si le schéma change.
 - [ ] **Version** choisie, **textes légaux** à jour.

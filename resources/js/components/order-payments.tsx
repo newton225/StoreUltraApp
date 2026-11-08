@@ -370,6 +370,8 @@ export default function OrderPayments({ orderId, payments, today }: Props) {
                     {payments.items.map((payment) => (
                         <li
                             key={payment.id}
+                            data-test="payment-row"
+                            data-amount={payment.amount}
                             className="flex flex-wrap items-center justify-between gap-2 px-4 py-2"
                         >
                             <div className="space-y-0.5">

@@ -71,7 +71,7 @@
                     <td class="num">{{ $money($row['purchase']) }}</td>
                     <td class="num">{{ $money($row['sale']) }}</td>
                     <td class="num">{{ $money($row['advance']) }}</td>
-                    <td class="num">{{ $row['percent'] }} %</td>
+                    <td class="num">{{ number_format((float) $row['percent'], 1, app()->getLocale() === 'fr' ? ',' : '.', ' ') }} %</td>
                     <td class="num">{{ $money($row['balance']) }}</td>
                     @if ($report['shops']['with_profit'])
                         <td class="num">{{ $money($row['theoretical_margin']) }}</td>

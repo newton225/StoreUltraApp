@@ -5,6 +5,7 @@ return [
     'common' => [
         'date' => 'Date',
         'phone' => 'Phone',
+        'client_phone' => 'Client phone',
         'capital' => 'Capital',
         'tax_office' => 'Tax office',
         'zone' => 'Sub-prefecture',
@@ -15,10 +16,11 @@ return [
     ],
 
     'proforma' => [
+        'number_label' => 'Proforma no.',
         'title' => 'Proforma invoice',
         'advance' => 'ADVANCE TO PAY',
         'remaining' => 'REMAINING TO PAY AT DELIVERY',
-        'in_words' => 'This proforma invoice is closed at the sum of:',
+        'in_words' => 'This proforma invoice is issued for the sum of:',
         'delivered_on' => 'Planned delivery',
         'advance_received' => 'Advance to pay for the new order',
         'balance_after' => 'Balance of the new order after the advance',
@@ -56,6 +58,7 @@ return [
     ],
 
     'delivery_note' => [
+        'number_label' => 'Delivery note no.',
         'title' => 'Delivery note',
         'order' => 'Order',
         'kits_delivered' => 'KITS DELIVERED',
@@ -106,11 +109,12 @@ return [
     ],
 
     'invoice' => [
+        'number_label' => 'Invoice no.',
         'title' => 'Invoice',
         'advance' => 'ADVANCE',
         'balance_paid' => 'BALANCE PAID',
         'remaining' => 'REMAINING TO PAY',
-        'in_words' => 'This invoice is closed at the sum of:',
+        'in_words' => 'This invoice is issued for the sum of:',
         'delivered_on' => 'Delivery date',
         'advance_received' => 'Advance received for the new order',
         'balance_received' => 'Balance paid at delivery',

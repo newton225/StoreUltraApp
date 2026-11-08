@@ -14,6 +14,7 @@
         td { padding: 4px 5px; border: 1px solid #d1d5db; vertical-align: top; }
         tr { page-break-inside: avoid; }
         .num { text-align: right; white-space: nowrap; }
+        .nowrap { white-space: nowrap; }
     </style>
 </head>
 <body>
@@ -36,7 +37,8 @@
             @foreach ($table->rows as $row)
                 <tr>
                     @foreach ($row as $value)
-                        <td @class(['num' => is_int($value) || is_float($value)])>{{ is_int($value) ? number_format($value, 0, ',', ' ') : $value }}</td>
+                        {{-- a phone number is never cut in two lines --}}
+                        <td @class(['num' => is_int($value) || is_float($value), 'nowrap' => is_string($value) && preg_match('/^[+\d][\d ().+-]{6,}$/', $value) === 1])>{{ is_int($value) ? number_format($value, 0, ',', ' ') : $value }}</td>
                     @endforeach
                 </tr>
             @endforeach

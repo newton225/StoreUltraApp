@@ -14,11 +14,11 @@
         .nowrap { white-space: nowrap; }
         .project { text-align: center; font-weight: bold; font-size: 10.5px; margin: 0 0 2px 0; }
         .zones { text-align: center; font-style: italic; margin: 0 0 8px 0; }
-        .banner { width: 100%; border: 2px solid #2f5597; margin-bottom: 14px; }
+        .banner { width: 100%; border: 2px solid #2f5597; margin-bottom: 10px; }
         .banner td { text-align: center; }
         .banner .title { font-size: 17px; font-weight: bold; color: #2f5597; padding: 3px 0 1px 0; }
         .banner .subtitle { background: #fff2cc; font-weight: bold; font-size: 11px; text-transform: uppercase; padding: 6px 0 14px 0; }
-        .info { width: 100%; margin-bottom: 10px; }
+        .info { width: 100%; margin-bottom: 8px; }
         .info td { padding: 2px 0; vertical-align: top; font-size: 10.5px; }
         .info td.left { width: 52%; }
         table.lines { width: 100%; margin-bottom: 0; }
@@ -29,20 +29,20 @@
         table.lines tr.total td { font-weight: bold; text-align: center; font-size: 11px; padding: 3px 5px; }
         table.lines tr.total td.amount { text-align: right; }
         table.lines tr.net td.amount { background: #ffd966; }
-        .words { margin: 14px 0 12px 0; }
+        .words { margin: 8px 0 8px 0; }
         .fne { margin: 0 0 8px 0; color: #4b5563; }
-        .section { color: #2f5597; font-weight: bold; text-decoration: underline; margin: 6px 0 10px 0; font-size: 10px; text-transform: uppercase; }
+        .section { color: #2f5597; font-weight: bold; text-decoration: underline; margin: 4px 0 6px 0; font-size: 10px; text-transform: uppercase; }
         table.recon { width: 100%; }
-        table.recon th { background: #ddebf7; border: 1px solid #374151; padding: 6px 4px; font-size: 10px; }
-        table.recon td { border: 1px solid #374151; padding: 6px 5px; text-align: center; }
+        table.recon th { background: #ddebf7; border: 1px solid #374151; padding: 3px 4px; font-size: 10px; }
+        table.recon td { border: 1px solid #374151; padding: 3px 5px; text-align: center; }
         table.recon td.label { font-weight: bold; }
         table.recon td.amount { font-weight: bold; white-space: nowrap; }
         table.recon td.ref { font-weight: bold; }
         table.recon td.note { font-weight: bold; font-style: italic; }
-        .check { width: 100%; margin: 12px 0 18px 0; }
+        .check { width: 100%; margin: 8px 0 8px 0; }
         .check td { padding: 1px 4px; vertical-align: top; }
-        .signatures { width: 100%; margin-top: 8px; }
-        .signatures td { width: 33%; vertical-align: top; text-align: center; height: 70px; }
+        .signatures { width: 100%; margin-top: 6px; page-break-inside: avoid; }
+        .signatures td { width: 33%; vertical-align: top; text-align: center; height: 54px; }
         .signatures .role { font-weight: bold; text-decoration: underline; font-size: 10.5px; }
         .signatures .name { margin-top: 8px; font-size: 9.5px; }
     </style>
@@ -66,26 +66,27 @@
         @endif
     </table>
 
+    {{-- Two columns, one fact per line, a line only when it has a value: the company phone is in the letterhead, so it is not repeated here. --}}
     <table class="info">
         <tr>
             <td class="left">@if ($kind === 'delivery_note')<span class="strong">{{ __('documents.delivery_note.order') }} :</span> {{ $delivery->order->reference }}@else&nbsp;@endif</td>
-            <td><span class="strong">{{ __('documents.sheet.voucher') }} :</span> &nbsp;{{ $number }}</td>
+            <td><span class="strong">{{ __("documents.{$kind}.number_label") }} :</span> &nbsp;{{ $number }}</td>
         </tr>
         <tr>
-            <td class="left"><span class="strong">{{ __('documents.sheet.supplier') }} :</span> {{ $company['name'] ?: config('app.name') }}</td>
-            <td><span class="strong">{{ __('documents.common.phone') }} :</span> {{ $company['phone'] }}</td>
-        </tr>
-        <tr>
-            <td class="left"><span class="strong">{{ __('documents.common.client') }} :</span> {{ $client->name }}</td>
-            <td><span class="strong">{{ __('documents.common.phone') }} :</span> {{ $client->phone }}</td>
-        </tr>
-        <tr>
-            <td class="left"><span class="strong">{{ __('documents.sheet.delivery_place') }} :</span> {{ $client->delivery_address ?: $client->locality }}</td>
+            <td class="left">@if ($company['name'])<span class="strong">{{ __('documents.sheet.supplier') }} :</span> {{ $company['name'] }}@else&nbsp;@endif</td>
             <td><span class="strong">{{ __('documents.sheet.ordered_on') }} :</span> {{ $sheet['ordered_on'] }}</td>
         </tr>
         <tr>
-            <td class="left"><span class="strong">{{ __('documents.common.zone') }} :</span> {{ $client->zone->name }}</td>
+            <td class="left"><span class="strong">{{ __('documents.common.client') }} :</span> {{ $client->name }}</td>
+            <td>@if ($client->phone)<span class="strong">{{ __('documents.common.client_phone') }} :</span> {{ $client->phone }}@else&nbsp;@endif</td>
+        </tr>
+        <tr>
+            <td class="left">@if ($client->delivery_address || $client->locality)<span class="strong">{{ __('documents.sheet.delivery_place') }} :</span> {{ $client->delivery_address ?: $client->locality }}@else&nbsp;@endif</td>
             <td><span class="strong">{{ __("documents.{$kind}.delivered_on") }} :</span> {{ $sheet['delivered_on'] }}</td>
+        </tr>
+        <tr>
+            <td class="left"><span class="strong">{{ __('documents.common.zone') }} :</span> {{ $client->zone->name }}</td>
+            <td>&nbsp;</td>
         </tr>
     </table>
 

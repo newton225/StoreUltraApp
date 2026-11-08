@@ -132,6 +132,7 @@ export default function OrderDocuments({
                 {visible.map((target) => (
                     <li
                         key={`${target.type}-${target.subject_id}`}
+                        data-test={`document-${target.type}`}
                         className="flex flex-wrap items-center justify-between gap-2 px-4 py-2"
                     >
                         <span className="font-medium">

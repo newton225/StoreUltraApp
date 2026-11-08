@@ -93,6 +93,7 @@ export default function ConfirmAction({
         <>
             <Button
                 type="button"
+                data-test="confirm-action"
                 variant={variant}
                 size={size}
                 className={className}
@@ -128,6 +129,7 @@ export default function ConfirmAction({
                         </Button>
                         <Button
                             type="button"
+                            data-test="confirm-action-confirm"
                             variant={destructive ? 'destructive' : 'success'}
                             onClick={() => {
                                 setOpen(false);

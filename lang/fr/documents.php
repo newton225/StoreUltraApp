@@ -5,6 +5,7 @@ return [
     'common' => [
         'date' => 'Date',
         'phone' => 'Téléphone',
+        'client_phone' => 'Téléphone du client',
         'capital' => 'Capital',
         'tax_office' => 'Centre des impôts',
         'zone' => 'Sous-préfecture',
@@ -15,6 +16,7 @@ return [
     ],
 
     'proforma' => [
+        'number_label' => 'N° de la proforma',
         'title' => 'Facture proforma',
         'advance' => 'AVANCE À VERSER',
         'remaining' => 'RESTE À PAYER À LA LIVRAISON',
@@ -56,6 +58,7 @@ return [
     ],
 
     'delivery_note' => [
+        'number_label' => 'N° du bon de livraison',
         'title' => 'Bon de livraison',
         'order' => 'Commande',
         'kits_delivered' => 'KITS LIVRÉS',
@@ -106,6 +109,7 @@ return [
     ],
 
     'invoice' => [
+        'number_label' => 'N° de facture',
         'title' => 'Facture',
         'advance' => 'AVANCE',
         'balance_paid' => 'RELICAT RÉGLÉ',

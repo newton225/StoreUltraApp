@@ -38,6 +38,7 @@ export default function LanguageSwitcher({
                     <button
                         type="button"
                         lang={code}
+                        data-test={`locale-${code}`}
                         aria-pressed={code === locale}
                         onClick={() => choose(code)}
                         className={cn(

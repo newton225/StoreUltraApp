@@ -24,6 +24,7 @@ export default function CollapsiblePanel({
         <section className="rounded-lg border border-border">
             <button
                 type="button"
+                data-test="collapsible-trigger"
                 aria-expanded={open}
                 aria-controls={contentId}
                 onClick={() => setOpen((current) => !current)}

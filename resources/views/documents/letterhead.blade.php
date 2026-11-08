@@ -19,7 +19,7 @@
             </td>
         @endif
         <td style="vertical-align: middle; padding-bottom: 8px; font-size: 9px; color: #374151; line-height: 1.45;">
-            <div style="font-size: 15px; font-weight: bold; color: #2f5597;">{{ $company['name'] ?: config('app.name') }}</div>
+            @if ($company['name'])<div style="font-size: 15px; font-weight: bold; color: #2f5597;">{{ $company['name'] }}</div>@endif
             @if (count($legalLine) > 0)<div>{{ implode(' · ', $legalLine) }}</div>@endif
             @if ($company['address'])<div>{{ $company['address'] }}</div>@endif
             @if (count($contactLine) > 0)<div>{{ implode(' · ', $contactLine) }}</div>@endif

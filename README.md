@@ -92,6 +92,7 @@ composer dev              # serveur, file d'attente et Vite
 | Types TypeScript | `npm run types:check` |
 | Tout ce que l'intégration continue exécute | `composer ci:check` |
 | Reconstruire le front | `npm run build` |
+| Parcours de bout en bout (navigateur réel, application et base à part) | `npm run build` puis `npm run e2e` (arrêter le serveur Vite avant : `public/hot`) |
 
 ### Base de données en production : trois rôles
 

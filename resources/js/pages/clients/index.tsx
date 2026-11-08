@@ -98,7 +98,9 @@ export default function ClientsIndex({
                         )}
                         {canCreate && (
                             <Button variant="info" asChild>
-                                <Link href={create()}>{t('clients.new')}</Link>
+                                <Link href={create()} data-test="client-new">
+                                    {t('clients.new')}
+                                </Link>
                             </Button>
                         )}
                     </div>

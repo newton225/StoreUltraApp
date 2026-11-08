@@ -36,6 +36,7 @@ export default function TabLinks({
                             {tab.href ? (
                                 <Link
                                     href={tab.href}
+                                    data-test={`tab-${tab.key}`}
                                     aria-current={active ? 'page' : undefined}
                                     className={tabClass(active)}
                                 >
@@ -44,6 +45,7 @@ export default function TabLinks({
                             ) : (
                                 <button
                                     type="button"
+                                    data-test={`tab-${tab.key}`}
                                     aria-current={active ? 'page' : undefined}
                                     onClick={() => onSelect?.(tab.key)}
                                     className={tabClass(active)}

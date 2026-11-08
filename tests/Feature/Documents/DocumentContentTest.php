@@ -232,3 +232,16 @@ test('a statement lists each invoice of the period with the totals', function ()
 
     expect($html)->toContain('27 500 FCFA');
 });
+
+test('the supplier, the header and the footer carry the name of the company, never the name of the application', function () {
+    $order = realOrder('draft', 1, 1000);
+
+    $html = htmlOf(DocumentType::Proforma, $order);
+
+    expect($html)->toContain('Zebe Kits SARL')->not->toContain(config('app.name'));
+
+    // A company that has no name yet prints no name at all: the application's own name is never a stand-in.
+    app(BusinessSettings::class)->set('company_name', null);
+
+    expect(htmlOf(DocumentType::Proforma, $order))->not->toContain(config('app.name'));
+});

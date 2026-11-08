@@ -95,7 +95,10 @@ export default function ShowClient({
                     </div>
                     {canEdit && (
                         <Button asChild variant="infoOutline">
-                            <Link href={edit(client.id)}>
+                            <Link
+                                href={edit(client.id)}
+                                data-test="client-edit"
+                            >
                                 {t('clients.edit')}
                             </Link>
                         </Button>

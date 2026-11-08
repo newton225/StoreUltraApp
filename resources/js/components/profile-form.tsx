@@ -222,6 +222,7 @@ export default function ProfileForm({
 
                         {!readOnly && (
                             <SaveBar
+                                data-test="profile-save"
                                 dirty={isDirty}
                                 processing={processing}
                                 isNew={!profile}
