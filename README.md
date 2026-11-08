@@ -129,6 +129,35 @@ peut rien écrire.
 **Mots de passe de test.** Le mot de passe de `postgres` de la machine de développement a été saisi dans des échanges avec l'assistant : il doit
 être **changé**, et la base de test `storeultra_test` doit avoir son propre rôle (jamais `postgres`).
 
+### Sauvegarde et restauration
+
+`php artisan app:backup` (planifiée chaque jour à 01 h 30) fait **une archive unique, chiffrée par mot de passe (AES-256)** : la base de
+données (PostgreSQL : `pg_dump` au format personnalisé, avec le rôle `storeultra_backup` ; SQLite : copie cohérente du fichier), **tous les
+fichiers privés** (documents émis, pièces, justificatifs, signatures, copies du journal d'audit) et un `manifest.json` avec l'empreinte de
+chaque élément. Elle est déposée sur le disque `BACKUP_DISK`, puis la **rétention** supprime les vieilles copies : tout pendant 7 jours, une
+par jour jusqu'à 30 jours, une par semaine jusqu'à 90 jours, une par mois jusqu'à 365 jours, rien au-delà (`app:backup --prune-only` ne
+fait que ce nettoyage). Les variables sont décrites dans `.env.example`. Le client `pg_dump` doit être **au moins aussi récent que le
+serveur** (la commande refuse sinon), et `BACKUP_PASSWORD` est **obligatoire** : sans lui rien n'est sauvegardé.
+
+À savoir : le disque par défaut est un dossier du serveur, qui ne survit pas à la perte du serveur. Pointez `BACKUP_DISK` vers un stockage
+extérieur (bucket compatible S3, SFTP) ; `php artisan app:check-production` le rappelle tant que ce n'est pas fait. Gardez le mot de passe
+**ailleurs que sur le serveur** : sans lui les archives ne s'ouvrent plus. Une donnée supprimée peut survivre jusqu'à 365 jours dans les copies.
+
+**Restauration, à la main, application arrêtée** (pas de bouton : écraser toutes les données ne se fait pas d'un clic) :
+
+1. Récupérer l'archive voulue et l'extraire avec le mot de passe (7-Zip, `unzip -P`, ou `ZipArchive` en PHP) : elle contient `database.dump`
+   (ou `database.sqlite`), le dossier `files/` et `manifest.json`.
+2. Vérifier les empreintes du `manifest.json` (`sha256sum`) contre les fichiers extraits.
+3. Remettre le contenu de `files/` dans `storage/app/private/`.
+4. PostgreSQL : recréer une base vide au même nom (propriétaire `storeultra_migrator`), puis
+   `pg_restore --no-owner --role=storeultra_migrator --dbname=<base> database.dump`, et relancer `database/postgres/roles.sql` pour redonner
+   les droits. SQLite : remplacer le fichier de base par `database.sqlite`.
+5. `php artisan migrate --database=pgsql_migrator --force` (ne fait rien si l'archive est à jour), `php artisan app:verify-audit-log` pour
+   contrôler la chaîne du journal, puis remettre l'application en route.
+
+**Faire un exercice de restauration** sur une machine propre avant l'ouverture au public, puis régulièrement : une sauvegarde jamais
+restaurée n'est qu'une hypothèse (OPS-65).
+
 ## 5. Structure du code
 
 ```

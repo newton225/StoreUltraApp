@@ -38,6 +38,13 @@ return [
             'report' => false,
         ],
 
+        'backups' => [
+            'driver' => 'local',
+            'root' => storage_path('app/backups'),
+            'throw' => true,
+            'report' => false,
+        ],
+
         'audit-archive' => [
             'driver' => 'local',
             'root' => storage_path('app/private/audit-archive'),

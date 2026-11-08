@@ -27,6 +27,9 @@ function useSafeProductionSettings(): void
         'database.default' => 'pgsql',
         'database.connections.pgsql.username' => 'storeultra_app',
         'mail.default' => 'smtp',
+        'backup.password' => 'a-long-test-password',
+        'backup.disk' => 'remote-backups',
+        'filesystems.disks.remote-backups.driver' => 's3',
     ]);
 }
 
@@ -146,4 +149,15 @@ test('a migration that was deployed but not run is reported', function () {
 
     expect(app(ProductionCheck::class)->pendingMigrations())->toHaveCount(1)
         ->and(app(ProductionCheck::class)->pendingMigrations()[0])->toContain('1 migration(s) not run yet')->toContain('give_clients_menu');
+});
+
+test('a missing backup password or a backup kept on the server itself is a warning', function () {
+    useSafeProductionSettings();
+    config(['backup.password' => '']);
+
+    expect(app(ProductionCheck::class)->run()['warnings'])->toContain('BACKUP_PASSWORD is empty: app:backup refuses to run, so nothing is backed up.');
+
+    config(['backup.password' => 'a-long-test-password', 'backup.disk' => 'backups']);
+
+    expect(implode(' ', app(ProductionCheck::class)->run()['warnings']))->toContain('written on the server itself');
 });

@@ -399,6 +399,7 @@ return [
             ],
             'access_log' => ['pruned' => 'Journal d\'accès purgé'],
             'cash_closing' => ['recorded' => 'Caisse clôturée'],
+            'backup' => ['created' => 'Sauvegarde créée'],
             'audit_archive' => ['created' => 'Copie mensuelle du journal créée', 'downloaded' => 'Copie mensuelle du journal téléchargée', 'pruned' => 'Copie mensuelle du journal supprimée'],
             'expense' => ['cancelled' => 'Frais annulé', 'linked_to_cash' => 'Frais rattaché à la caisse', 'proof_opened' => 'Justificatif consulté', 'recorded' => 'Frais enregistré'],
             'invoice' => ['fne_recorded' => 'Numéro FNE enregistré'],

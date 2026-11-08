@@ -398,6 +398,7 @@ return [
             ],
             'access_log' => ['pruned' => 'Access journal purged'],
             'cash_closing' => ['recorded' => 'Cash box closed'],
+            'backup' => ['created' => 'Backup created'],
             'audit_archive' => ['created' => 'Monthly journal copy created', 'downloaded' => 'Monthly journal copy downloaded', 'pruned' => 'Monthly journal copy deleted'],
             'expense' => ['cancelled' => 'Cost cancelled', 'linked_to_cash' => 'Cost linked to the cash box', 'proof_opened' => 'Proof viewed', 'recorded' => 'Cost recorded'],
             'invoice' => ['fne_recorded' => 'FNE number recorded'],

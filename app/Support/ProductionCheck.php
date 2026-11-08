@@ -85,6 +85,12 @@ class ProductionCheck
             $warnings[] = 'The application connects to the database as a super-user: give it a role of its own.';
         }
 
+        if ((string) config('backup.password') === '') {
+            $warnings[] = 'BACKUP_PASSWORD is empty: app:backup refuses to run, so nothing is backed up.';
+        } elseif (config('filesystems.disks.'.config('backup.disk').'.driver') === 'local') {
+            $warnings[] = 'The backups are written on the server itself (BACKUP_DISK): they would be lost with it. Point BACKUP_DISK to a storage elsewhere.';
+        }
+
         if (in_array(config('mail.default'), ['log', 'array'], true)) {
             $warnings[] = 'MAIL_MAILER does not send anything: password reset links would never arrive.';
         }
