@@ -20,6 +20,7 @@ use App\Models\PurchaseOrderItem;
 use App\Models\Shop;
 use App\Models\ShopPayment;
 use App\Support\AdvanceAllocation;
+use App\Support\ListSort;
 use App\Support\ShopAccounts;
 use App\Support\WeekCalendar;
 use Carbon\CarbonImmutable;
@@ -42,14 +43,14 @@ class PurchaseController extends Controller
         $week = $calendar->startOf($request->date('week') ?? now());
         $shopId = $request->integer('shop') ?: null;
         $status = PurchaseOrderStatus::tryFrom($request->string('status')->toString());
+        $sort = ListSort::resolve($request, PurchaseOrder::SORTABLE);
 
         $purchaseOrders = PurchaseOrder::query()
             ->with('shop:id,name')
             ->whereDate('week', $week)
             ->when($shopId !== null, fn (Builder $query) => $query->where('shop_id', $shopId))
             ->when($status !== null, fn (Builder $query) => $query->where('status', $status->value))
-            ->orderBy('shop_id')
-            ->orderBy('id')
+            ->sortedBy($sort['sort'], $sort['direction'])
             ->paginate(self::PER_PAGE)
             ->withQueryString()
             ->through(fn (PurchaseOrder $purchase): array => [
@@ -73,6 +74,7 @@ class PurchaseController extends Controller
             'week' => $week->toDateString(),
             'weeks' => $calendar->known($request->user(), $week),
             'filters' => ['shop' => $shopId, 'status' => $status?->value],
+            'sort' => $sort,
             'statuses' => array_column(PurchaseOrderStatus::cases(), 'value'),
             'shops' => Shop::query()->orderBy('name')->get(['id', 'name']),
             'pending_lines' => (clone $pending)->whereNotNull('shop_id')->count(),

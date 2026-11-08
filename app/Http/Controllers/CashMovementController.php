@@ -11,6 +11,7 @@ use App\Models\CashClosing;
 use App\Models\CashMovement;
 use App\Models\Expense;
 use App\Support\CashBalance;
+use App\Support\ListSort;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -29,11 +30,12 @@ class CashMovementController extends Controller
      */
     public function index(Request $request, CashBalance $balance): Response
     {
-        $direction = in_array($request->string('direction')->toString(), [CashMovement::IN, CashMovement::OUT], true)
-            ? $request->string('direction')->toString()
+        $direction = in_array($request->string('flow')->toString(), [CashMovement::IN, CashMovement::OUT], true)
+            ? $request->string('flow')->toString()
             : null;
         $from = $request->date('from');
         $to = $request->date('to');
+        $sort = ListSort::resolve($request, CashMovement::SORTABLE);
 
         $valid = fn (): Builder => CashMovement::query()->whereNull('cancelled_at');
         $net = fn (Builder $query): int => $balance->net($query);
@@ -51,8 +53,7 @@ class CashMovementController extends Controller
             ->when($direction !== null, fn (Builder $query) => $query->where('direction', $direction))
             ->when($from !== null, fn (Builder $query) => $query->whereDate('occurred_on', '>=', $from))
             ->when($to !== null, fn (Builder $query) => $query->whereDate('occurred_on', '<=', $to))
-            ->orderByDesc('occurred_on')
-            ->orderByDesc('id')
+            ->sortedBy($sort['sort'], $sort['direction'])
             ->paginate(self::PER_PAGE)
             ->withQueryString()
             ->through(fn (CashMovement $movement): array => [
@@ -110,13 +111,14 @@ class CashMovementController extends Controller
             ->all();
 
         return Inertia::render('cash/index', [
+            'sort' => $sort,
             'closings' => $closings,
             'last_closed_on' => $lastClosedOn?->toDateString(),
             'balance_today' => $balance->asOf(today()),
             'unlinked_expenses' => $unlinked,
             'movements' => $movements,
             'summary' => ['opening' => $opening, 'in' => $in, 'out' => $out, 'closing' => $opening + $in - $out],
-            'filters' => ['direction' => $direction, 'from' => $from?->toDateString(), 'to' => $to?->toDateString()],
+            'filters' => ['flow' => $direction, 'from' => $from?->toDateString(), 'to' => $to?->toDateString()],
             'today' => today()->toDateString(),
             'current_user_name' => $request->user()->name,
         ]);

@@ -150,7 +150,11 @@ Chaque vue prévoit ses états, tous :
   l'ordre par défaut, SEC-45), avec l'identifiant en dernier critère pour que les pages ne se chevauchent pas ; le choix
   **revient avec les filtres** de la page (et ne se perd pas quand on filtre), la pagination revient à la première page,
   et **l'export suit le même tri** (UI-116). Une colonne qu'on ne peut pas trier honnêtement (une valeur calculée à
-  l'écran) n'a pas d'en-tête cliquable.
+  l'écran) n'a pas d'en-tête cliquable. Les paramètres du tri (`sort`, `direction`) sont **réservés** : un filtre ne porte jamais ce nom (une caisse filtrée
+  par `direction` entrée/sortie ne pouvait pas être triée en même temps ; le filtre s'appelle `flow`). Une liste affichée en
+  **cartes**, sans en-têtes de colonnes, offre le même tri par **une liste « Trier par »** (`SortSelect`), jamais par un
+  tri laissé sans commande. Un test parcourt **chaque colonne acceptée de chaque liste, dans les deux sens, sur les deux
+  moteurs** : une sous-requête de tri qui plante sous PostgreSQL ne se voit pas sous SQLite.
 
 - **UI-47.** **La pagination a une seule apparence, définie ici, et elle se fait par un composant partagé** : jamais
   recopiée page par page, jamais « précédent / suivant » seuls. Sous la liste, dans une **section arrondie** (bordure fine et coins arrondis, comme les autres blocs de l'écran, jamais un bandeau carré), sur **une ligne** : à **gauche**

@@ -3,6 +3,7 @@
 return [
 
     'sort' => [
+        'by' => 'Sort by',
         'ascending' => 'Sort ascending',
         'descending' => 'Sort descending',
     ],

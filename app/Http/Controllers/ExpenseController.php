@@ -14,6 +14,7 @@ use App\Models\ExpenseType;
 use App\Models\Order;
 use App\Models\Shop;
 use App\Models\Zone;
+use App\Support\ListSort;
 use App\Support\UploadedFiles;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -34,6 +35,7 @@ class ExpenseController extends Controller
         $typeId = $request->integer('type') ?: null;
         $from = $request->date('from');
         $to = $request->date('to');
+        $sort = ListSort::resolve($request, Expense::SORTABLE);
 
         $filtered = fn (): Builder => Expense::query()
             ->when($typeId !== null, fn (Builder $query) => $query->where('expense_type_id', $typeId))
@@ -45,8 +47,7 @@ class ExpenseController extends Controller
         $expenses = $filtered()
             ->with(['type', 'author:id,name'])
             ->withCount('allocations')
-            ->orderByDesc('incurred_on')
-            ->orderByDesc('id')
+            ->sortedBy($sort['sort'], $sort['direction'])
             ->paginate(self::PER_PAGE)
             ->withQueryString()
             ->through(fn (Expense $expense): array => [
@@ -67,6 +68,7 @@ class ExpenseController extends Controller
 
         return Inertia::render('expenses/index', [
             'expenses' => $expenses,
+            'sort' => $sort,
             'total' => $total,
             'filters' => ['type' => $typeId, 'from' => $from?->toDateString(), 'to' => $to?->toDateString()],
             'types' => ExpenseType::query()->orderBy('label_fr')->get()->map(fn (ExpenseType $type): array => ['id' => $type->id, 'name' => $type->name])->values(),

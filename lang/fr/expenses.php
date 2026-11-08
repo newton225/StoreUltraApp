@@ -23,6 +23,15 @@ return [
         'week' => 'Semaine entière',
     ],
 
+    'sort' => [
+        'newest' => 'Plus récents d\'abord',
+        'oldest' => 'Plus anciens d\'abord',
+        'amount_high' => 'Montant le plus élevé',
+        'amount_low' => 'Montant le plus bas',
+        'type' => 'Par type de frais',
+        'author' => 'Par auteur',
+    ],
+
     'filters' => [
         'type' => 'Type',
         'all_types' => 'Tous les types',

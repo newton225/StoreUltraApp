@@ -9,6 +9,8 @@ import SelectField from '@/components/select-field';
 import { useFormat } from '@/hooks/use-format';
 import { useTranslation } from '@/hooks/use-translation';
 import { useCanDo } from '@/hooks/use-can-do';
+import SortHeader, { sortQuery } from '@/components/sort-header';
+import type { SortState } from '@/components/sort-header';
 
 type Row = {
     id: number;
@@ -23,6 +25,7 @@ type Row = {
 };
 
 type Props = {
+    sort: SortState;
     orders: PageLinks & { data: Row[] };
     total_outstanding: number;
     zones: { id: number; name: string }[];
@@ -34,6 +37,7 @@ export default function Arrears({
     total_outstanding: totalOutstanding,
     zones,
     filters,
+    sort,
 }: Props) {
     const canExport = useCanDo('payments.export');
     const { t } = useTranslation();
@@ -53,7 +57,12 @@ export default function Arrears({
                         title={t('payments.arrears.title')}
                         description={t('payments.arrears.description')}
                     />
-                    {canExport && <ExportMenu view="arrears" query={filters} />}
+                    {canExport && (
+                        <ExportMenu
+                            view="arrears"
+                            query={{ ...filters, ...sortQuery(sort) }}
+                        />
+                    )}
                 </div>
 
                 <div className="flex flex-wrap items-center justify-between gap-4">
@@ -66,7 +75,10 @@ export default function Arrears({
                             onChange={(value) =>
                                 router.get(
                                     arrears.url(),
-                                    value ? { zone: value } : {},
+                                    {
+                                        ...(value ? { zone: value } : {}),
+                                        ...sortQuery(sort),
+                                    },
                                     { preserveState: true, replace: true },
                                 )
                             }
@@ -97,29 +109,37 @@ export default function Arrears({
                         <table className="w-full text-left text-sm">
                             <thead className="bg-muted/50 text-muted-foreground">
                                 <tr>
-                                    <th className="px-4 py-2 font-medium">
+                                    <SortHeader column="client" state={sort}>
                                         {t('payments.arrears.columns.client')}
-                                    </th>
+                                    </SortHeader>
                                     <th className="px-4 py-2 font-medium">
                                         {t('payments.arrears.columns.phone')}
                                     </th>
-                                    <th className="px-4 py-2 font-medium">
+                                    <SortHeader column="zone" state={sort}>
                                         {t('payments.arrears.columns.zone')}
-                                    </th>
-                                    <th className="px-4 py-2 font-medium">
+                                    </SortHeader>
+                                    <SortHeader column="week" state={sort}>
                                         {t('payments.arrears.columns.week')}
-                                    </th>
-                                    <th className="px-4 py-2 text-right font-medium">
+                                    </SortHeader>
+                                    <SortHeader
+                                        column="due"
+                                        state={sort}
+                                        align="right"
+                                    >
                                         {t('payments.arrears.columns.due')}
-                                    </th>
+                                    </SortHeader>
                                     <th className="px-4 py-2 text-right font-medium">
                                         {t('payments.arrears.columns.paid')}
                                     </th>
-                                    <th className="px-4 py-2 text-right font-medium">
+                                    <SortHeader
+                                        column="outstanding"
+                                        state={sort}
+                                        align="right"
+                                    >
                                         {t(
                                             'payments.arrears.columns.outstanding',
                                         )}
-                                    </th>
+                                    </SortHeader>
                                 </tr>
                             </thead>
                             <tbody>

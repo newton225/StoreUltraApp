@@ -13,6 +13,7 @@ use App\Models\Order;
 use App\Models\PaymentMethod;
 use App\Models\User;
 use App\Models\Zone;
+use App\Support\ListSort;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -34,6 +35,7 @@ class DeliveryController extends Controller
     {
         $user = $request->user();
         $zoneId = $request->integer('zone') ?: null;
+        $sort = ListSort::resolve($request, Delivery::SORTABLE);
 
         $toDeliver = Order::query()
             ->visibleTo($user)
@@ -60,8 +62,7 @@ class DeliveryController extends Controller
             ->whereHas('order', fn (Builder $orders) => $orders->visibleTo($user)
                 ->when($zoneId !== null, fn (Builder $inner) => $inner->whereHas('client', fn (Builder $clients) => $clients->where('zone_id', $zoneId))))
             ->with(['order.client:id,name', 'agent:id,name'])
-            ->orderByDesc('delivered_on')
-            ->orderByDesc('id')
+            ->sortedBy($sort['sort'], $sort['direction'])
             ->paginate(self::PER_PAGE)
             ->withQueryString()
             ->through(fn (Delivery $delivery): array => [
@@ -76,6 +77,7 @@ class DeliveryController extends Controller
             ]);
 
         return Inertia::render('deliveries/index', [
+            'sort' => $sort,
             'to_deliver' => $toDeliver,
             'deliveries' => $deliveries,
             'zones' => Zone::query()

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Database\Factories\CashMovementFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -86,5 +87,29 @@ class CashMovement extends Model
     public function isCancelled(): bool
     {
         return $this->cancelled_at !== null;
+    }
+
+    /**
+     * The columns the cash journal can be sorted by (the keys of the column headers).
+     */
+    public const SORTABLE = ['date', 'reference', 'label', 'direction', 'amount'];
+
+    /**
+     * Sorts the cash movements by one of the SORTABLE keys, newest first when none is given.
+     *
+     * @param  Builder<CashMovement>  $query
+     * @param  'asc'|'desc'  $direction
+     * @return Builder<CashMovement>
+     */
+    public function scopeSortedBy(Builder $query, ?string $sort, string $direction = 'asc'): Builder
+    {
+        return (match ($sort) {
+            'date' => $query->orderBy('occurred_on', $direction),
+            'reference' => $query->orderBy('reference', $direction),
+            'label' => $query->orderBy('label', $direction),
+            'direction' => $query->orderBy('direction', $direction),
+            'amount' => $query->orderBy('amount', $direction),
+            default => $query->orderByDesc('occurred_on'),
+        })->orderBy('id', $sort === null ? 'desc' : $direction);
     }
 }

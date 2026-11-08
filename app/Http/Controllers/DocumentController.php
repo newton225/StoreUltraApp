@@ -13,6 +13,7 @@ use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\PurchaseOrder;
+use App\Support\ListSort;
 use App\Support\Search;
 use Illuminate\Contracts\Database\Eloquent\Builder as BuilderContract;
 use Illuminate\Http\RedirectResponse;
@@ -35,6 +36,7 @@ class DocumentController extends Controller
         $type = DocumentType::tryFrom($request->string('type')->toString());
         $search = trim($request->string('search')->toString());
         $state = $request->string('state')->toString();
+        $sort = ListSort::resolve($request, Document::SORTABLE);
 
         $documents = Document::query()
             ->with('subject')
@@ -42,7 +44,7 @@ class DocumentController extends Controller
             ->when($search !== '', fn (BuilderContract $query) => $query->tap(fn ($q) => Search::contains($q, 'number', $search)))
             ->when($state === 'valid', fn (BuilderContract $query) => $query->whereNull('cancelled_at'))
             ->when($state === 'cancelled', fn (BuilderContract $query) => $query->whereNotNull('cancelled_at'))
-            ->orderByDesc('id')
+            ->sortedBy($sort['sort'], $sort['direction'])
             ->paginate(self::PER_PAGE)
             ->withQueryString()
             ->through(fn (Document $document): array => [
@@ -58,6 +60,7 @@ class DocumentController extends Controller
 
         return Inertia::render('documents/index', [
             'documents' => $documents,
+            'sort' => $sort,
             'filters' => ['type' => $type?->value, 'search' => $search, 'state' => $state ?: null],
             'types' => array_column(DocumentType::cases(), 'value'),
             'period' => ['start' => today()->startOfMonth()->toDateString(), 'end' => today()->endOfMonth()->toDateString()],

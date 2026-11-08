@@ -23,6 +23,15 @@ return [
         'week' => 'Whole week',
     ],
 
+    'sort' => [
+        'newest' => 'Newest first',
+        'oldest' => 'Oldest first',
+        'amount_high' => 'Highest amount',
+        'amount_low' => 'Lowest amount',
+        'type' => 'By type of cost',
+        'author' => 'By author',
+    ],
+
     'filters' => [
         'type' => 'Kind',
         'all_types' => 'All kinds',

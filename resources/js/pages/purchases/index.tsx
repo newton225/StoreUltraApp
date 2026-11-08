@@ -15,6 +15,8 @@ import { useFormat } from '@/hooks/use-format';
 import { useTranslation } from '@/hooks/use-translation';
 import { StatusBadge } from '@/components/status-badge';
 import { useCanDo } from '@/hooks/use-can-do';
+import SortHeader, { sortQuery } from '@/components/sort-header';
+import type { SortState } from '@/components/sort-header';
 
 type Purchase = {
     id: number;
@@ -29,6 +31,7 @@ type Purchase = {
 type Paginated = { data: Purchase[]; total: number };
 
 type Props = {
+    sort: SortState;
     purchaseOrders: Paginated;
     week: string;
     weeks: string[];
@@ -68,6 +71,7 @@ export default function PurchasesIndex({
     unassigned_lines: unassignedLines,
     summary,
     accounts,
+    sort,
 }: Props) {
     const canGenerate = useCanDo('purchases.generate');
     const { t } = useTranslation();
@@ -82,6 +86,7 @@ export default function PurchasesIndex({
             week,
             shop: filters.shop === null ? '' : String(filters.shop),
             status: filters.status ?? '',
+            ...sortQuery(sort),
             ...patch,
         };
 
@@ -102,7 +107,10 @@ export default function PurchasesIndex({
                         title={t('purchases.title')}
                         description={t('purchases.description')}
                     />
-                    <ExportMenu view="purchases" query={{ week, ...filters }} />
+                    <ExportMenu
+                        view="purchases"
+                        query={{ week, ...filters, ...sortQuery(sort) }}
+                    />
                 </div>
 
                 <div className="grid w-fit min-w-64 gap-1">
@@ -235,21 +243,35 @@ export default function PurchasesIndex({
                             <table className="w-full text-left text-sm">
                                 <thead className="bg-muted/50 text-muted-foreground">
                                     <tr>
-                                        <th className="px-4 py-2 font-medium">
+                                        <SortHeader
+                                            column="reference"
+                                            state={sort}
+                                        >
                                             {t('purchases.columns.reference')}
-                                        </th>
-                                        <th className="px-4 py-2 font-medium">
+                                        </SortHeader>
+                                        <SortHeader column="shop" state={sort}>
                                             {t('purchases.columns.shop')}
-                                        </th>
-                                        <th className="px-4 py-2 font-medium">
+                                        </SortHeader>
+                                        <SortHeader
+                                            column="status"
+                                            state={sort}
+                                        >
                                             {t('purchases.columns.status')}
-                                        </th>
-                                        <th className="px-4 py-2 text-right font-medium">
+                                        </SortHeader>
+                                        <SortHeader
+                                            column="expected"
+                                            state={sort}
+                                            align="right"
+                                        >
                                             {t('purchases.columns.expected')}
-                                        </th>
-                                        <th className="px-4 py-2 text-right font-medium">
+                                        </SortHeader>
+                                        <SortHeader
+                                            column="actual"
+                                            state={sort}
+                                            align="right"
+                                        >
                                             {t('purchases.columns.actual')}
-                                        </th>
+                                        </SortHeader>
                                         <th className="px-4 py-2 font-medium">
                                             {t('purchases.columns.next')}
                                         </th>

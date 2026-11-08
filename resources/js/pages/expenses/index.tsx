@@ -18,6 +18,9 @@ import { useFormat } from '@/hooks/use-format';
 import { useTranslation } from '@/hooks/use-translation';
 import { useVisitBusy } from '@/hooks/use-visit-busy';
 import { useCanDo } from '@/hooks/use-can-do';
+import { sortQuery } from '@/components/sort-header';
+import type { SortState } from '@/components/sort-header';
+import SortSelect from '@/components/sort-select';
 
 type Row = {
     id: number;
@@ -36,6 +39,7 @@ type Row = {
 };
 
 type Props = {
+    sort: SortState;
     expenses: {
         data: Row[];
         total: number;
@@ -54,6 +58,7 @@ export default function ExpensesIndex({
     total,
     filters,
     types,
+    sort,
 }: Props) {
     const canCreate = useCanDo('expenses.create');
     const canCancel = useCanDo('expenses.cancel');
@@ -75,6 +80,7 @@ export default function ExpensesIndex({
             from,
             to,
             type: filters.type === null ? '' : String(filters.type),
+            ...sortQuery(sort),
             ...patch,
         };
 
@@ -96,7 +102,10 @@ export default function ExpensesIndex({
                         description={t('expenses.description')}
                     />
                     <div className="flex shrink-0 items-center gap-2">
-                        <ExportMenu view="expenses" query={filters} />
+                        <ExportMenu
+                            view="expenses"
+                            query={{ ...filters, ...sortQuery(sort) }}
+                        />
                         {canCreate && (
                             <Button variant="info" asChild>
                                 <Link href={create()}>{t('expenses.new')}</Link>
@@ -156,6 +165,42 @@ export default function ExpensesIndex({
                             aria-label={t('expenses.filters.to')}
                         />
                     </label>
+                    <SortSelect
+                        id="sort-expenses"
+                        state={sort}
+                        choices={[
+                            {
+                                sort: '',
+                                direction: 'asc',
+                                label: t('expenses.sort.newest'),
+                            },
+                            {
+                                sort: 'date',
+                                direction: 'asc',
+                                label: t('expenses.sort.oldest'),
+                            },
+                            {
+                                sort: 'amount',
+                                direction: 'desc',
+                                label: t('expenses.sort.amount_high'),
+                            },
+                            {
+                                sort: 'amount',
+                                direction: 'asc',
+                                label: t('expenses.sort.amount_low'),
+                            },
+                            {
+                                sort: 'type',
+                                direction: 'asc',
+                                label: t('expenses.sort.type'),
+                            },
+                            {
+                                sort: 'author',
+                                direction: 'asc',
+                                label: t('expenses.sort.author'),
+                            },
+                        ]}
+                    />
                 </form>
 
                 <p className="text-sm">

@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import { useFormat } from '@/hooks/use-format';
 import { useTranslation } from '@/hooks/use-translation';
 import { useCanDo } from '@/hooks/use-can-do';
+import SortHeader, { sortQuery } from '@/components/sort-header';
+import type { SortState } from '@/components/sort-header';
 
 type ToDeliver = {
     id: number;
@@ -34,6 +36,7 @@ type Made = {
 };
 
 type Props = {
+    sort: SortState;
     to_deliver: ToDeliver[];
     deliveries: {
         data: Made[];
@@ -52,6 +55,7 @@ export default function DeliveriesIndex({
     deliveries,
     zones,
     filters,
+    sort,
 }: Props) {
     const canExport = useCanDo('deliveries.export');
     const { t } = useTranslation();
@@ -72,7 +76,10 @@ export default function DeliveriesIndex({
                         description={t('deliveries.description')}
                     />
                     {canExport && (
-                        <ExportMenu view="deliveries" query={filters} />
+                        <ExportMenu
+                            view="deliveries"
+                            query={{ ...filters, ...sortQuery(sort) }}
+                        />
                     )}
                 </div>
 
@@ -85,7 +92,10 @@ export default function DeliveriesIndex({
                         onChange={(value) =>
                             router.get(
                                 index.url(),
-                                value ? { zone: value } : {},
+                                {
+                                    ...(value ? { zone: value } : {}),
+                                    ...sortQuery(sort),
+                                },
                                 { preserveState: true, replace: true },
                             )
                         }
@@ -198,21 +208,31 @@ export default function DeliveriesIndex({
                             <table className="w-full text-left text-sm">
                                 <thead className="bg-muted/50 text-muted-foreground">
                                     <tr>
-                                        <th className="px-4 py-2 font-medium">
+                                        <SortHeader
+                                            column="reference"
+                                            state={sort}
+                                        >
                                             {t('deliveries.done.reference')}
-                                        </th>
-                                        <th className="px-4 py-2 font-medium">
+                                        </SortHeader>
+                                        <SortHeader column="date" state={sort}>
                                             {t('deliveries.done.date')}
-                                        </th>
-                                        <th className="px-4 py-2 font-medium">
+                                        </SortHeader>
+                                        <SortHeader
+                                            column="client"
+                                            state={sort}
+                                        >
                                             {t('deliveries.done.client')}
-                                        </th>
-                                        <th className="px-4 py-2 text-right font-medium">
+                                        </SortHeader>
+                                        <SortHeader
+                                            column="kits"
+                                            state={sort}
+                                            align="right"
+                                        >
                                             {t('deliveries.done.kits')}
-                                        </th>
-                                        <th className="px-4 py-2 font-medium">
+                                        </SortHeader>
+                                        <SortHeader column="agent" state={sort}>
                                             {t('deliveries.done.agent')}
-                                        </th>
+                                        </SortHeader>
                                         <th className="px-4 py-2 font-medium">
                                             {t('deliveries.done.received_by')}
                                         </th>

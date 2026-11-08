@@ -138,6 +138,12 @@ return [
     ],
 
     'ui' => [
+        'sort' => [
+            'newest' => 'Newest first',
+            'oldest' => 'Oldest first',
+            'number' => 'By number',
+            'type' => 'By type',
+        ],
         'issued' => 'Document issued.',
         'cancelled' => 'Document cancelled.',
         'fne_recorded' => 'FNE number recorded.',

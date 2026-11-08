@@ -3,6 +3,7 @@
 return [
 
     'sort' => [
+        'by' => 'Trier par',
         'ascending' => 'Trier par ordre croissant',
         'descending' => 'Trier par ordre décroissant',
     ],

@@ -83,6 +83,14 @@ return [
         'confirm_title' => 'Record this movement?',
         'confirm_body' => 'The movement is frozen: it cannot be edited, only cancelled with a reason, and it stays in the books.',
     ],
+    'sort' => [
+        'newest' => 'Newest first',
+        'oldest' => 'Oldest first',
+        'amount_high' => 'Highest amount',
+        'amount_low' => 'Lowest amount',
+        'reference' => 'By reference',
+    ],
+
     'filters' => [
         'from' => 'From',
         'to' => 'To',

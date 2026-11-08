@@ -29,6 +29,9 @@ import { useFormat } from '@/hooks/use-format';
 import { useTranslation } from '@/hooks/use-translation';
 import { newIdempotencyKey } from '@/lib/idempotency';
 import { useCanDo } from '@/hooks/use-can-do';
+import { sortQuery } from '@/components/sort-header';
+import type { SortState } from '@/components/sort-header';
+import SortSelect from '@/components/sort-select';
 
 type Row = {
     id: number;
@@ -47,6 +50,7 @@ type Row = {
 };
 
 type Props = {
+    sort: SortState;
     movements: {
         data: Row[];
         current_page: number;
@@ -56,7 +60,7 @@ type Props = {
     };
     summary: { opening: number; in: number; out: number; closing: number };
     filters: {
-        direction: string | null;
+        flow: string | null;
         from: string | null;
         to: string | null;
     };
@@ -108,6 +112,7 @@ export default function CashIndex({
     last_closed_on: lastClosedOn,
     balance_today: balanceToday,
     unlinked_expenses: unlinkedExpenses,
+    sort,
 }: Props) {
     const canRecord = useCanDo('cash.record');
     const canCancel = useCanDo('cash.cancel');
@@ -130,7 +135,8 @@ export default function CashIndex({
         const next = {
             from,
             to,
-            direction: filters.direction ?? '',
+            flow: filters.flow ?? '',
+            ...sortQuery(sort),
             ...patch,
         };
 
@@ -159,7 +165,10 @@ export default function CashIndex({
                         title={t('cash.title')}
                         description={t('cash.description')}
                     />
-                    <ExportMenu view="cash" query={filters} />
+                    <ExportMenu
+                        view="cash"
+                        query={{ ...filters, ...sortQuery(sort) }}
+                    />
                 </div>
 
                 <div
@@ -420,15 +429,46 @@ export default function CashIndex({
                     </label>
                     <SelectField
                         id="cash-filter-direction"
-                        name="direction"
-                        defaultValue={filters.direction ?? ''}
-                        onChange={(value) => apply({ direction: value })}
+                        name="flow"
+                        defaultValue={filters.flow ?? ''}
+                        onChange={(value) => apply({ flow: value })}
                         options={[
                             { value: '', label: t('cash.filters.all') },
                             ...['in', 'out'].map((value) => ({
                                 value,
                                 label: t(`cash.directions.${value}`),
                             })),
+                        ]}
+                    />
+                    <SortSelect
+                        id="sort-cash"
+                        state={sort}
+                        choices={[
+                            {
+                                sort: '',
+                                direction: 'asc',
+                                label: t('cash.sort.newest'),
+                            },
+                            {
+                                sort: 'date',
+                                direction: 'asc',
+                                label: t('cash.sort.oldest'),
+                            },
+                            {
+                                sort: 'amount',
+                                direction: 'desc',
+                                label: t('cash.sort.amount_high'),
+                            },
+                            {
+                                sort: 'amount',
+                                direction: 'asc',
+                                label: t('cash.sort.amount_low'),
+                            },
+                            {
+                                sort: 'reference',
+                                direction: 'asc',
+                                label: t('cash.sort.reference'),
+                            },
                         ]}
                     />
                 </form>

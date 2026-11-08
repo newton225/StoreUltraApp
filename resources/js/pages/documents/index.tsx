@@ -18,6 +18,9 @@ import { Label } from '@/components/ui/label';
 import { useTranslation } from '@/hooks/use-translation';
 import { useVisitBusy } from '@/hooks/use-visit-busy';
 import { useCanDo } from '@/hooks/use-can-do';
+import { sortQuery } from '@/components/sort-header';
+import type { SortState } from '@/components/sort-header';
+import SortSelect from '@/components/sort-select';
 
 type Doc = {
     id: number;
@@ -31,6 +34,7 @@ type Doc = {
 };
 
 type Props = {
+    sort: SortState;
     documents: {
         data: Doc[];
         total: number;
@@ -49,6 +53,7 @@ export default function DocumentsIndex({
     filters,
     types,
     period,
+    sort,
 }: Props) {
     const canExport = useCanDo('documents.export');
     const { t, locale } = useTranslation();
@@ -69,6 +74,7 @@ export default function DocumentsIndex({
             search,
             type: filters.type ?? '',
             state: filters.state ?? '',
+            ...sortQuery(sort),
             ...patch,
         };
 
@@ -106,7 +112,10 @@ export default function DocumentsIndex({
                         description={t('documents.ui.description')}
                     />
                     {canExport && (
-                        <ExportMenu view="documents" query={filters} />
+                        <ExportMenu
+                            view="documents"
+                            query={{ ...filters, ...sortQuery(sort) }}
+                        />
                     )}
                 </div>
 
@@ -232,6 +241,32 @@ export default function DocumentsIndex({
                                 {
                                     value: 'cancelled',
                                     label: t('documents.ui.filters.cancelled'),
+                                },
+                            ]}
+                        />
+                        <SortSelect
+                            id="sort-documents"
+                            state={sort}
+                            choices={[
+                                {
+                                    sort: '',
+                                    direction: 'asc',
+                                    label: t('documents.ui.sort.newest'),
+                                },
+                                {
+                                    sort: 'date',
+                                    direction: 'asc',
+                                    label: t('documents.ui.sort.oldest'),
+                                },
+                                {
+                                    sort: 'number',
+                                    direction: 'asc',
+                                    label: t('documents.ui.sort.number'),
+                                },
+                                {
+                                    sort: 'type',
+                                    direction: 'asc',
+                                    label: t('documents.ui.sort.type'),
                                 },
                             ]}
                         />

@@ -138,6 +138,12 @@ return [
     ],
 
     'ui' => [
+        'sort' => [
+            'newest' => 'Plus récents d\'abord',
+            'oldest' => 'Plus anciens d\'abord',
+            'number' => 'Par numéro',
+            'type' => 'Par type',
+        ],
         'issued' => 'Document émis.',
         'cancelled' => 'Document annulé.',
         'fne_recorded' => 'Numéro FNE enregistré.',

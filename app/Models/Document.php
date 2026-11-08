@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\DocumentType;
 use Database\Factories\DocumentFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -83,5 +84,28 @@ class Document extends Model
     public function isCancelled(): bool
     {
         return $this->cancelled_at !== null;
+    }
+
+    /**
+     * The columns the list of documents can be sorted by (the keys of the column headers). The « about » column is
+     * built on screen from the record behind the document, so it cannot be sorted honestly.
+     */
+    public const SORTABLE = ['number', 'type', 'date'];
+
+    /**
+     * Sorts a list of documents by one of the SORTABLE keys, newest first when none is given.
+     *
+     * @param  Builder<Document>  $query
+     * @param  'asc'|'desc'  $direction
+     * @return Builder<Document>
+     */
+    public function scopeSortedBy(Builder $query, ?string $sort, string $direction = 'asc'): Builder
+    {
+        return (match ($sort) {
+            'number' => $query->orderBy('number', $direction),
+            'type' => $query->orderBy('type', $direction),
+            'date' => $query->orderBy('issued_at', $direction),
+            default => $query,
+        })->orderBy('id', $sort === null ? 'desc' : $direction);
     }
 }

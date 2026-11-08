@@ -83,6 +83,14 @@ return [
         'confirm_title' => 'Enregistrer ce mouvement ?',
         'confirm_body' => 'Le mouvement est figé : il ne se modifie pas, il s\'annule avec un motif et reste dans les livres.',
     ],
+    'sort' => [
+        'newest' => 'Plus récents d\'abord',
+        'oldest' => 'Plus anciens d\'abord',
+        'amount_high' => 'Montant le plus élevé',
+        'amount_low' => 'Montant le plus bas',
+        'reference' => 'Par référence',
+    ],
+
     'filters' => [
         'from' => 'Du',
         'to' => 'Au',

@@ -98,9 +98,11 @@ class PaymentController extends Controller
     public function arrears(Request $request, AdvanceArrears $arrears): Response
     {
         $zoneId = $request->integer('zone') ?: null;
+        $sort = ListSort::resolve($request, AdvanceArrears::SORTABLE);
 
         return Inertia::render('payments/arrears', [
-            'orders' => $arrears->page($zoneId, self::PER_PAGE),
+            'orders' => $arrears->page($zoneId, self::PER_PAGE, $sort['sort'], $sort['direction']),
+            'sort' => $sort,
             'total_outstanding' => $arrears->outstanding($zoneId),
             'zones' => Zone::query()->orderBy('name')->get(['id', 'name']),
             'filters' => ['zone' => $zoneId],

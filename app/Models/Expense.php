@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Database\Factories\ExpenseFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -107,5 +108,28 @@ class Expense extends Model
     public function isCancelled(): bool
     {
         return $this->cancelled_at !== null;
+    }
+
+    /**
+     * The columns the list of costs can be sorted by (the keys of the column headers).
+     */
+    public const SORTABLE = ['date', 'type', 'amount', 'author'];
+
+    /**
+     * Sorts a list of costs by one of the SORTABLE keys, newest first when none is given.
+     *
+     * @param  Builder<Expense>  $query
+     * @param  'asc'|'desc'  $direction
+     * @return Builder<Expense>
+     */
+    public function scopeSortedBy(Builder $query, ?string $sort, string $direction = 'asc'): Builder
+    {
+        return (match ($sort) {
+            'date' => $query->orderBy('incurred_on', $direction),
+            'type' => $query->orderBy(ExpenseType::query()->select('label_fr')->whereColumn('expense_types.id', 'expenses.expense_type_id'), $direction),
+            'amount' => $query->orderBy('amount', $direction),
+            'author' => $query->orderBy(User::query()->select('name')->whereColumn('users.id', 'expenses.created_by'), $direction),
+            default => $query->orderByDesc('incurred_on'),
+        })->orderBy('id', $sort === null ? 'desc' : $direction);
     }
 }

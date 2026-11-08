@@ -201,16 +201,17 @@ class ListExports
      */
     private function cash(Request $request): array
     {
-        $direction = in_array($request->string('direction')->toString(), [CashMovement::IN, CashMovement::OUT], true) ? $request->string('direction')->toString() : null;
+        $direction = in_array($request->string('flow')->toString(), [CashMovement::IN, CashMovement::OUT], true) ? $request->string('flow')->toString() : null;
         $from = $request->date('from');
         $to = $request->date('to');
+        $sort = ListSort::resolve($request, CashMovement::SORTABLE);
 
         $rows = CashMovement::query()
             ->with('recorder:id,name')
             ->when($direction !== null, fn (Builder $query) => $query->where('direction', $direction))
             ->when($from !== null, fn (Builder $query) => $query->whereDate('occurred_on', '>=', $from))
             ->when($to !== null, fn (Builder $query) => $query->whereDate('occurred_on', '<=', $to))
-            ->orderByDesc('occurred_on')->orderByDesc('id')->limit(self::MAX_ROWS)->get()
+            ->sortedBy($sort['sort'], $sort['direction'])->limit(self::MAX_ROWS)->get()
             ->map(fn (CashMovement $movement): array => [
                 $movement->reference, $movement->occurred_on->toDateString(), $this->t('cash.directions.'.$movement->direction),
                 $movement->direction === CashMovement::OUT ? -$movement->amount : $movement->amount,
@@ -226,7 +227,9 @@ class ListExports
      */
     private function arrears(Request $request): array
     {
-        $rows = $this->arrears->rows($request->integer('zone') ?: null)
+        $sort = ListSort::resolve($request, AdvanceArrears::SORTABLE);
+
+        $rows = $this->arrears->rows($request->integer('zone') ?: null, $sort['sort'], $sort['direction'])
             ->take(self::MAX_ROWS)
             ->map(fn (array $row): array => [
                 $row['reference'], $row['client'], $row['phone'], $row['zone'], $row['delivery_week'],
@@ -306,13 +309,15 @@ class ListExports
         $from = $request->date('from');
         $to = $request->date('to');
 
+        $sort = ListSort::resolve($request, Expense::SORTABLE);
+
         $rows = Expense::query()
             ->with(['type', 'author:id,name'])
             ->withCount('allocations')
             ->when($typeId !== null, fn (Builder $query) => $query->where('expense_type_id', $typeId))
             ->when($from !== null, fn (Builder $query) => $query->whereDate('incurred_on', '>=', $from))
             ->when($to !== null, fn (Builder $query) => $query->whereDate('incurred_on', '<=', $to))
-            ->orderByDesc('incurred_on')->orderByDesc('id')->limit(self::MAX_ROWS)->get()
+            ->sortedBy($sort['sort'], $sort['direction'])->limit(self::MAX_ROWS)->get()
             ->map(fn (Expense $expense): array => [
                 $expense->incurred_on->toDateString(), $expense->type->name, $expense->amount,
                 $this->t('expenses.scopes.'.$expense->scope), $expense->week?->toDateString(), $expense->allocations_count,
@@ -329,12 +334,13 @@ class ListExports
     private function deliveries(Request $request, User $user): array
     {
         $zoneId = $request->integer('zone') ?: null;
+        $sort = ListSort::resolve($request, Delivery::SORTABLE);
 
         $rows = Delivery::query()
             ->whereHas('order', fn (Builder $orders) => $orders->visibleTo($user)
                 ->when($zoneId !== null, fn (Builder $inner) => $inner->whereHas('client', fn (Builder $clients) => $clients->where('zone_id', $zoneId))))
             ->with(['order.client.zone', 'agent:id,name'])
-            ->orderByDesc('delivered_on')->orderByDesc('id')->limit(self::MAX_ROWS)->get()
+            ->sortedBy($sort['sort'], $sort['direction'])->limit(self::MAX_ROWS)->get()
             ->map(fn (Delivery $delivery): array => [
                 $delivery->reference, $delivery->delivered_on->toDateString(), $delivery->order->reference,
                 $delivery->order->client?->name, $delivery->order->client?->zone->name, $delivery->kits_delivered,
@@ -353,12 +359,14 @@ class ListExports
         $shopId = $request->integer('shop') ?: null;
         $status = PurchaseOrderStatus::tryFrom($request->string('status')->toString());
 
+        $sort = ListSort::resolve($request, PurchaseOrder::SORTABLE);
+
         $rows = PurchaseOrder::query()
             ->with('shop:id,name')
             ->whereDate('week', $week)
             ->when($shopId !== null, fn (Builder $query) => $query->where('shop_id', $shopId))
             ->when($status !== null, fn (Builder $query) => $query->where('status', $status->value))
-            ->orderBy('shop_id')->orderBy('id')->limit(self::MAX_ROWS)->get()
+            ->sortedBy($sort['sort'], $sort['direction'])->limit(self::MAX_ROWS)->get()
             ->map(fn (PurchaseOrder $purchase): array => [
                 $purchase->reference, $purchase->shop->name, $purchase->week->toDateString(),
                 $this->t('purchases.statuses.'.$purchase->status->value), $purchase->expected_total, $purchase->actual_total,
@@ -505,12 +513,14 @@ class ListExports
         $search = trim($request->string('search')->toString());
         $state = $request->string('state')->toString();
 
+        $sort = ListSort::resolve($request, Document::SORTABLE);
+
         $rows = Document::query()
             ->when($type !== null, fn (Builder $query) => $query->where('type', $type->value))
             ->when($search !== '', fn (Builder $query) => $query->tap(fn ($q) => Search::contains($q, 'number', $search)))
             ->when($state === 'valid', fn (Builder $query) => $query->whereNull('cancelled_at'))
             ->when($state === 'cancelled', fn (Builder $query) => $query->whereNotNull('cancelled_at'))
-            ->orderByDesc('id')->limit(self::MAX_ROWS)->get()
+            ->sortedBy($sort['sort'], $sort['direction'])->limit(self::MAX_ROWS)->get()
             ->map(fn (Document $document): array => [
                 $document->number, $this->t('documents.types.'.$document->type->value), $document->locale,
                 $document->issued_at->format('Y-m-d H:i'),
