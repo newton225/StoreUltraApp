@@ -148,6 +148,32 @@ class ProductionCheck
     }
 
     /**
+     * The migrations that were deployed but not run yet. Forgetting them after an update is dangerous here: a
+     * new right or action that profiles receive through a migration would be missing, and users would be refused.
+     * It needs the database, so only the command asks it (at every deployment), not every web request.
+     *
+     * @return list<string>
+     */
+    public function pendingMigrations(): array
+    {
+        try {
+            $migrator = app('migrator');
+            $repository = $migrator->getRepository();
+
+            if (! $repository->repositoryExists()) {
+                return ['The migrations table does not exist: run php artisan migrate.'];
+            }
+
+            $files = array_keys($migrator->getMigrationFiles([database_path('migrations'), ...$migrator->paths()]));
+            $pending = array_values(array_diff($files, $repository->getRan()));
+        } catch (Throwable) {
+            return [];
+        }
+
+        return $pending === [] ? [] : [count($pending).' migration(s) not run yet ('.implode(', ', array_slice($pending, 0, 3)).(count($pending) > 3 ? ', …' : '').'): run php artisan migrate, otherwise profiles may miss new rights.'];
+    }
+
+    /**
      * Refuse to go on when a setting is dangerous.
      *
      * @throws RuntimeException listing what has to change

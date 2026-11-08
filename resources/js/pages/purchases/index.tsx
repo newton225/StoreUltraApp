@@ -152,7 +152,7 @@ export default function PurchasesIndex({
                                     />
                                     <InputError message={errors.week} />
                                     <ConfirmAction
-                                        variant="default"
+                                        variant="info"
                                         label={t('purchases.generate.submit')}
                                         title={t(
                                             'purchases.generate.confirm_title',
@@ -160,7 +160,11 @@ export default function PurchasesIndex({
                                         description={t(
                                             'purchases.generate.confirm_body',
                                         )}
-                                        disabled={processing}
+                                        disabled={
+                                            processing ||
+                                            (pendingLines === 0 &&
+                                                unassignedLines === 0)
+                                        }
                                     />
                                 </>
                             )}

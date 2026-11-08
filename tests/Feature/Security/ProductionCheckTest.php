@@ -136,3 +136,14 @@ test('the command fails when the application connects as a super-user', function
 
     $this->artisan('app:check-production')->assertFailed();
 });
+
+test('a migration that was deployed but not run is reported', function () {
+    config(['database.default' => $this->testConnection]);
+
+    expect(app(ProductionCheck::class)->pendingMigrations())->toBe([]);
+
+    DB::table('migrations')->where('migration', '2026_11_07_120000_give_clients_menu_to_existing_profiles')->delete();
+
+    expect(app(ProductionCheck::class)->pendingMigrations())->toHaveCount(1)
+        ->and(app(ProductionCheck::class)->pendingMigrations()[0])->toContain('1 migration(s) not run yet')->toContain('give_clients_menu');
+});
