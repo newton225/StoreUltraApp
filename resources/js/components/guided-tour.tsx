@@ -267,7 +267,12 @@ export default function GuidedTour({
                     {t(step.body)}
                 </p>
                 <div className="flex items-center justify-between gap-2 pt-1">
-                    <Button variant="ghost" size="sm" onClick={close}>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        data-test="tour-skip"
+                        onClick={close}
+                    >
                         {t('tours.skip')}
                     </Button>
                     <div className="flex items-center gap-2">

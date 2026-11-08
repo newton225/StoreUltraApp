@@ -20,6 +20,7 @@ cochée est un point **supposé faux**.
 
 - [ ] **Documents émis uniformes** : en-tête et pied de page partagés, alimentés par la page de l'entreprise (nom, logo, contacts, mention) (UI-133).
 - [ ] **Listes de choix qui grandissent** (zones, kits, clients, boutiques, produits, utilisateurs) : cherchables explicitement, filtre sans accents, clavier (UI-134, UI-121).
+- [ ] **Liste de choix très longue** (clients...) : premiers éléments seulement, recherche bornée côté serveur, mêmes droits, sans accents, choix conservé (UI-136).
 - [ ] **Image téléversée** : aperçu avant enregistrement et fenêtre de recadrage, au doigt et à la souris (UI-135).
 - [ ] **Semaine** choisie dans une liste de semaines ayant des données, composant commun, « Toutes les semaines » pour un filtre (UI-132).
 - [ ] **Sortie visible** de tout formulaire ou panneau déplié dans une page : « Garder … » qui referme et efface le champ et les erreurs (UI-131).

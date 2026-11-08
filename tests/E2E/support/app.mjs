@@ -36,6 +36,10 @@ App\\Models\\PaymentMethod::factory()->create(['label_fr' => 'Espèces']);
 foreach (['Charlie E2E', 'Alpha E2E', 'Bravo E2E'] as $name) {
     $client = App\\Models\\Client::factory()->create(['zone_id' => $zone->id, 'name' => $name]);
 }
+foreach (range(1, 25) as $n) {
+    App\\Models\\Client::factory()->create(['zone_id' => $zone->id, 'name' => sprintf('Filler E2E %02d', $n)]);
+}
+App\\Models\\Client::factory()->create(['zone_id' => $zone->id, 'name' => 'Zoé Traoré E2E']);
 App\\Models\\Order::factory()->for($client)->create(['status' => 'proforma_issued', 'advance_due' => 40000, 'total_sale' => 336600]);
 $profile = App\\Models\\Profile::factory()->create(['label_fr' => 'Lecteur clients', 'label_en' => 'Client reader', 'permissions' => ['manage_clients', 'clients.update']]);
 App\\Models\\User::factory()->create(['name' => 'Lecteur E2E', 'email' => '${READER.email}', 'password' => bcrypt('${READER.password}'), 'email_verified_at' => now(), 'profile_id' => $profile->id]);

@@ -19,6 +19,11 @@ type Props = {
     required?: boolean;
     /** The empty option is an invitation to choose, shown as such (playbook UI-120). */
     prompt: boolean;
+    /**
+     * For a list too long to be sent whole: what the user types is looked up on the server (after a short pause)
+     * and the answer replaces the choices. `options` are then only the first ones.
+     */
+    lookup?: (query: string) => Promise<SearchableOption[]>;
 };
 
 /** Lower case without accents, so that "ete" finds "Été" and "Niakara" finds "niakara". */
@@ -44,6 +49,7 @@ export default function SearchableSelect({
     className,
     required,
     prompt,
+    lookup,
 }: Props) {
     const { t } = useTranslation();
     const listId = useId();
@@ -58,9 +64,61 @@ export default function SearchableSelect({
     const [upwards, setUpwards] = useState(false);
     const [query, setQuery] = useState('');
     const [active, setActive] = useState(0);
+    const [found, setFound] = useState<SearchableOption[]>([]);
+    const [searching, setSearching] = useState(false);
+    const [picked, setPicked] = useState<SearchableOption | null>(null);
+
+    // Server lookup: wait for a pause in the typing, ignore an answer that arrives after a newer question.
+    useEffect(() => {
+        if (!lookup || query.trim() === '') {
+            return;
+        }
+
+        let stale = false;
+        setSearching(true);
+
+        const timer = window.setTimeout(() => {
+            lookup(query.trim())
+                .then((answer) => {
+                    if (!stale) {
+                        setFound(answer);
+                    }
+                })
+                .catch(() => {
+                    if (!stale) {
+                        setFound([]);
+                    }
+                })
+                .finally(() => {
+                    if (!stale) {
+                        setSearching(false);
+                    }
+                });
+        }, 250);
+
+        return () => {
+            stale = true;
+            window.clearTimeout(timer);
+        };
+    }, [lookup, query]);
+
+    // The real select must hold every option that can be chosen, the ones found on the server included.
+    const known = useMemo(() => {
+        const all = [...options, ...found, ...(picked ? [picked] : [])];
+
+        return all.filter(
+            (option, index) =>
+                all.findIndex((other) => other.value === option.value) ===
+                index,
+        );
+    }, [options, found, picked]);
 
     const visible = useMemo(() => {
         const wanted = normalise(query.trim());
+
+        if (lookup && wanted !== '') {
+            return found;
+        }
 
         return wanted === ''
             ? options
@@ -69,9 +127,9 @@ export default function SearchableSelect({
                       option.value !== '' &&
                       normalise(option.label).includes(wanted),
               );
-    }, [options, query]);
+    }, [options, query, lookup, found]);
 
-    const current = options.find((option) => option.value === value);
+    const current = known.find((option) => option.value === value);
     const showingPrompt = prompt && value === '';
 
     const close = (refocus: boolean): void => {
@@ -101,6 +159,9 @@ export default function SearchableSelect({
     // What the user picks goes through the real select, so the form, the validation and `onChange` all see it.
     const choose = (next: string): void => {
         const element = select.current;
+
+        // A client found on the server stays the chosen one when the next search replaces the answer.
+        setPicked(known.find((option) => option.value === next) ?? null);
 
         if (element && element.value !== next) {
             Object.getOwnPropertyDescriptor(
@@ -223,7 +284,7 @@ export default function SearchableSelect({
                     onChange?.(event.target.value);
                 }}
             >
-                {options.map((option) => (
+                {known.map((option) => (
                     <option key={option.value} value={option.value}>
                         {option.label}
                     </option>
@@ -233,6 +294,7 @@ export default function SearchableSelect({
             <button
                 ref={trigger}
                 type="button"
+                data-test="select-trigger"
                 role="combobox"
                 aria-expanded={open}
                 aria-haspopup="listbox"
@@ -280,6 +342,7 @@ export default function SearchableSelect({
                         <input
                             ref={search}
                             type="text"
+                            data-test="select-search"
                             role="searchbox"
                             value={query}
                             autoComplete="off"
@@ -308,7 +371,9 @@ export default function SearchableSelect({
                     >
                         {visible.length === 0 ? (
                             <li className="px-2 py-3 text-center text-sm text-muted-foreground">
-                                {t('common.select.no_results')}
+                                {searching
+                                    ? t('common.select.searching')
+                                    : t('common.select.no_results')}
                             </li>
                         ) : (
                             visible.map((option, index) => {
@@ -319,6 +384,7 @@ export default function SearchableSelect({
                                         key={option.value}
                                         id={`${listId}-${index}`}
                                         role="option"
+                                        data-test="select-option"
                                         aria-selected={option.value === value}
                                         data-active={index === active}
                                         onPointerEnter={() => setActive(index)}

@@ -612,6 +612,14 @@ Chaque vue prévoit ses états, tous :
 - **UI-135.** **Une image que l'on téléverse se voit avant l'enregistrement, et se recadre.** Dès qu'un fichier image est choisi, la page montre
   son aperçu (avec la mention « pas encore enregistré ») et propose une fenêtre de recadrage : on trace le rectangle à garder, ou on garde l'image
   entière. Le résultat recadré remplace le fichier du formulaire. Le recadrage se fait sans bibliothèque (canevas), au doigt comme à la souris.
+- **UI-136.** **Une liste de choix qui peut compter des milliers d'éléments ne s'envoie pas entière : elle se cherche sur le serveur.**
+  La page ne porte que les **premiers** éléments (une vingtaine) ; ce que l'on tape est envoyé au serveur après une courte
+  pause, qui répond une liste **bornée**. (1) Les **mêmes droits** que le formulaire (profil limité aux zones, éléments
+  actifs seulement) et la **même règle de recherche sans accents** (DATA-13), triée comme on lit les noms ; (2) une réponse
+  qui arrive **après** une question plus récente est **ignorée** ; (3) l'élément trouvé **reste choisi** quand la recherche
+  suivante remplace la liste, et le vrai `select` caché le contient pour que le formulaire l'envoie ; (4) « Recherche… » pendant
+  l'attente, « Aucun résultat » sinon ; (5) un test fixe la **borne** et les droits, et un parcours de bout en bout cherche un
+  élément **au-delà des premiers**.
 - **UI-113.** **Dans tous les formulaires, un champ obligatoire porte un astérisque rouge (`*`) après son
   libellé**, toujours, sans exception d'écran. Le marquage est produit **une seule fois** par le composant
   `Label`, qui lit l'attribut `required` du champ qu'il désigne (`htmlFor` = `id` du champ) : on ne l'écrit donc

@@ -49,6 +49,25 @@ class Search
     }
 
     /**
+     * Order by a text column the way a person reads it: without caring for accents or case, so « Éléonore » sits
+     * between « Eleonore » and « Eloi », not after « Zadi ».
+     *
+     * @param  EloquentBuilder<*>|QueryBuilder  $query
+     * @param  literal-string  $column  a plain column name written in the code, never typed by a user
+     */
+    public static function orderBy(EloquentBuilder|QueryBuilder $query, string $column): void
+    {
+        $base = $query instanceof EloquentBuilder ? $query->getQuery() : $query;
+        $connection = $base->getConnection();
+
+        if ($connection instanceof Connection && $connection->getDriverName() === 'sqlite') {
+            self::registerSqliteFunction($connection);
+        }
+
+        $query->orderByRaw("lower(unaccent(\"{$column}\"))");
+    }
+
+    /**
      * Give SQLite the `unaccent` function PostgreSQL has: letters without their marks, as plain ASCII.
      */
     private static function registerSqliteFunction(Connection $connection): void

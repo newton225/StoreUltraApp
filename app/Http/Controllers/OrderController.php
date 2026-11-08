@@ -115,9 +115,13 @@ class OrderController extends Controller
         $batchWeek = $request->filled('batch_week') ? $request->date('batch_week') : null;
 
         return Inertia::render('orders/create', [
+            // Only the first ones: the list searches the others on the server as the user types (ClientLookupController).
             'clients' => Client::query()
+                ->visibleTo($request->user())
                 ->where('status', ClientStatus::Active->value)
-                ->orderBy('name')
+                ->tap(fn ($query) => Search::orderBy($query, 'name'))
+                ->orderBy('id')
+                ->limit(ClientLookupController::LIMIT)
                 ->get(['id', 'name', 'reference']),
             'kits' => Kit::query()->where('active', true)->orderBy('name_fr')->get()->map(fn (Kit $kit): array => ['id' => $kit->id, 'name' => $kit->name]),
             'defaults' => [

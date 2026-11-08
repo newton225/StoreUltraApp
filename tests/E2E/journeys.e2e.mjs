@@ -143,6 +143,33 @@ describe('the sale', () => {
     });
 });
 
+describe('long lists', () => {
+    test('a client beyond the first ones is found by searching the server, accents ignored', async () => {
+        const page = await owner.context.newPage();
+
+        await page.goto(`${app.url}/orders/create`);
+
+        // The guided tour of a page the owner has never seen covers it: skip it first.
+        await page.locator('[data-test=tour-skip]').click();
+
+        // The field of the client: the form only holds the first ones (« Zoé Traoré E2E » is far down the alphabet).
+        const field = page.locator('div:has(> select#client_id)');
+        await field.locator('[data-test=select-trigger]').click();
+        assert.ok((await page.locator('[data-test=select-option]').count()) <= 21);
+
+        await page.locator('[data-test=select-search]').fill('zoe traore');
+        const found = page.locator('[data-test=select-option]', { hasText: 'Zoé Traoré E2E' });
+        await found.waitFor();
+        await found.click();
+
+        // What was found on the server is what the form will send.
+        const chosen = await page.locator('select#client_id').evaluate((select) => select.selectedOptions[0]?.textContent);
+        assert.match(chosen, /Zoé Traoré E2E/);
+
+        await page.close();
+    });
+});
+
 describe('rights', () => {
     test('a profile with only the clients menu sees only that, and is refused the rest', async () => {
         const { context, page } = await signedIn(READER);

@@ -18,6 +18,7 @@ import { Label } from '@/components/ui/label';
 import { useTranslation } from '@/hooks/use-translation';
 import { formGrid } from '@/lib/form-layout';
 import { FieldLabel } from '@/components/field-label';
+import { index as lookupClients } from '@/actions/App/Http/Controllers/ClientLookupController';
 
 type Props = {
     clients: { id: number; name: string; reference: string | null }[];
@@ -51,6 +52,32 @@ const ORDER_CREATE_TOUR: TourStep[] = [
         body: 'tours.order_create.form_batch.body',
     },
 ];
+
+/**
+ * Clients are looked up on the server as the user types (the form only holds the first ones), so the list never
+ * grows with the number of clients. Defined here, once, so its identity never changes between renders.
+ */
+const findClients = async (
+    query: string,
+): Promise<{ value: string; label: string }[]> => {
+    const response = await fetch(lookupClients.url({ query: { q: query } }), {
+        headers: { Accept: 'application/json' },
+        credentials: 'same-origin',
+    });
+
+    if (!response.ok) {
+        throw new Error('The clients could not be searched.');
+    }
+
+    const { data } = (await response.json()) as {
+        data: { id: number; name: string; reference: string | null }[];
+    };
+
+    return data.map((client) => ({
+        value: String(client.id),
+        label: `${client.name} (${client.reference ?? ''})`,
+    }));
+};
 
 export default function CreateOrder({
     clients,
@@ -125,6 +152,7 @@ export default function CreateOrder({
                                         <SelectField
                                             id="client_id"
                                             searchable
+                                            lookup={findClients}
                                             name="client_id"
                                             required
                                             options={[

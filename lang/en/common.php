@@ -12,6 +12,7 @@ return [
         'search' => 'Search…',
         'search_label' => 'Search the list',
         'no_results' => 'No result',
+        'searching' => 'Searching…',
     ],
 
     'pagination' => [

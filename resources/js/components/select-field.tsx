@@ -19,6 +19,8 @@ type Props = {
     prompt?: boolean;
     /** Searchable list; by default a list of eight choices or more is (see SEARCH_FROM). */
     searchable?: boolean;
+    /** Looks choices up on the server as the user types (a list too long to be sent whole). */
+    lookup?: (query: string) => Promise<SelectOption[]>;
 };
 
 /** From this many options, a list can be searched instead of scrolled. */

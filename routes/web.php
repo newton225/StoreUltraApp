@@ -7,6 +7,7 @@ use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\CashCloseController;
 use App\Http\Controllers\CashMovementController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ClientLookupController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeliveryController;
@@ -58,6 +59,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('exports/{report}', [ExportController::class, 'show'])->name('exports.show');
     Route::get('list-exports/{view}/{format}', [ListExportController::class, 'show'])->name('list-exports.show');
 
+    Route::get('lookup/clients', [ClientLookupController::class, 'index'])->middleware(['can:orders.create', 'throttle:120,1'])->name('lookup.clients');
     Route::resource('clients', ClientController::class)->except(['destroy']);
     Route::patch('clients/{client}/status', [ClientController::class, 'status'])->name('clients.status');
     Route::get('order-documents/zip', [OrderDocumentArchiveController::class, 'show'])->middleware('throttle:archives')
