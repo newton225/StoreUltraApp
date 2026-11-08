@@ -16,6 +16,7 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ExpenseTypeController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\HealthController;
+use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\KitController;
 use App\Http\Controllers\KitVersionController;
@@ -47,6 +48,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
 Route::get('legal/{document}', [LegalController::class, 'show'])->whereIn('document', LegalTexts::DOCUMENTS)->name('legal.show');
+
+// Where an invited person chooses their password: public, the single-use token is the proof (SEC-165).
+Route::middleware(['guest', 'throttle:10,1'])->group(function () {
+    Route::get('invitation/{token}', [InvitationController::class, 'show'])->name('invitation.show');
+    Route::post('invitation', [InvitationController::class, 'accept'])->name('invitation.accept');
+});
 
 Route::post('locale', [LocaleController::class, 'update'])
     ->middleware('throttle:20,1')
@@ -120,6 +127,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::middleware('can:manage-users')->group(function () {
         Route::resource('users', UserController::class)->except(['show', 'destroy']);
+        Route::post('users/{user}/invitation', [UserController::class, 'invite'])->middleware('throttle:20,1')->name('users.invitation');
+        Route::post('users/{user}/invitation-link', [UserController::class, 'invitationLink'])->middleware('throttle:20,1')->name('users.invitation-link');
         Route::patch('profiles/{profile}/rights', [ProfileController::class, 'toggleRight'])->name('profiles.rights');
         Route::resource('profiles', ProfileController::class)->except(['show']);
     });

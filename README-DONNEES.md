@@ -48,7 +48,7 @@ Réglages initiaux : voir le [chapitre 7 du besoin fonctionnel](README-FONCTIONN
 | Table | Champs principaux |
 | --- | --- |
 | `profiles` | Profils de droits : `code` (unique, renseigné pour les 3 profils système `owner`, `employee`, `agent`), `label_fr`, `label_en`, `restricted_to_zones` (limité aux sous-préfectures affectées), `is_system` (non modifiable, non supprimable), `permissions` (JSON, catalogue fermé : gérer les commandes, les achats, les frais, le catalogue, voir les bénéfices) |
-| `users` | Table existante (Fortify) + `profile_id` (profil de droits), `role` (responsable, employé, agent : reflet du profil), `locale` (fr ou en), `appearance` (clair, sombre, système), `active` |
+| `users` | Table existante (Fortify) + `profile_id` (profil de droits), `role` (responsable, employé, agent : reflet du profil), `password_set_at` (date où la personne a choisi son mot de passe ; vide tant que l'invitation n'est pas acceptée), `locale` (fr ou en), `appearance` (clair, sombre, système), `active` |
 
 Les droits se déduisent du rôle et, pour l'agent, des zones affectées (`zone_user`).
 

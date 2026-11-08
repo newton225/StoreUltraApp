@@ -28,6 +28,14 @@ return [
         'log_in' => 'log in',
     ],
 
+    'invitation' => [
+        'title' => 'Choose your password',
+        'description' => 'Your account is created: choose a password only you will know',
+        'submit' => 'Save my password',
+        'expired' => 'This link is no longer valid (already used or expired). Ask the person who created your account for a new one.',
+        'done' => 'Password saved. You can now log in.',
+    ],
+
     'reset' => [
         'title' => 'Reset password',
         'description' => 'Please enter your new password below',

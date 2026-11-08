@@ -3,6 +3,7 @@
 use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Inertia\Testing\AssertableInertia as Assert;
 
 function validUserPayload(array $overrides = []): array
@@ -54,7 +55,9 @@ test('the owner sees every user', function () {
             ->has('users', 3));
 });
 
-test('the owner creates a user with a role, a verified email and a hashed password', function () {
+test('the owner creates a user with a role and a verified email, without choosing a password', function () {
+    Notification::fake();
+
     $this->actingAs(User::factory()->owner()->create())
         ->post(route('users.store'), validUserPayload())
         ->assertSessionHasNoErrors()
@@ -65,7 +68,9 @@ test('the owner creates a user with a role, a verified email and a hashed passwo
     expect($user->role)->toBe(UserRole::Agent);
     expect($user->is_active)->toBeTrue();
     expect($user->email_verified_at)->not->toBeNull();
-    expect(Hash::check('Str0ng-Passw0rd-123', $user->password))->toBeTrue();
+    // The password typed by the owner (a leftover field of an old client) is never used: nobody knows the real one yet.
+    expect(Hash::check('Str0ng-Passw0rd-123', $user->password))->toBeFalse();
+    expect($user->password_set_at)->toBeNull();
 });
 
 test('creating a user is rejected for invalid data', function (array $overrides, string $field) {
@@ -79,8 +84,6 @@ test('creating a user is rejected for invalid data', function (array $overrides,
 })->with([
     'duplicate email' => [['email' => 'taken@example.com'], 'email'],
     'unknown role' => [['role' => 'admin'], 'role'],
-    'weak password' => [['password' => 'abc', 'password_confirmation' => 'abc'], 'password'],
-    'password not confirmed' => [['password_confirmation' => 'different'], 'password'],
 ]);
 
 test('the owner updates the details, the role and the status of a user', function () {
@@ -104,7 +107,7 @@ test('the owner updates the details, the role and the status of a user', functio
     expect($user->is_active)->toBeFalse();
 });
 
-test('the password only changes when a new one is given', function () {
+test('the owner cannot set the password of an existing account either', function () {
     $user = User::factory()->create();
     $originalHash = $user->password;
 
@@ -128,7 +131,9 @@ test('the password only changes when a new one is given', function () {
         'password_confirmation' => 'An0ther-Passw0rd-456',
     ])->assertSessionHasNoErrors();
 
-    expect(Hash::check('An0ther-Passw0rd-456', $user->refresh()->password))->toBeTrue();
+    // A password sent by an old client is ignored: only the person chooses it (invitation, SEC-165).
+    expect($user->refresh()->password)->toBe($originalHash);
+    expect(Hash::check('An0ther-Passw0rd-456', $user->password))->toBeFalse();
 });
 
 test('the owner cannot lock themselves out', function (array $changes, string $field) {

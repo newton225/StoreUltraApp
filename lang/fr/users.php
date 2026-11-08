@@ -10,6 +10,25 @@ return [
     'empty' => 'Aucun utilisateur',
     'created' => 'Utilisateur créé.',
     'updated' => 'Utilisateur mis à jour.',
+    'created_invited' => 'Utilisateur créé. Un e-mail d\'invitation a été envoyé à :email.',
+    'created_not_sent' => 'Utilisateur créé, mais l\'e-mail n\'a pas pu partir. Affichez le lien ci-dessous pour le lui transmettre.',
+    'invitation_sent' => 'E-mail envoyé à :email.',
+    'invitation_not_sent' => 'L\'e-mail n\'a pas pu partir. Affichez le lien pour le transmettre vous-même.',
+
+    'invitation' => [
+        'title' => 'Mot de passe',
+        'pending' => 'La personne n\'a pas encore choisi son mot de passe : elle ne peut pas se connecter.',
+        'done' => 'La personne a choisi son mot de passe. Vous ne le connaissez pas, et c\'est voulu.',
+        'send' => 'Envoyer un e-mail pour choisir le mot de passe',
+        'send_help' => 'Un nouveau lien, valable 48 heures. Il remplace le précédent. Utile aussi si la personne a oublié son mot de passe.',
+        'show_link' => 'Afficher le lien à transmettre',
+        'show_link_title' => 'Afficher le lien ?',
+        'show_link_description' => 'Ce lien permet de fixer le mot de passe de ce compte. Ne le transmettez qu\'à la personne concernée. Un nouveau lien remplace le précédent, et l\'affichage est inscrit au journal.',
+        'link_label' => 'Lien à transmettre',
+        'link_help' => 'Valable 48 heures, utilisable une seule fois.',
+        'copy' => 'Copier',
+        'copied' => 'Lien copié.',
+    ],
 
     'columns' => [
         'name' => 'Nom',
@@ -28,12 +47,13 @@ return [
     'status' => [
         'active' => 'Actif',
         'inactive' => 'Désactivé',
+        'pending' => 'Invitation en attente',
     ],
 
     'create' => [
         'head' => 'Nouvel utilisateur',
         'title' => 'Nouvel utilisateur',
-        'description' => 'La personne se connecte avec cette adresse e-mail et ce mot de passe',
+        'description' => 'La personne reçoit un e-mail pour choisir elle-même son mot de passe',
         'submit' => 'Créer l\'utilisateur',
     ],
 
@@ -44,9 +64,7 @@ return [
         'email' => 'Adresse e-mail',
         'role' => 'Rôle',
         'profile' => 'Profil',
-        'password' => 'Mot de passe',
-        'password_confirmation' => 'Confirmer le mot de passe',
-        'password_optional' => 'Laissez vide pour conserver le mot de passe actuel',
+        'invitation_note' => 'Un e-mail sera envoyé à cette adresse : la personne y choisira son mot de passe, que vous ne connaîtrez pas.',
         'zones' => 'Sous-préfectures',
         'zones_help' => 'Un agent de terrain ne voit que les clients de ces sous-préfectures',
         'zones_empty' => 'Aucune sous-préfecture n\'existe encore',

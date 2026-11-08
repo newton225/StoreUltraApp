@@ -408,7 +408,13 @@ return [
             'purchase_order' => ['cancelled' => 'Purchase order cancelled', 'created' => 'Purchase order created', 'received' => 'Purchase order received', 'sent' => 'Purchase order sent'],
             'shop_payment' => ['recorded' => 'Shop payment recorded'],
             'supply_plan' => ['created' => 'Automatic delivery created', 'updated' => 'Automatic delivery changed'],
-            'user' => ['created' => 'User created', 'updated' => 'User changed'],
+            'user' => [
+                'created' => 'User created',
+                'invitation_accepted' => 'Invitation accepted (password chosen)',
+                'invitation_link_shown' => 'Invitation link shown',
+                'invited' => 'Invitation sent by e-mail',
+                'updated' => 'User changed',
+            ],
         ],
         'subjects' => [
             'Client' => 'Client',

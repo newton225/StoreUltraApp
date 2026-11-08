@@ -1,7 +1,6 @@
 import { Form } from '@inertiajs/react';
 import { useState } from 'react';
 import InputError from '@/components/input-error';
-import PasswordInput from '@/components/password-input';
 import SelectField from '@/components/select-field';
 import { SaveBar } from '@/components/save-bar';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -18,6 +17,7 @@ export type EditableUser = {
     profile_id: number;
     is_active: boolean;
     zone_ids?: number[];
+    invitation_pending?: boolean;
 };
 
 export type ZoneOption = { id: number; name: string; active: boolean };
@@ -26,7 +26,6 @@ type Props = {
     formProps: { action: string; method: 'post' };
     profiles: { id: number; name: string; restricted_to_zones: boolean }[];
     zones: ZoneOption[];
-    passwordRules: string;
     user?: EditableUser;
     isSelf?: boolean;
     submitLabel: string;
@@ -36,7 +35,6 @@ export default function UserForm({
     formProps,
     profiles,
     zones,
-    passwordRules,
     user,
     isSelf = false,
     submitLabel,
@@ -149,40 +147,14 @@ export default function UserForm({
                             </fieldset>
                         )}
 
-                        <div className="grid gap-2 md:col-span-2">
-                            <Label htmlFor="password">
-                                {t('users.form.password')}
-                            </Label>
-                            <PasswordInput
-                                id="password"
-                                name="password"
-                                autoComplete="new-password"
-                                required={!isEdit}
-                                passwordrules={passwordRules}
-                            />
-                            {isEdit && (
-                                <p className="text-xs text-muted-foreground">
-                                    {t('users.form.password_optional')}
-                                </p>
-                            )}
-                            <InputError message={errors.password} />
-                        </div>
-
-                        <div className="grid gap-2 md:col-span-2">
-                            <Label htmlFor="password_confirmation">
-                                {t('users.form.password_confirmation')}
-                            </Label>
-                            <PasswordInput
-                                id="password_confirmation"
-                                name="password_confirmation"
-                                autoComplete="new-password"
-                                required={!isEdit}
-                                passwordrules={passwordRules}
-                            />
-                        </div>
+                        {!isEdit && (
+                            <p className="self-end pb-2 text-sm text-muted-foreground md:col-span-4">
+                                {t('users.form.invitation_note')}
+                            </p>
+                        )}
 
                         {isEdit && (
-                            <div className="col-span-full grid gap-2">
+                            <div className="grid gap-2 self-end md:col-span-4">
                                 <div className="flex items-center space-x-3">
                                     <input
                                         type="hidden"

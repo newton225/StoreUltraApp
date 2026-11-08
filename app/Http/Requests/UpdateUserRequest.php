@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Enums\UserRole;
 use App\Models\Profile;
@@ -12,11 +11,10 @@ use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Password;
 
 class UpdateUserRequest extends FormRequest
 {
-    use PasswordValidationRules, ProfileValidationRules;
+    use ProfileValidationRules;
 
     /**
      * Get the validation rules that apply to the request.
@@ -61,7 +59,6 @@ class UpdateUserRequest extends FormRequest
                     }
                 },
             ],
-            'password' => ['nullable', 'string', Password::default(), 'confirmed'],
             'zone_ids' => ['nullable', 'array'],
             'zone_ids.*' => ['integer', Rule::exists(Zone::class, 'id')],
         ];

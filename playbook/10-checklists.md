@@ -41,6 +41,7 @@ cochée est un point **supposé faux**.
 - [ ] **Clôture de période** (caisse, stock, compte) : écart écrit comme une écriture, période figée y compris par les chemins indirects, clôture immuable et tracée (DATA-76).
 - [ ] **Nouvelle permission** : ajoutée au catalogue fermé, aux profils système qui doivent l'avoir, à l'écran des
   profils avec son explication dans toutes les langues (SEC-22, SEC-150 à SEC-160), et il apparaît dans le tableau croisé des droits par profil, menu et action (SEC-164).
+- [ ] **Création d'un compte** : le créateur ne choisit ni ne connaît le mot de passe ; invitation par e-mail à lien unique et limité, plan B tracé, compte fermé jusque-là (SEC-165).
 - [ ] Les **erreurs** sont des réponses utiles, pas des exceptions (CODE-50, CODE-51).
 
 ## 3. Nouvel écran

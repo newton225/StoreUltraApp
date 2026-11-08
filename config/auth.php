@@ -99,6 +99,15 @@ return [
             'expire' => 60,
             'throttle' => 60,
         ],
+
+        // Invitation to choose a first password (account created by the owner): same table, a longer life than a
+        // forgotten-password link because the person may not read the e-mail at once.
+        'invitations' => [
+            'provider' => 'users',
+            'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
+            'expire' => 60 * 48,
+            'throttle' => 0,
+        ],
     ],
 
     /*

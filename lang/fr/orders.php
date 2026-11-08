@@ -409,7 +409,13 @@ return [
             'purchase_order' => ['cancelled' => 'Bon de commande annulé', 'created' => 'Bon de commande créé', 'received' => 'Bon de commande reçu', 'sent' => 'Bon de commande envoyé'],
             'shop_payment' => ['recorded' => 'Règlement de boutique enregistré'],
             'supply_plan' => ['created' => 'Livraison automatique créée', 'updated' => 'Livraison automatique modifiée'],
-            'user' => ['created' => 'Utilisateur créé', 'updated' => 'Utilisateur modifié'],
+            'user' => [
+                'created' => 'Utilisateur créé',
+                'invitation_accepted' => 'Invitation acceptée (mot de passe choisi)',
+                'invitation_link_shown' => 'Lien d\'invitation affiché',
+                'invited' => 'Invitation envoyée par e-mail',
+                'updated' => 'Utilisateur modifié',
+            ],
         ],
         'subjects' => [
             'Client' => 'Client',

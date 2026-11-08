@@ -13,10 +13,9 @@ import type { ZoneOption } from '@/components/user-form';
 type Props = {
     profiles: { id: number; name: string; restricted_to_zones: boolean }[];
     zones: ZoneOption[];
-    passwordRules: string;
 };
 
-export default function CreateUser({ profiles, zones, passwordRules }: Props) {
+export default function CreateUser({ profiles, zones }: Props) {
     const { t } = useTranslation();
 
     setLayoutProps({
@@ -39,7 +38,6 @@ export default function CreateUser({ profiles, zones, passwordRules }: Props) {
                     formProps={store.form()}
                     profiles={profiles}
                     zones={zones}
-                    passwordRules={passwordRules}
                     submitLabel={t('users.create.submit')}
                 />
             </div>

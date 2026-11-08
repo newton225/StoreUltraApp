@@ -16,6 +16,7 @@ type ListedUser = {
     email: string;
     profile: string;
     is_active: boolean;
+    invitation_pending: boolean;
 };
 
 export default function UsersIndex({ users }: { users: ListedUser[] }) {
@@ -83,19 +84,28 @@ export default function UsersIndex({ users }: { users: ListedUser[] }) {
                                             {user.profile}
                                         </td>
                                         <td className="px-4 py-2">
-                                            <Badge
-                                                variant={
-                                                    user.is_active
-                                                        ? 'success'
-                                                        : 'neutral'
-                                                }
-                                            >
-                                                {user.is_active
-                                                    ? t('users.status.active')
-                                                    : t(
-                                                          'users.status.inactive',
-                                                      )}
-                                            </Badge>
+                                            {user.invitation_pending &&
+                                            user.is_active ? (
+                                                <Badge variant="warning">
+                                                    {t('users.status.pending')}
+                                                </Badge>
+                                            ) : (
+                                                <Badge
+                                                    variant={
+                                                        user.is_active
+                                                            ? 'success'
+                                                            : 'neutral'
+                                                    }
+                                                >
+                                                    {user.is_active
+                                                        ? t(
+                                                              'users.status.active',
+                                                          )
+                                                        : t(
+                                                              'users.status.inactive',
+                                                          )}
+                                                </Badge>
+                                            )}
                                         </td>
                                         <td className="px-4 py-2 text-right">
                                             <Button

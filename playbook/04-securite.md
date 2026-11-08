@@ -401,6 +401,17 @@ encaisse. Contrôles :
   un menu n'est jamais ajoutée sans lui, sauf pour un rôle de terrain qui agit sans ouvrir le menu. Une nouvelle action = l'enum,
   la route ou le contrôleur, les textes dans toutes les langues, la migration qui l'accorde aux profils qui avaient le menu
   (rien ne change le jour de la mise à jour) et la ligne du tableau croisé (SEC-158).
+- **SEC-165.** **Celui qui crée un compte ne connaît jamais le mot de passe : la personne le choisit par invitation.**
+  (1) À la création, le compte reçoit un mot de passe aléatoire que personne n'a vu, et un champ « mot de passe choisi le » reste
+  vide : tant qu'il l'est, le compte ne peut pas se connecter. (2) La personne reçoit un **e-mail** avec un lien à **usage unique**
+  et à **durée limitée** (48 h ici, plus long qu'un lien d'oubli parce que le courrier peut être lu tard), qui ouvre une page
+  publique où elle choisit son mot de passe, soumis aux mêmes règles de force. (3) Le lien est un jeton dont seul le haché est
+  gardé ; un nouveau lien **remplace** le précédent ; la page n'envoie jamais le lien à un autre site (`no-referrer`, SEC-76).
+  (4) **Plan B** quand le courrier ne part pas ou n'existe pas : le responsable fait **afficher** le lien, après confirmation, pour
+  le transmettre lui-même ; l'affichage est écrit au journal (sans le lien) car il donne accès au compte. (5) Envoi, affichage et
+  acceptation sont tracés ; le renvoi sert aussi à un mot de passe oublié. (6) Les comptes qui existaient avant sont réputés avoir
+  choisi leur mot de passe (la migration les marque). Un test fixe : le courrier part, le lien marche une fois, expire à la limite,
+  ne sert pas pour un autre compte, et le compte n'ouvre pas de session avant.
 
 ## 16. Erreurs fréquentes à ne pas refaire
 

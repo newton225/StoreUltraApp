@@ -27,6 +27,7 @@ class SecurityHeaders
         'documents.download',
         'expenses.proof',
         'exports.show',
+        'invitation.show',
         'list-exports.show',
         'orders.documents.zip',
     ];

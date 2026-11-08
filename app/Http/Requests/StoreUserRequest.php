@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Enums\UserRole;
 use App\Models\Profile;
@@ -13,7 +12,7 @@ use Illuminate\Validation\Rule;
 
 class StoreUserRequest extends FormRequest
 {
-    use PasswordValidationRules, ProfileValidationRules;
+    use ProfileValidationRules;
 
     /**
      * Get the validation rules that apply to the request.
@@ -26,7 +25,6 @@ class StoreUserRequest extends FormRequest
             ...$this->profileRules(),
             'profile_id' => ['required_without:role', 'nullable', 'integer', Rule::exists(Profile::class, 'id')],
             'role' => ['required_without:profile_id', 'nullable', Rule::enum(UserRole::class)],
-            'password' => $this->passwordRules(),
             'zone_ids' => ['nullable', 'array'],
             'zone_ids.*' => ['integer', Rule::exists(Zone::class, 'id')],
         ];

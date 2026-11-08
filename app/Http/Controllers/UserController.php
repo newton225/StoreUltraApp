@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Users\InviteUser;
 use App\Enums\UserRole;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
@@ -10,8 +11,9 @@ use App\Models\Profile;
 use App\Models\User;
 use App\Models\Zone;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -33,6 +35,7 @@ class UserController extends Controller
                     'email' => $user->email,
                     'profile' => $user->effectiveProfile()->label,
                     'is_active' => $user->is_active,
+                    'invitation_pending' => $user->password_set_at === null,
                 ])
                 ->values(),
         ]);
@@ -46,19 +49,22 @@ class UserController extends Controller
         return Inertia::render('users/create', [
             'profiles' => $this->profiles(),
             'zones' => $this->zones(),
-            'passwordRules' => Password::defaults()->toPasswordRulesString(),
         ]);
     }
 
     /**
-     * Create a user account. The owner vouches for the email address, so it starts verified.
+     * Create a user account without a password the owner knows: the person gets an e-mail to choose their own
+     * (playbook SEC-165). Until they do, the account holds a random password nobody has seen. The invitation
+     * itself proves the address, so the account is not asked to verify it again.
      */
-    public function store(StoreUserRequest $request): RedirectResponse
+    public function store(StoreUserRequest $request, InviteUser $invitations): RedirectResponse
     {
         $profile = $this->profileOf($request);
 
-        $user = new User($request->safe()->only(['name', 'email', 'password']));
+        $user = new User($request->safe()->only(['name', 'email']));
         $user->forceFill([
+            'password' => Str::random(64),
+            'password_set_at' => null,
             'role' => $profile->role(),
             'profile_id' => $profile->id,
             'is_active' => true,
@@ -70,9 +76,42 @@ class UserController extends Controller
 
         AuditLog::record('user.created', $user, [], ['email' => $user->email, 'profile' => $profile->label_fr], $request->user());
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('users.created')]);
+        $sent = $invitations->sendByMail($user, $request->user());
 
-        return to_route('users.index');
+        Inertia::flash('toast', $sent
+            ? ['type' => 'success', 'message' => __('users.created_invited', ['email' => $user->email])]
+            : ['type' => 'warning', 'message' => __('users.created_not_sent')]);
+
+        return $sent ? to_route('users.index') : to_route('users.edit', $user);
+    }
+
+    /**
+     * Send the user a new e-mail to choose their password (an invitation that expired, or a forgotten password).
+     */
+    public function invite(Request $request, User $user, InviteUser $invitations): RedirectResponse
+    {
+        abort_if($user->is($request->user()), 403);
+
+        $sent = $invitations->sendByMail($user, $request->user());
+
+        Inertia::flash('toast', $sent
+            ? ['type' => 'success', 'message' => __('users.invitation_sent', ['email' => $user->email])]
+            : ['type' => 'error', 'message' => __('users.invitation_not_sent')]);
+
+        return back();
+    }
+
+    /**
+     * A link to hand over when the e-mail is not available. It replaces the previous one and gives access to the
+     * account, so it is shown once, to the owner, and traced.
+     */
+    public function invitationLink(Request $request, User $user, InviteUser $invitations): RedirectResponse
+    {
+        abort_if($user->is($request->user()), 403);
+
+        Inertia::flash('invitation_link', $invitations->linkToHandOver($user, $request->user()));
+
+        return back();
     }
 
     /**
@@ -85,10 +124,10 @@ class UserController extends Controller
                 ...$user->only(['id', 'name', 'email', 'is_active']),
                 'profile_id' => $user->effectiveProfile()->id,
                 'zone_ids' => $user->zones()->pluck('zones.id')->all(),
+                'invitation_pending' => $user->password_set_at === null,
             ],
             'profiles' => $this->profiles(),
             'zones' => $this->zones(),
-            'passwordRules' => Password::defaults()->toPasswordRulesString(),
         ]);
     }
 
@@ -107,10 +146,6 @@ class UserController extends Controller
             'is_active' => $request->boolean('is_active'),
         ]);
         $user->setRelation('profile', $profile);
-
-        if ($request->filled('password')) {
-            $user->password = $request->validated('password');
-        }
 
         $user->save();
 

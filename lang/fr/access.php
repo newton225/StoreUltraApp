@@ -28,6 +28,14 @@ return [
         'log_in' => 'connexion',
     ],
 
+    'invitation' => [
+        'title' => 'Choisissez votre mot de passe',
+        'description' => 'Votre compte est créé : choisissez un mot de passe que vous seul connaîtrez',
+        'submit' => 'Enregistrer mon mot de passe',
+        'expired' => 'Ce lien n\'est plus valable (déjà utilisé ou expiré). Demandez-en un nouveau à la personne qui a créé votre compte.',
+        'done' => 'Mot de passe enregistré. Vous pouvez vous connecter.',
+    ],
+
     'reset' => [
         'title' => 'Réinitialiser le mot de passe',
         'description' => 'Saisissez votre nouveau mot de passe ci-dessous',
