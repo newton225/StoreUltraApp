@@ -25,6 +25,7 @@ use Illuminate\Support\Carbon;
  * @phpstan-type SheetDebt array{reference: string, amount: int, partial: bool}
  * @phpstan-type Sheet array{
  *     lines: list<SheetLine>,
+ *     discount: int,
  *     total: int,
  *     advance: int,
  *     balance_paid: int,
@@ -144,6 +145,7 @@ class CommercialSheet
 
         return [
             'lines' => $lines,
+            'discount' => $order->discountTotal(),
             'total' => $total,
             'advance' => $advance,
             'balance_paid' => $balancePaid,

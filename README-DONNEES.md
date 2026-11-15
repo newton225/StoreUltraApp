@@ -104,10 +104,11 @@ semaine (ou aujourd'hui pour la semaine en cours). Si un prix manque, la command
 | Table | Rôle | Champs principaux |
 | --- | --- | --- |
 | `orders` | Commande d'un client | `reference` (ORD-000123), `client_id`, `supply_plan_id` (nul permis), `kit_version_id`, `kits_count`, `delivery_week` (début de semaine), `status`, `advance_due` (avance due), `total_sale`, `total_purchase_expected`, `notes` |
+| `order_discounts` | Remises accordées sur une commande (**jamais modifiées ni supprimées**) | `order_id`, `amount`, `reason`, `total_before`, `total_after`, `user_id`, `created_at` |
 | `order_items` | Lignes **figées** | `order_id`, `product_id`, `shop_id`, `quantity`, `unit_purchase_price`, `unit_sale_price` |
 | `order_status_changes` | Transitions d'état | `order_id`, `from`, `to`, `reason`, `user_id`, `at` |
 
-`total_sale` et `total_purchase_expected` sont calculés à la création à partir de `order_items` et conservés.
+`total_sale` et `total_purchase_expected` sont calculés à la création à partir de `order_items` et conservés. Une remise (`order_discounts`) baisse `total_sale` du montant accordé (et `advance_due` si l'avance n'est pas encore encaissée) : le prix avant remise est `total_sale` plus la somme des remises, les lignes `order_items` gardent leurs montants d'origine.
 
 ### 2.7 Encaissements
 

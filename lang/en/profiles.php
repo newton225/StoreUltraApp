@@ -87,6 +87,8 @@ return [
         'orders_finalize_help' => 'Mark delivered, settled or closed (password asked).',
         'orders_cancel' => 'Cancel orders',
         'orders_cancel_help' => 'Cancel an order with its reason (password when money was collected).',
+        'orders_discount' => 'Grant discounts',
+        'orders_discount_help' => 'Lower the price of an order before the delivery, with the reason (password required).',
         'orders_batch' => 'Batch actions on orders',
         'orders_batch_help' => 'Move several orders along or issue their proformas at once.',
         'orders_issue_documents' => 'Generate documents',

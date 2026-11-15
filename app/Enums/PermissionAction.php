@@ -20,6 +20,7 @@ enum PermissionAction: string
     case OrdersAdvance = 'orders.advance';
     case OrdersFinalize = 'orders.finalize';
     case OrdersCancel = 'orders.cancel';
+    case OrdersDiscount = 'orders.discount';
     case OrdersBatch = 'orders.batch';
     case OrdersIssueDocuments = 'orders.issue_documents';
     case OrdersCancelDocuments = 'orders.cancel_documents';

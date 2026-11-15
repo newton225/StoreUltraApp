@@ -87,6 +87,8 @@ return [
         'orders_finalize_help' => 'Marquer livrée, soldée ou clôturée (mot de passe demandé).',
         'orders_cancel' => 'Annuler des commandes',
         'orders_cancel_help' => 'Annuler une commande, avec le motif (mot de passe si de l\'argent est encaissé).',
+        'orders_discount' => 'Accorder des remises',
+        'orders_discount_help' => 'Baisser le prix d\'une commande avant la livraison, avec le motif (mot de passe demandé).',
         'orders_batch' => 'Actions en lot sur les commandes',
         'orders_batch_help' => 'Faire avancer ou émettre les proformas de plusieurs commandes à la fois.',
         'orders_issue_documents' => 'Générer les documents',

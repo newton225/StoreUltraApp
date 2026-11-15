@@ -9,6 +9,7 @@ use App\Actions\Orders\IssueProformasForZone;
 use App\Enums\ClientStatus;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentKind;
+use App\Enums\PermissionAction;
 use App\Exceptions\OrderPricesMissing;
 use App\Http\Requests\StoreOrderRequest;
 use App\Models\Client;
@@ -206,6 +207,19 @@ class OrderController extends Controller
                     ...($seesCosts ? ['unit_purchase_price' => $item->unit_purchase_price] : []),
                     'line_sale_total' => $item->line_sale_total,
                 ])->values(),
+                'discounts' => $order->discounts()->with('user:id,name')->get()->map(fn ($discount): array => [
+                    'id' => $discount->id,
+                    'amount' => $discount->amount,
+                    'reason' => $discount->reason,
+                    'total_before' => $discount->total_before,
+                    'total_after' => $discount->total_after,
+                    'user' => $discount->user?->name,
+                    'at' => $discount->created_at?->toIso8601String(),
+                ])->values(),
+                'may_discount' => $order->status->isCancellable()
+                    && request()->user()->can('transition', $order)
+                    && request()->user()->canDo(PermissionAction::OrdersDiscount)
+                    && $order->total_sale > $netPaid,
                 'history' => $order->statusChanges->map(fn ($change): array => [
                     'id' => $change->id,
                     'from' => $change->from->value,

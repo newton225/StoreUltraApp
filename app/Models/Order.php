@@ -121,6 +121,22 @@ class Order extends Model
     }
 
     /**
+     * @return HasMany<OrderDiscount, $this>
+     */
+    public function discounts(): HasMany
+    {
+        return $this->hasMany(OrderDiscount::class)->orderBy('id');
+    }
+
+    /**
+     * What was taken off the price since the order was made.
+     */
+    public function discountTotal(): int
+    {
+        return (int) $this->discounts()->getQuery()->toBase()->sum('amount');
+    }
+
+    /**
      * @return HasMany<OrderStatusChange, $this>
      */
     public function statusChanges(): HasMany

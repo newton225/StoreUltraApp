@@ -267,6 +267,24 @@ return [
         'by' => 'par :user',
     ],
 
+    'discount' => [
+        'open' => 'Accorder une remise',
+        'title' => 'Accorder une remise',
+        'help' => 'La remise baisse le prix de la commande. Elle ne peut pas dépasser le reste à encaisser (:max) et ne se corrige pas : une erreur se règle en annulant la commande.',
+        'amount' => 'Montant de la remise (FCFA)',
+        'reason' => 'Motif de la remise',
+        'password' => 'Votre mot de passe',
+        'confirm' => 'Accorder la remise',
+        'back' => 'Retour',
+        'before' => 'Prix avant remise',
+        'line' => 'Remise',
+        'granted' => 'Remise accordée.',
+        'errors' => [
+            'status' => 'Une remise ne peut plus être accordée une fois les kits livrés.',
+            'too_high' => 'La remise dépasse le reste à encaisser (:max).',
+        ],
+    ],
+
     'plans' => [
         'kit_help' => 'Le kit que ce client reçoit à chaque livraison.',
         'kits_per_cycle_help' => 'Nombre de kits de chaque commande créée. Exemple : 3 kits à chaque livraison.',
@@ -403,7 +421,7 @@ return [
             'audit_archive' => ['created' => 'Copie mensuelle du journal créée', 'downloaded' => 'Copie mensuelle du journal téléchargée', 'pruned' => 'Copie mensuelle du journal supprimée'],
             'expense' => ['cancelled' => 'Frais annulé', 'linked_to_cash' => 'Frais rattaché à la caisse', 'proof_opened' => 'Justificatif consulté', 'recorded' => 'Frais enregistré'],
             'invoice' => ['fne_recorded' => 'Numéro FNE enregistré'],
-            'order' => ['step_password_failed' => 'Mot de passe refusé pour une étape de commande', 'batch_step' => 'Étape enregistrée en groupe', 'created' => 'Commande créée', 'status_changed' => 'Étape de la commande changée'],
+            'order' => ['step_password_failed' => 'Mot de passe refusé pour une étape de commande', 'batch_step' => 'Étape enregistrée en groupe', 'created' => 'Commande créée', 'status_changed' => 'Étape de la commande changée', 'discount_granted' => 'Remise accordée sur la commande'],
             'payment' => ['recorded' => 'Paiement enregistré'],
             'profile' => ['created' => 'Profil créé', 'deleted' => 'Profil supprimé', 'updated' => 'Profil modifié'],
             'purchase_order' => ['cancelled' => 'Bon de commande annulé', 'created' => 'Bon de commande créé', 'received' => 'Bon de commande reçu', 'sent' => 'Bon de commande envoyé'],

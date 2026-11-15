@@ -26,6 +26,7 @@ use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\OrderAdvancePaymentController;
 use App\Http\Controllers\OrderBatchController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\OrderDiscountController;
 use App\Http\Controllers\OrderDocumentArchiveController;
 use App\Http\Controllers\OrderProformaController;
 use App\Http\Controllers\OrderTransitionController;
@@ -80,6 +81,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('can:orders.record_delivery')->name('orders.deliveries.store');
     Route::post('orders/{order}/payments', [PaymentController::class, 'store'])->middleware('can:orders.record_payment')->name('orders.payments.store');
     Route::post('orders/{order}/transition', [OrderTransitionController::class, 'store'])->name('orders.transition');
+    Route::post('orders/{order}/discount', [OrderDiscountController::class, 'store'])->middleware(['can:orders.discount', 'throttle:20,1'])->name('orders.discount.store');
 
     Route::middleware('can:manage-orders')->group(function () {
         Route::post('orders/advance-payments', [OrderAdvancePaymentController::class, 'store'])->middleware('can:orders.record_payment')->name('orders.advance-payments.store');

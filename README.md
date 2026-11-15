@@ -94,6 +94,50 @@ composer dev              # serveur, file d'attente et Vite
 | Reconstruire le front | `npm run build` |
 | Parcours de bout en bout (navigateur réel, application et base à part) | `npm run build` puis `npm run e2e` (arrêter le serveur Vite avant : `public/hot`) |
 
+### Exposer l'application sur Internet (téléphone, collègue) avec ngrok ou le menu Ports de VS Code
+
+Pour ouvrir l'application depuis un téléphone ou la montrer à quelqu'un, on la publie par un tunnel. Deux outils au choix, la méthode est la même.
+**Piège principal : le tunnel ne transmet que le port de Laravel (8000), jamais celui de Vite (5173).** Il faut donc servir les fichiers
+**compilés**, pas ceux du serveur de développement ; sinon la page est **blanche** (ou sans style, ou sans champ de saisie qui réagit).
+
+1. **Arrêter Vite et compiler.** Fermer `composer dev` / `npm run dev` (Ctrl+C). Vérifier que le fichier `public/hot` a disparu : tant qu'il
+   existe, Laravel ordonne à la page de charger ses fichiers depuis `http://[::1]:5173`, adresse de votre machine, injoignable depuis le
+   téléphone. S'il reste après l'arrêt (arrêt brutal), le supprimer à la main. Puis `npm run build`.
+2. **Lancer Laravel seul** : `php artisan serve` (port 8000). Ne pas lancer `composer dev` : il relance Vite et recrée `public/hot`.
+3. **Ouvrir le tunnel** sur le port 8000 :
+   - **ngrok** : `ngrok http 8000`, puis copier l'adresse `https://…ngrok-free.dev` affichée.
+   - **VS Code** : onglet **Ports** (panneau du bas, à côté du terminal), « Forward a Port », saisir `8000`. Dans la colonne **Visibilité**,
+     choisir **Public** (clic droit sur la ligne, « Port Visibility »). En **Privé**, chaque visiteur doit s'identifier avec le compte GitHub
+     du propriétaire du tunnel : un invité ou un téléphone non connecté n'y accède pas. Copier l'adresse de la colonne « Forwarded Address ».
+4. **Régler le `.env`** (fichier local, jamais commité), puis redémarrer `php artisan serve` (il garde l'ancien environnement tant qu'il tourne) :
+
+   ```env
+   APP_URL=https://adresse-du-tunnel
+   TRUSTED_PROXIES=127.0.0.1,::1
+   ```
+
+   - `APP_URL` sert aux **liens des e-mails d'invitation** : sans lui, ils pointent vers `localhost` et ne s'ouvrent que sur votre machine.
+   - `TRUSTED_PROXIES` dit à Laravel de croire les en-têtes du tunnel. Sans lui, il croit être en `http` et écrit les adresses de ses fichiers
+     en `http://` sur une page `https://` : le navigateur les bloque, d'où une **page blanche**. Jamais `*`.
+5. **Ouvrir l'adresse du tunnel** et recharger sans cache (Ctrl+Maj+R). La première visite par ngrok gratuit peut afficher une page
+   d'avertissement à valider.
+
+À savoir :
+- **Après chaque modification du code**, relancer `npm run build` (Vite ne recompile pas tout seul dans ce mode).
+- **L'adresse change** si le tunnel est relancé sans domaine fixe : mettre `APP_URL` à jour et relancer `php artisan serve`. Les invitations
+  déjà envoyées gardent l'ancienne adresse et sont à renvoyer.
+- **Le responsable doit avoir activé la double authentification** pour aller au-delà de la page de sécurité (sauf réglage local dans `.env`).
+- **Tout porteur de l'adresse atteint la page de connexion** : utiliser des données de test, ne partager le lien qu'avec les personnes
+  concernées, fermer le tunnel après usage.
+- **Pour revenir au travail normal** : fermer le tunnel, remettre `APP_URL=http://localhost:8000`, retirer `TRUSTED_PROXIES`, puis relancer
+  `composer dev`.
+- **Le tunnel n'est pas la production** : l'application de production a sa propre adresse, son proxy déclaré dans `TRUSTED_PROXIES`
+  et un `APP_URL` réel.
+- Les parcours de bout en bout (`npm run e2e`) refusent aussi de démarrer tant que `public/hot` existe.
+
+Si la page reste blanche : (1) `public/hot` existe-t-il ? (2) `npm run build` a-t-il été relancé après le dernier changement ? (3) la console du
+navigateur (F12) signale-t-elle des fichiers « mixed content » (→ `TRUSTED_PROXIES`) ou injoignables (→ port 5173, donc `public/hot`) ?
+
 ### Base de données en production : trois rôles
 
 L'application ne se connecte **jamais** avec `postgres` ni avec le rôle qui possède les tables : elle pourrait supprimer une table

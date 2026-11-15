@@ -266,6 +266,24 @@ return [
         'by' => 'by :user',
     ],
 
+    'discount' => [
+        'open' => 'Grant a discount',
+        'title' => 'Grant a discount',
+        'help' => 'The discount lowers the price of the order. It cannot go above what is left to collect (:max) and it cannot be corrected: a mistake is fixed by cancelling the order.',
+        'amount' => 'Discount amount (FCFA)',
+        'reason' => 'Reason for the discount',
+        'password' => 'Your password',
+        'confirm' => 'Grant the discount',
+        'back' => 'Back',
+        'before' => 'Price before discount',
+        'line' => 'Discount',
+        'granted' => 'Discount granted.',
+        'errors' => [
+            'status' => 'A discount can no longer be granted once the kits are delivered.',
+            'too_high' => 'The discount is above what is left to collect (:max).',
+        ],
+    ],
+
     'plans' => [
         'kit_help' => 'The kit this client receives with every delivery.',
         'kits_per_cycle_help' => 'Number of kits of every order created. Example: 3 kits with every delivery.',
@@ -402,7 +420,7 @@ return [
             'audit_archive' => ['created' => 'Monthly journal copy created', 'downloaded' => 'Monthly journal copy downloaded', 'pruned' => 'Monthly journal copy deleted'],
             'expense' => ['cancelled' => 'Cost cancelled', 'linked_to_cash' => 'Cost linked to the cash box', 'proof_opened' => 'Proof viewed', 'recorded' => 'Cost recorded'],
             'invoice' => ['fne_recorded' => 'FNE number recorded'],
-            'order' => ['step_password_failed' => 'Password refused for an order step', 'batch_step' => 'Step recorded in a group', 'created' => 'Order created', 'status_changed' => 'Order step changed'],
+            'order' => ['step_password_failed' => 'Password refused for an order step', 'batch_step' => 'Step recorded in a group', 'created' => 'Order created', 'status_changed' => 'Order step changed', 'discount_granted' => 'Discount granted on the order'],
             'payment' => ['recorded' => 'Payment recorded'],
             'profile' => ['created' => 'Profile created', 'deleted' => 'Profile deleted', 'updated' => 'Profile changed'],
             'purchase_order' => ['cancelled' => 'Purchase order cancelled', 'created' => 'Purchase order created', 'received' => 'Purchase order received', 'sent' => 'Purchase order sent'],

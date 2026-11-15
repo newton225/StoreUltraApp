@@ -83,6 +83,7 @@ return [
         'unit_price' => 'P.U (FCFA)',
         'amount_column' => 'MONTANT (FCFA)',
         'net' => 'NET À PAYER',
+        'discount' => 'REMISE ACCORDÉE',
         'reconciliation' => 'Rapprochement avant nouvelle commande',
         'movement' => 'Mouvement',
         'reference' => 'Référence',

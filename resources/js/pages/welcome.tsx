@@ -100,7 +100,11 @@ export default function Welcome() {
                         </nav>
                         <div className="flex items-center gap-1 sm:gap-2">
                             <LanguageSwitcher />
-                            <Button asChild size="sm" className="max-[360px]:px-2">
+                            <Button
+                                asChild
+                                size="sm"
+                                className="max-[360px]:px-2"
+                            >
                                 <Link href={entry}>{entryLabel}</Link>
                             </Button>
                         </div>

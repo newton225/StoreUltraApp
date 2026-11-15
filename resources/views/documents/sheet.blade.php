@@ -154,6 +154,12 @@
                         <td class="amount">{{ $line['amount'] !== null ? $money($line['amount']) : '' }}</td>
                     </tr>
                 @endforeach
+                @if ($sheet['discount'] > 0)
+                    <tr class="total">
+                        <td colspan="5">{{ __('documents.sheet.discount') }}</td>
+                        <td class="amount">-{{ $money($sheet['discount']) }}</td>
+                    </tr>
+                @endif
                 <tr class="total net">
                     <td colspan="5">{{ __('documents.sheet.net') }}</td>
                     <td class="amount">{{ $money($sheet['total']) }}</td>

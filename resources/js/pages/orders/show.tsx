@@ -11,6 +11,9 @@ import type { OrderDeliveriesData } from '@/components/order-deliveries';
 import type { OrderDocumentsData } from '@/components/order-documents';
 import type { OrderProfitData } from '@/components/order-profit';
 import OrderProfit from '@/components/order-profit';
+import OrderDiscount, {
+    type OrderDiscountData,
+} from '@/components/order-discount';
 import OrderDocuments from '@/components/order-documents';
 import OrderDeliveries from '@/components/order-deliveries';
 import type { OrderPaymentsData } from '@/components/order-payments';
@@ -61,6 +64,8 @@ type Order = {
     kit: { name: string; version: number };
     allowed_next: string[];
     password_steps: string[];
+    discounts: OrderDiscountData[];
+    may_discount: boolean;
     items: {
         id: number;
         product_name: string;
@@ -613,9 +618,21 @@ export default function ShowOrder({
                 <div key={tab} className="fade-in">
                     {tab === 'lines' && (
                         <section className="space-y-3">
-                            <p className="text-sm text-muted-foreground">
-                                {t('orders.show.lines_help')}
-                            </p>
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                <p className="text-sm text-muted-foreground">
+                                    {t('orders.show.lines_help')}
+                                </p>
+                                {order.may_discount && (
+                                    <OrderDiscount
+                                        orderId={order.id}
+                                        maximum={Math.max(
+                                            0,
+                                            order.total_sale -
+                                                payments.net_paid,
+                                        )}
+                                    />
+                                )}
+                            </div>
                             <div className="overflow-x-auto rounded-lg border border-border">
                                 <table className="w-full min-w-[30rem] text-left text-sm">
                                     <thead className="bg-muted/50 text-muted-foreground">
@@ -670,6 +687,62 @@ export default function ShowOrder({
                                         ))}
                                     </tbody>
                                     <tfoot className="border-t border-border bg-muted/50 font-semibold">
+                                        {order.discounts.length > 0 && (
+                                            <>
+                                                <tr className="font-normal">
+                                                    <td
+                                                        className="px-4 py-2"
+                                                        colSpan={profit ? 3 : 2}
+                                                    >
+                                                        {t(
+                                                            'orders.discount.before',
+                                                        )}
+                                                    </td>
+                                                    <td className="px-4 py-2 text-right">
+                                                        {money(
+                                                            order.total_sale +
+                                                                order.discounts.reduce(
+                                                                    (sum, d) =>
+                                                                        sum +
+                                                                        d.amount,
+                                                                    0,
+                                                                ),
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                                {order.discounts.map((d) => (
+                                                    <tr
+                                                        key={d.id}
+                                                        className="font-normal"
+                                                    >
+                                                        <td
+                                                            className="px-4 py-2"
+                                                            colSpan={
+                                                                profit ? 3 : 2
+                                                            }
+                                                        >
+                                                            <span className="font-medium">
+                                                                {t(
+                                                                    'orders.discount.line',
+                                                                )}
+                                                            </span>{' '}
+                                                            <span className="text-muted-foreground">
+                                                                {d.reason}
+                                                                {d.user
+                                                                    ? ` — ${d.user}`
+                                                                    : ''}
+                                                                {d.at
+                                                                    ? `, ${date(d.at)}`
+                                                                    : ''}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-4 py-2 text-right">
+                                                            −{money(d.amount)}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </>
+                                        )}
                                         <tr>
                                             <td
                                                 className="px-4 py-2"

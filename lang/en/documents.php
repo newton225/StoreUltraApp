@@ -83,6 +83,7 @@ return [
         'unit_price' => 'Price (FCFA)',
         'amount_column' => 'AMOUNT (FCFA)',
         'net' => 'NET TO PAY',
+        'discount' => 'DISCOUNT GRANTED',
         'reconciliation' => 'Reconciliation before the new order',
         'movement' => 'Movement',
         'reference' => 'Reference',
