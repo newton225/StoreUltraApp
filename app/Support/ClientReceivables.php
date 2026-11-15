@@ -56,7 +56,7 @@ class ClientReceivables
                     'total' => (int) $rows->sum('total'),
                     'paid' => (int) $rows->sum('paid'),
                     'remaining' => (int) $rows->sum('remaining'),
-                    'orders' => $rows->all(),
+                    'orders' => array_values($rows->all()),
                 ];
             })
             ->sortByDesc('remaining')

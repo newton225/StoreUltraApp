@@ -15,7 +15,7 @@ class OrderCancellationController extends Controller
     public function store(CancelOrdersRequest $request, CancelOrders $cancel): RedirectResponse
     {
         $result = $cancel->handle(
-            array_map('intval', $request->validated('orders')),
+            array_values(array_map('intval', $request->validated('orders'))),
             $request->validated('reason'),
             $request->user(),
         );
