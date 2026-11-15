@@ -1,6 +1,7 @@
 import { FieldLabel } from '@/components/field-label';
 import InputError from '@/components/input-error';
 import SelectField from '@/components/select-field';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useTranslation } from '@/hooks/use-translation';
@@ -13,6 +14,8 @@ export type EditableProduct = {
     unit: string;
     shop_id: number | null;
     pack_size: number;
+    sellable: boolean;
+    bought_whole: boolean;
     archived_at: string | null;
 };
 
@@ -87,6 +90,25 @@ export default function ProductFields({ product, shops, errors }: Props) {
                     required
                 />
                 <InputError message={errors.pack_size} />
+            </div>
+
+            <div className="grid gap-2 md:col-span-6">
+                <div className="flex items-center space-x-3">
+                    <input type="hidden" name="sellable" value="0" />
+                    <Checkbox
+                        id="sellable"
+                        name="sellable"
+                        value="1"
+                        defaultChecked={product?.sellable ?? true}
+                    />
+                    <FieldLabel
+                        htmlFor="sellable"
+                        help={t('catalog.products.form.sellable_help')}
+                    >
+                        {t('catalog.products.form.sellable')}
+                    </FieldLabel>
+                </div>
+                <InputError message={errors.sellable} />
             </div>
         </>
     );

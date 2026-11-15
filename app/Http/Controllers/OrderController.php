@@ -23,6 +23,7 @@ use App\Models\Kit;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
+use App\Models\ProductComponent;
 use App\Models\User;
 use App\Support\BusinessSettings;
 use App\Support\DeliveryReceiver;
@@ -187,7 +188,7 @@ class OrderController extends Controller
     {
         Gate::authorize('view', $order);
 
-        $order->load('client:id,name,reference', 'kitVersion.kit', 'items.product', 'items.needs', 'statusChanges.user:id,name', 'payments.method', 'payments.collector:id,name', 'payments.recorder:id,name', 'deliveries.agent:id,name');
+        $order->load('client:id,name,reference', 'kitVersion.kit', 'items.product.components.component:id,name,unit', 'items.needs', 'statusChanges.user:id,name', 'payments.method', 'payments.collector:id,name', 'payments.recorder:id,name', 'deliveries.agent:id,name');
 
         $netPaid = $order->netPaid();
         $remainingKits = $order->remainingKits();
@@ -219,6 +220,13 @@ class OrderController extends Controller
                     ...($seesCosts ? ['unit_purchase_price' => $item->unit_purchase_price] : []),
                     'line_sale_total' => $item->line_sale_total,
                     'from_stock' => (int) $item->needs->sum('quantity_from_stock'),
+                    // What a manufactured product is made of, for the units ordered, with what the stock already gave.
+                    'components' => $item->product->components->reject(fn (): bool => ! $item->product->isManufactured())->map(fn (ProductComponent $component): array => [
+                        'name' => $component->component->name,
+                        'unit' => $component->component->unit,
+                        'quantity' => (int) ceil($item->quantity * $component->quantity),
+                        'from_stock' => (int) ($item->needs->firstWhere('product_id', $component->component_product_id)?->quantity_from_stock ?? 0),
+                    ])->values(),
                 ])->values(),
                 'discounts' => $order->discounts()->with('user:id,name')->get()->map(fn ($discount): array => [
                     'id' => $discount->id,

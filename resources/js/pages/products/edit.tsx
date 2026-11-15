@@ -102,6 +102,7 @@ export default function EditProduct({
                         components={components}
                         options={componentOptions}
                         isComponent={isComponent}
+                        boughtWhole={product.bought_whole}
                     />
                 </section>
 

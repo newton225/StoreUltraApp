@@ -23,11 +23,12 @@ use Illuminate\Support\Carbon;
  * @property int $expected_total
  * @property int $actual_total
  * @property string|null $notes
+ * @property int|null $zone_id The sub-prefecture the purchase order was made for, empty for the whole week.
  * @property string $kind orders (made for customer orders) or restock (made to fill the stock).
  * @property int|null $created_by
  * @property Carbon|null $sent_at
  */
-#[Fillable(['reference', 'shop_id', 'week', 'status', 'kind', 'expected_total', 'actual_total', 'notes', 'created_by', 'sent_at'])]
+#[Fillable(['reference', 'shop_id', 'week', 'status', 'kind', 'zone_id', 'expected_total', 'actual_total', 'notes', 'created_by', 'sent_at'])]
 class PurchaseOrder extends Model
 {
     /** @use HasFactory<PurchaseOrderFactory> */
@@ -51,6 +52,14 @@ class PurchaseOrder extends Model
             'actual_total' => 'integer',
             'sent_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @return BelongsTo<Zone, $this>
+     */
+    public function zone(): BelongsTo
+    {
+        return $this->belongsTo(Zone::class);
     }
 
     /**

@@ -9,6 +9,7 @@ use App\Models\PurchaseOrder;
 use App\Models\Shop;
 use App\Models\User;
 use App\Support\DocumentNumbers;
+use App\Support\PackQuantity;
 use App\Support\ProductPricing;
 use App\Support\WeekCalendar;
 
@@ -21,9 +22,9 @@ class CreateRestockPurchaseOrder
     public function __construct(private DocumentNumbers $numbers, private WeekCalendar $calendar, private ProductPricing $pricing) {}
 
     /**
-     * @param  list<array{product_id: int, packs: int}>  $lines
+     * @param  list<array{product_id: int, quantity: int}>  $lines  Units to buy; each is rounded up to whole packages.
      */
-    public function handle(Shop $shop, array $lines, ?User $user = null): PurchaseOrder
+    public function handle(Shop $shop, array $lines, ?User $user = null, ?int $zoneId = null): PurchaseOrder
     {
         $products = Product::query()->whereKey(array_column($lines, 'product_id'))->get()->keyBy('id');
 
@@ -33,6 +34,7 @@ class CreateRestockPurchaseOrder
             'week' => $this->calendar->startOf(now())->toDateString(),
             'status' => PurchaseOrderStatus::Draft,
             'kind' => PurchaseOrder::KIND_RESTOCK,
+            'zone_id' => $zoneId,
             'created_by' => $user?->id,
         ]);
 
@@ -40,7 +42,7 @@ class CreateRestockPurchaseOrder
 
         foreach ($lines as $line) {
             $product = $products[$line['product_id']];
-            $quantity = $line['packs'] * $product->pack_size;
+            $quantity = PackQuantity::units($line['quantity'], $product->pack_size);
             $price = $this->pricing->purchasePrice($product) ?? 0;
 
             $purchase->items()->create([
@@ -60,6 +62,7 @@ class CreateRestockPurchaseOrder
             'reference' => $purchase->reference,
             'shop_id' => $shop->id,
             'kind' => PurchaseOrder::KIND_RESTOCK,
+            'zone_id' => $zoneId,
             'expected_total' => $expected,
         ], $user);
 

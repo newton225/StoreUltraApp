@@ -45,6 +45,7 @@ type Purchase = {
     week: string;
     status: string;
     kind: string;
+    zone: string | null;
     expected_total: number;
     actual_total: number;
     orders_count: number;
@@ -130,9 +131,9 @@ export default function ShowPurchase({ purchase, methods, today }: Props) {
                 <div className="space-y-2">
                     <Heading
                         title={`${purchase.reference ?? ''} — ${purchase.shop.name}`}
-                        description={t('purchases.show.week_of', {
+                        description={`${t('purchases.show.week_of', {
                             date: date(purchase.week),
-                        })}
+                        })}${purchase.zone ? ` · ${purchase.zone}` : ''}`}
                     />
                     <div className="flex flex-wrap items-center gap-3 text-sm">
                         <StatusBadge

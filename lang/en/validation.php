@@ -249,6 +249,7 @@ return [
         'payment_terms' => 'payment terms',
         'unit' => 'unit',
         'pack_size' => 'units per package',
+        'sellable' => 'can be put in a kit',
         'shop_id' => 'shop',
         'purchase_price' => 'purchase price',
         'sale_price' => 'sale price',

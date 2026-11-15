@@ -23,6 +23,7 @@ class UpdateProductRequest extends FormRequest
             'name' => ['required', 'string', 'max:255', Rule::unique(Product::class)->ignore($product instanceof Product ? $product->id : null)],
             'unit' => ['required', 'string', 'max:20'],
             'pack_size' => ['sometimes', 'required', 'integer', 'min:1', 'max:100000'],
+            'sellable' => ['sometimes', 'boolean'],
             'shop_id' => ['nullable', 'integer', Rule::exists(Shop::class, 'id')],
         ];
     }

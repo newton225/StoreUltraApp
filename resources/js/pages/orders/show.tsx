@@ -73,6 +73,13 @@ type Order = {
         line_sale_total: number | null;
         /** Units of the line taken from the stock (all its needs together). */
         from_stock: number;
+        /** What a manufactured product is made of for the units ordered (empty for a product bought as it is). */
+        components: {
+            name: string;
+            unit: string;
+            quantity: number;
+            from_stock: number;
+        }[];
     }[];
     history: {
         id: number;
@@ -663,6 +670,39 @@ export default function ShowOrder({
                                             >
                                                 <td className="px-4 py-2">
                                                     {item.product_name}
+                                                    {item.components.length >
+                                                        0 && (
+                                                        <ul
+                                                            aria-label={t(
+                                                                'orders.items.components',
+                                                            )}
+                                                            className="mt-1 space-y-0.5 border-l border-border pl-3 text-xs text-muted-foreground"
+                                                        >
+                                                            {item.components.map(
+                                                                (component) => (
+                                                                    <li
+                                                                        key={
+                                                                            component.name
+                                                                        }
+                                                                    >
+                                                                        {
+                                                                            component.name
+                                                                        }{' '}
+                                                                        :{' '}
+                                                                        {
+                                                                            component.quantity
+                                                                        }{' '}
+                                                                        {
+                                                                            component.unit
+                                                                        }
+                                                                        {component.from_stock >
+                                                                            0 &&
+                                                                            ` (${t('orders.items.from_stock', { count: component.from_stock })})`}
+                                                                    </li>
+                                                                ),
+                                                            )}
+                                                        </ul>
+                                                    )}
                                                 </td>
                                                 <td className="px-4 py-2 text-right">
                                                     {item.quantity} {item.unit}

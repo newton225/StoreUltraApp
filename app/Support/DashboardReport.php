@@ -200,14 +200,15 @@ class DashboardReport
     }
 
     /**
-     * What the purchase orders behind these orders ask of each shop: quantity ordered (whole packages, after the stock) x
-     * expected price, cancelled purchase orders left out. A purchase order is shared by several orders, so it counts
-     * whole even when only some of its orders are in the period or the zone chosen. Shops with none are absent.
+     * What was really received from each shop for these orders: quantity received x price really paid (the planned one
+     * when it is not known), cancelled purchase orders left out. A purchase order is shared by several orders, so it
+     * counts whole even when only some of its orders are in the period or the zone chosen. Shops with no purchase
+     * order are absent; a shop whose goods are not received yet shows zero.
      *
      * @param  list<int>  $orderIds
      * @return array<int, int>
      */
-    private function orderedByShop(array $orderIds): array
+    private function receivedByShop(array $orderIds): array
     {
         $fromLines = OrderItem::query()->whereIn('order_id', $orderIds)->whereNotNull('purchase_order_id')->pluck('purchase_order_id');
         $fromNeeds = OrderItemNeed::query()
@@ -217,18 +218,18 @@ class DashboardReport
             ->get()
             ->map(fn (OrderItemNeed $need): ?int => $need->purchaseOrderItem?->purchase_order_id);
 
-        $ordered = [];
+        $received = [];
 
         PurchaseOrder::query()
             ->whereIn('id', $fromLines->merge($fromNeeds)->filter()->unique()->values())
             ->where('status', '!=', PurchaseOrderStatus::Cancelled->value)
             ->with('items')
             ->get()
-            ->each(function (PurchaseOrder $purchase) use (&$ordered): void {
-                $ordered[$purchase->shop_id] = ($ordered[$purchase->shop_id] ?? 0) + $purchase->items->sum(fn (PurchaseOrderItem $item): int|float => $item->quantity_ordered * $item->unit_price_expected);
+            ->each(function (PurchaseOrder $purchase) use (&$received): void {
+                $received[$purchase->shop_id] = ($received[$purchase->shop_id] ?? 0) + $purchase->items->sum(fn (PurchaseOrderItem $item): int|float => $item->quantity_received * $item->effectivePrice());
             });
 
-        return array_map(fn (int|float $amount): int => (int) round($amount), $ordered);
+        return array_map(fn (int|float $amount): int => (int) round($amount), $received);
     }
 
     /**
@@ -286,11 +287,11 @@ class DashboardReport
 
         // What was really ordered from each shop: the purchase orders behind these orders, in whole packages and after
         // the stock. A shop with no purchase order yet shows what its lines are planned to cost.
-        $ordered = $this->orderedByShop($ids);
+        $received = $this->receivedByShop($ids);
         $purchaseTotal = 0;
 
         foreach ($rows as $key => $row) {
-            $rows[$key]['bought'] = $ordered[$key] ?? $row['purchase'];
+            $rows[$key]['bought'] = $received[$key] ?? $row['purchase'];
             $purchaseTotal += $rows[$key]['bought'];
         }
 

@@ -24,13 +24,18 @@ type Product = {
 };
 type Shop = { id: number; name: string; products: Product[] };
 
-type Props = { shops: Shop[] };
+type Props = { shops: Shop[]; zones: { id: number; name: string }[] };
 
-export default function RestockCreate({ shops }: Props) {
+/** The units really bought: what is typed, rounded up to whole packages as the shop sells it. */
+const bought = (quantity: number, packSize: number): number =>
+    quantity > 0 ? Math.ceil(quantity / Math.max(1, packSize)) * packSize : 0;
+
+export default function RestockCreate({ shops, zones }: Props) {
     const { t } = useTranslation();
     const { money } = useFormat();
     const [shopId, setShopId] = useState('');
-    const [packs, setPacks] = useState<Record<number, string>>({});
+    const [zoneId, setZoneId] = useState('');
+    const [quantities, setQuantities] = useState<Record<number, string>>({});
     const [errors, setErrors] = useState<Record<string, string | undefined>>(
         {},
     );
@@ -48,33 +53,35 @@ export default function RestockCreate({ shops }: Props) {
     const lines = products
         .map((product) => ({
             product,
-            packs: Math.floor(Number(packs[product.id] ?? 0)),
+            quantity: Math.floor(Number(quantities[product.id] ?? 0)),
         }))
-        .filter((line) => line.packs > 0);
+        .filter((line) => line.quantity > 0);
     const total = lines.reduce(
         (sum, line) =>
             sum +
-            line.packs * line.product.pack_size * (line.product.price ?? 0),
+            bought(line.quantity, line.product.pack_size) *
+                (line.product.price ?? 0),
         0,
     );
 
-    useLeaveGuard(Object.keys(packs).length > 0, t('common.form.leave'));
+    useLeaveGuard(Object.keys(quantities).length > 0, t('common.form.leave'));
 
     const send = (): void => {
         router.post(
             storeRestock.url(),
             {
                 shop_id: Number(shopId),
+                zone_id: zoneId === '' ? null : Number(zoneId),
                 lines: lines.map((line) => ({
                     product_id: line.product.id,
-                    packs: line.packs,
+                    quantity: line.quantity,
                 })),
             },
             {
                 onStart: () => setProcessing(true),
                 onFinish: () => setProcessing(false),
                 onError: (received) => setErrors(received),
-                onSuccess: () => setPacks({}),
+                onSuccess: () => setQuantities({}),
             },
         );
     };
@@ -89,32 +96,59 @@ export default function RestockCreate({ shops }: Props) {
                     description={t('purchases.restock.description')}
                 />
 
-                <div className="grid max-w-md gap-2">
-                    <Label htmlFor="restock-shop">
-                        {t('purchases.restock.shop')}
-                        <span className="text-destructive" aria-hidden>
-                            {' '}
-                            *
-                        </span>
-                    </Label>
-                    <SelectField
-                        id="restock-shop"
-                        searchable
-                        name="shop_id"
-                        required
-                        onChange={(value) => {
-                            setShopId(value);
-                            setPacks({});
-                        }}
-                        options={[
-                            { value: '', label: t('purchases.restock.choose') },
-                            ...shops.map((shop) => ({
-                                value: String(shop.id),
-                                label: shop.name,
-                            })),
-                        ]}
-                    />
-                    <InputError message={errors.shop_id} />
+                <div className="grid max-w-3xl items-start gap-4 sm:grid-cols-2">
+                    <div className="grid gap-2">
+                        <Label htmlFor="restock-shop">
+                            {t('purchases.restock.shop')}
+                            <span className="text-destructive" aria-hidden>
+                                {' '}
+                                *
+                            </span>
+                        </Label>
+                        <SelectField
+                            id="restock-shop"
+                            searchable
+                            name="shop_id"
+                            required
+                            onChange={(value) => {
+                                setShopId(value);
+                                setQuantities({});
+                            }}
+                            options={[
+                                {
+                                    value: '',
+                                    label: t('purchases.restock.choose'),
+                                },
+                                ...shops.map((shop) => ({
+                                    value: String(shop.id),
+                                    label: shop.name,
+                                })),
+                            ]}
+                        />
+                        <InputError message={errors.shop_id} />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="restock-zone">
+                            {t('purchases.restock.zone')}
+                        </Label>
+                        <SelectField
+                            id="restock-zone"
+                            searchable
+                            name="zone_id"
+                            onChange={setZoneId}
+                            options={[
+                                {
+                                    value: '',
+                                    label: t('purchases.restock.no_zone'),
+                                },
+                                ...zones.map((zone) => ({
+                                    value: String(zone.id),
+                                    label: zone.name,
+                                })),
+                            ]}
+                        />
+                        <InputError message={errors.zone_id} />
+                    </div>
                 </div>
 
                 {shopId !== '' &&
@@ -125,16 +159,19 @@ export default function RestockCreate({ shops }: Props) {
                     ) : (
                         <div className="space-y-3 fade-in">
                             <ul className="divide-y divide-border rounded-lg border border-border text-sm">
-                                {products.map((product, index) => {
-                                    const count = Math.floor(
-                                        Number(packs[product.id] ?? 0),
+                                {products.map((product, position) => {
+                                    const typed = Math.floor(
+                                        Number(quantities[product.id] ?? 0),
                                     );
-                                    const units = count * product.pack_size;
+                                    const units = bought(
+                                        typed,
+                                        product.pack_size,
+                                    );
 
                                     return (
                                         <li
                                             key={product.id}
-                                            className={`grid items-center gap-3 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_8rem_minmax(0,12rem)] ${index % 2 === 1 ? 'bg-muted/30' : ''}`}
+                                            className={`grid items-center gap-3 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_8rem_minmax(0,12rem)] ${position % 2 === 1 ? 'bg-muted/30' : ''}`}
                                         >
                                             <div>
                                                 <div className="font-medium">
@@ -159,43 +196,60 @@ export default function RestockCreate({ shops }: Props) {
                                             </div>
                                             <div className="grid gap-1">
                                                 <Label
-                                                    htmlFor={`restock-packs-${product.id}`}
+                                                    htmlFor={`restock-qty-${product.id}`}
                                                     className="text-xs font-normal text-muted-foreground"
                                                 >
                                                     {t(
-                                                        'purchases.restock.packs',
+                                                        'purchases.restock.quantity',
                                                     )}
                                                 </Label>
                                                 <Input
-                                                    id={`restock-packs-${product.id}`}
+                                                    id={`restock-qty-${product.id}`}
                                                     type="number"
                                                     min={0}
                                                     step={1}
                                                     inputMode="numeric"
                                                     className="tabular-nums"
                                                     value={
-                                                        packs[product.id] ?? ''
+                                                        quantities[
+                                                            product.id
+                                                        ] ?? ''
                                                     }
                                                     onChange={(event) =>
-                                                        setPacks((current) => ({
-                                                            ...current,
-                                                            [product.id]:
-                                                                event.target
-                                                                    .value,
-                                                        }))
+                                                        setQuantities(
+                                                            (current) => ({
+                                                                ...current,
+                                                                [product.id]:
+                                                                    event.target
+                                                                        .value,
+                                                            }),
+                                                        )
                                                     }
                                                 />
                                             </div>
                                             <div className="text-right text-muted-foreground tabular-nums">
-                                                {units > 0
+                                                {units > 0 &&
+                                                product.pack_size > 1 &&
+                                                units !== typed
                                                     ? t(
-                                                          'purchases.restock.units',
+                                                          'purchases.restock.rounded',
                                                           {
                                                               units,
                                                               unit: product.unit,
+                                                              packs:
+                                                                  units /
+                                                                  product.pack_size,
                                                           },
                                                       )
-                                                    : ''}
+                                                    : units > 0
+                                                      ? t(
+                                                            'purchases.restock.units',
+                                                            {
+                                                                units,
+                                                                unit: product.unit,
+                                                            },
+                                                        )
+                                                      : ''}
                                             </div>
                                         </li>
                                     );

@@ -47,6 +47,7 @@ class UpdateProductComponentsRequest extends FormRequest
             'components' => ['nullable', 'array', 'max:30'],
             'components.*.component_product_id' => ['required', 'integer', 'distinct', Rule::exists(Product::class, 'id')->whereNull('archived_at')],
             'components.*.quantity' => ['required', 'numeric', 'gt:0', 'max:100000', 'decimal:0,3'],
+            'bought_whole' => ['sometimes', 'boolean'],
         ];
     }
 

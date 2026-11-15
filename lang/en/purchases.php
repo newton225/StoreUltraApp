@@ -13,9 +13,13 @@ return [
     'empty' => 'No purchase order for this week',
 
     'restock' => [
-        'open' => 'Order for the stock',
-        'title' => 'Order for the stock',
-        'description' => 'Buy products from a shop with no customer order behind it: everything received enters the stock at the price really paid and will serve the next orders. Quantities are entered in whole packages.',
+        'open' => 'New purchase',
+        'title' => 'New purchase from a shop',
+        'description' => 'Enter the quantities of products to buy from a shop, with no customer order behind it (a normal purchase): everything received enters the stock at the price really paid and will serve the next orders. The shop sells by packages: the quantity entered is rounded up to whole packages. You can attach the purchase to a sub-prefecture.',
+        'zone' => 'Sub-prefecture (optional)',
+        'no_zone' => 'No particular sub-prefecture',
+        'quantity' => 'Quantity',
+        'rounded' => '→ :units :unit (:packs package(s))',
         'shop' => 'Shop',
         'choose' => 'Choose a shop',
         'no_products' => 'This shop has no product to order (manufactured products are not ordered, only their components).',
@@ -70,6 +74,8 @@ return [
     'orders_title' => 'Purchase orders of the week',
 
     'generate' => [
+        'zone' => 'Sub-prefecture',
+        'all_zones' => 'All sub-prefectures',
         'title' => 'Prepare the purchases of the week',
         'description' => 'Orders whose advance is paid (or whose proforma is issued, if you buy on credit in the Settings) are grouped by shop: one purchase order per shop, to send in order to buy the products.',
         'week' => 'Week of',

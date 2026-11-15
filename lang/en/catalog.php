@@ -89,6 +89,8 @@ return [
         'form' => [
             'name' => 'Name',
             'unit' => 'Unit',
+            'sellable' => 'Can be put in a kit',
+            'sellable_help' => 'Untick for a product that is never sold alone nor in a kit: a material or a component, only used to make other products or bought for the stock. It is then no longer offered in the list of products of a kit.',
             'pack_size' => 'Units per package',
             'pack_size_help' => 'How many units the shop sells at once (1 bundle = 10 bars: enter 10). Purchase orders are made of whole packages; leave 1 when the product is sold one by one.',
             'shop' => 'Usual shop',
@@ -111,6 +113,8 @@ return [
         'quantity' => 'Quantity per manufactured unit',
         'add' => 'Add a component',
         'remove' => 'Remove this component',
+        'bought_whole' => 'Bought ready-made from the shop',
+        'bought_whole_help' => 'Ticked, the product itself is on the supplier purchase order, at its own purchase price and in its usual shop; the composition is then only information. Unticked, the product is manufactured: its components are on the order instead.',
         'save' => 'Save the composition',
         'saved' => 'Composition saved.',
         'is_component' => 'This product already goes into another product\'s composition: it cannot be made from others itself.',

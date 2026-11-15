@@ -51,7 +51,7 @@ trait KitVersionValidationRules
                 'required',
                 'integer',
                 'distinct',
-                Rule::exists(Product::class, 'id')->whereNull('archived_at'),
+                Rule::exists(Product::class, 'id')->whereNull('archived_at')->where('sellable', true),
             ],
             'items.*.quantity_per_kit' => ['required', 'integer', 'min:1'],
             'items.*.sale_price_per_kit' => ['nullable', 'required_if:sale_price_mode,'.KitVersion::MODE_LINES, 'numeric', 'decimal:0,2', 'min:0'],

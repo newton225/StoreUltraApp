@@ -62,7 +62,7 @@ class ProductController extends Controller
         Gate::authorize('catalog.products');
 
         $product = DB::transaction(function () use ($request): Product {
-            $product = Product::create($request->safe()->only(['name', 'unit', 'shop_id', 'pack_size']));
+            $product = Product::create($request->safe()->only(['name', 'unit', 'shop_id', 'pack_size', 'sellable']));
 
             $product->prices()->create([
                 'shop_id' => $product->shop_id,
@@ -86,7 +86,7 @@ class ProductController extends Controller
     public function edit(Product $product): Response
     {
         return Inertia::render('products/edit', [
-            'product' => $product->only(['id', 'name', 'unit', 'shop_id', 'pack_size', 'archived_at']),
+            'product' => $product->only(['id', 'name', 'unit', 'shop_id', 'pack_size', 'sellable', 'bought_whole', 'archived_at']),
             'shops' => $this->shops(),
             'prices' => $product->prices()->get(['id', 'purchase_price', 'sale_price', 'effective_from']),
             'components' => $product->components()->with('component:id,name,unit')->get()->map(fn (ProductComponent $component): array => [

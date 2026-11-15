@@ -308,6 +308,7 @@ return [
         'payment_terms' => 'conditions de paiement',
         'unit' => 'unité',
         'pack_size' => 'unités par conditionnement',
+        'sellable' => 'peut être mis dans un kit',
         'shop_id' => 'boutique',
         'purchase_price' => 'prix d\'achat',
         'sale_price' => 'prix de vente',

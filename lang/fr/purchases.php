@@ -13,9 +13,13 @@ return [
     'empty' => 'Aucun bon de commande pour cette semaine',
 
     'restock' => [
-        'open' => 'Commander pour le stock',
-        'title' => 'Commander pour le stock',
-        'description' => 'Achetez des produits à une boutique sans commande client derrière : tout ce qui est reçu entre en stock, au prix réellement payé, et servira aux prochaines commandes. Les quantités se saisissent en conditionnements entiers.',
+        'open' => 'Nouvel achat',
+        'title' => 'Nouvel achat à une boutique',
+        'description' => 'Saisissez les quantités de produits à acheter à une boutique, sans commande client derrière (un achat normal) : tout ce qui est reçu entre en stock, au prix réellement payé, et servira aux prochaines commandes. La boutique vend par conditionnements : la quantité saisie est arrondie au conditionnement entier. Vous pouvez rattacher l\'achat à une sous-préfecture.',
+        'zone' => 'Sous-préfecture (facultatif)',
+        'no_zone' => 'Aucune sous-préfecture précise',
+        'quantity' => 'Quantité',
+        'rounded' => '→ :units :unit (:packs conditionnement(s))',
         'shop' => 'Boutique',
         'choose' => 'Choisir une boutique',
         'no_products' => 'Cette boutique n\'a aucun produit à commander (les produits fabriqués ne se commandent pas, seuls leurs composants).',
@@ -70,6 +74,8 @@ return [
     'orders_title' => 'Bons de commande de la semaine',
 
     'generate' => [
+        'zone' => 'Sous-préfecture',
+        'all_zones' => 'Toutes les sous-préfectures',
         'title' => 'Préparer les achats de la semaine',
         'description' => 'Les commandes dont l\'avance est payée (ou dont la proforma est émise, si vous achetez à crédit dans les Paramètres) sont regroupées par boutique : un bon de commande par boutique, à envoyer pour acheter les produits.',
         'week' => 'Semaine du',

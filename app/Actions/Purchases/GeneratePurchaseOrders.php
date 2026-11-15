@@ -34,20 +34,22 @@ class GeneratePurchaseOrders
      * Group the needs of the week into one purchase order per shop. Only orders whose advance is received are
      * taken, and a line already on a purchase order is never taken twice. What the lines need is first served from
      * the stock (the oldest order first, at the average cost); what is missing is bought in whole packages. A shop
-     * with nothing to buy gets no purchase order. Needs whose product has no shop are left aside and counted.
+     * with nothing to buy gets no purchase order. Needs whose product has no shop are left aside and counted. With a
+     * sub-prefecture, only the orders of its clients are taken and the purchase orders are made for it.
      *
      * @return array{created: int, unassigned: int}
      */
-    public function handle(CarbonInterface $week, ?User $user = null): array
+    public function handle(CarbonInterface $week, ?User $user = null, ?int $zoneId = null): array
     {
         $weekStart = $this->calendar->startOf($week);
 
-        return DB::transaction(function () use ($weekStart, $user): array {
+        return DB::transaction(function () use ($weekStart, $user, $zoneId): array {
             $items = OrderItem::query()
                 ->whereNull('purchase_order_id')
                 ->whereHas('order', fn ($orders) => $orders
                     ->whereIn('status', OrderStatus::purchasableValues((bool) $this->settings->get('purchase_on_credit')))
-                    ->whereDate('delivery_week', $weekStart))
+                    ->whereDate('delivery_week', $weekStart)
+                    ->when($zoneId !== null, fn ($query) => $query->whereHas('client', fn ($clients) => $clients->where('zone_id', $zoneId))))
                 ->orderBy('id')
                 ->get();
 
@@ -80,6 +82,7 @@ class GeneratePurchaseOrders
                     'week' => $weekStart->toDateString(),
                     'status' => PurchaseOrderStatus::Draft,
                     'kind' => PurchaseOrder::KIND_ORDERS,
+                    'zone_id' => $zoneId,
                     'created_by' => $user?->id,
                 ]);
 

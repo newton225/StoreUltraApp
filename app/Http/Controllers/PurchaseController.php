@@ -23,6 +23,7 @@ use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
 use App\Models\Shop;
 use App\Models\ShopPayment;
+use App\Models\Zone;
 use App\Support\AdvanceAllocation;
 use App\Support\BusinessSettings;
 use App\Support\ListSort;
@@ -48,13 +49,15 @@ class PurchaseController extends Controller
     {
         $week = $calendar->startOf($request->date('week') ?? now());
         $shopId = $request->integer('shop') ?: null;
+        $zoneId = $request->integer('zone') ?: null;
         $status = PurchaseOrderStatus::tryFrom($request->string('status')->toString());
         $sort = ListSort::resolve($request, PurchaseOrder::SORTABLE);
 
         $purchaseOrders = PurchaseOrder::query()
-            ->with('shop:id,name')
+            ->with('shop:id,name', 'zone:id,name')
             ->whereDate('week', $week)
             ->when($shopId !== null, fn (Builder $query) => $query->where('shop_id', $shopId))
+            ->when($zoneId !== null, fn (Builder $query) => $query->where('zone_id', $zoneId))
             ->when($status !== null, fn (Builder $query) => $query->where('status', $status->value))
             ->sortedBy($sort['sort'], $sort['direction'])
             ->paginate(self::PER_PAGE)
@@ -66,6 +69,7 @@ class PurchaseController extends Controller
                 'week' => $purchase->week->toDateString(),
                 'status' => $purchase->status->value,
                 'kind' => $purchase->kind,
+                'zone' => $purchase->zone?->name,
                 'expected_total' => $purchase->expected_total,
                 'actual_total' => $purchase->actual_total,
             ]);
@@ -74,13 +78,15 @@ class PurchaseController extends Controller
             ->whereNull('purchase_order_id')
             ->whereHas('order', fn (Builder $orders) => $orders
                 ->whereIn('status', OrderStatus::purchasableValues((bool) $settings->get('purchase_on_credit')))
-                ->whereDate('delivery_week', $week));
+                ->whereDate('delivery_week', $week)
+                ->when($zoneId !== null, fn (Builder $query) => $query->whereHas('client', fn (Builder $clients) => $clients->where('zone_id', $zoneId))));
 
         return Inertia::render('purchases/index', [
             'purchaseOrders' => $purchaseOrders,
             'week' => $week->toDateString(),
             'weeks' => $calendar->known($request->user(), $week),
-            'filters' => ['shop' => $shopId, 'status' => $status?->value],
+            'filters' => ['shop' => $shopId, 'status' => $status?->value, 'zone' => $zoneId],
+            'zones' => Zone::query()->orderBy('name')->get(['id', 'name']),
             'sort' => $sort,
             'statuses' => array_column(PurchaseOrderStatus::cases(), 'value'),
             'shops' => Shop::query()->orderBy('name')->get(['id', 'name']),
@@ -97,14 +103,15 @@ class PurchaseController extends Controller
     public function generate(GeneratePurchaseOrdersRequest $request, GeneratePurchaseOrders $generate, WeekCalendar $calendar): RedirectResponse
     {
         $week = CarbonImmutable::parse($request->validated('week'));
-        $result = $generate->handle($week, $request->user());
+        $zoneId = $request->integer('zone_id') ?: null;
+        $result = $generate->handle($week, $request->user(), $zoneId);
 
         Inertia::flash('toast', [
             'type' => $result['unassigned'] > 0 ? 'warning' : 'success',
             'message' => __('purchases.generated', $result),
         ]);
 
-        return to_route('purchases.index', ['week' => $calendar->startOf($week)->toDateString()]);
+        return to_route('purchases.index', array_filter(['week' => $calendar->startOf($week)->toDateString(), 'zone' => $zoneId]));
     }
 
     /**
@@ -113,13 +120,14 @@ class PurchaseController extends Controller
     public function createRestock(ProductPricing $pricing): Response
     {
         return Inertia::render('purchases/restock', [
+            'zones' => Zone::query()->orderBy('name')->get(['id', 'name']),
             'shops' => Shop::query()->orderBy('name')->get(['id', 'name'])->map(fn (Shop $shop): array => [
                 'id' => $shop->id,
                 'name' => $shop->name,
                 'products' => Product::query()
                     ->where('shop_id', $shop->id)
                     ->whereNull('archived_at')
-                    ->whereDoesntHave('components')
+                    ->boughtAsSuch()
                     ->with('currentPrice')
                     ->orderBy('name')
                     ->get()
@@ -141,8 +149,9 @@ class PurchaseController extends Controller
     {
         $purchase = $create->handle(
             Shop::query()->findOrFail($request->integer('shop_id')),
-            array_values(array_map(fn (array $line): array => ['product_id' => (int) $line['product_id'], 'packs' => (int) $line['packs']], $request->validated('lines'))),
+            array_values(array_map(fn (array $line): array => ['product_id' => (int) $line['product_id'], 'quantity' => (int) $line['quantity']], $request->validated('lines'))),
             $request->user(),
+            $request->integer('zone_id') ?: null,
         );
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('purchases.restock.created', ['reference' => $purchase->reference])]);
@@ -155,7 +164,7 @@ class PurchaseController extends Controller
      */
     public function show(PurchaseOrder $purchaseOrder): Response
     {
-        $purchaseOrder->load('shop:id,name', 'items.product', 'payments.method', 'payments.payer:id,name');
+        $purchaseOrder->load('shop:id,name', 'zone:id,name', 'items.product', 'payments.method', 'payments.payer:id,name');
 
         // For each line: what the customer orders need of it and how much of that the stock already gave.
         $needs = OrderItemNeed::query()
@@ -173,6 +182,7 @@ class PurchaseController extends Controller
                 'reference' => $purchaseOrder->reference,
                 'shop' => ['id' => $purchaseOrder->shop->id, 'name' => $purchaseOrder->shop->name],
                 'week' => $purchaseOrder->week->toDateString(),
+                'zone' => $purchaseOrder->zone?->name,
                 'status' => $status->value,
                 'kind' => $purchaseOrder->kind,
                 'sent_at' => $purchaseOrder->sent_at?->toIso8601String(),
@@ -282,7 +292,7 @@ class PurchaseController extends Controller
             ->sum(fn (Order $order): int => $order->netPaid());
 
         $purchases = PurchaseOrder::query()
-            ->with('shop:id,name')
+            ->with('shop:id,name', 'zone:id,name')
             ->whereDate('week', $week)
             ->where('status', '!=', PurchaseOrderStatus::Cancelled->value)
             ->get()

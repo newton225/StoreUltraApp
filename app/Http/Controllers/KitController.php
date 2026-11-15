@@ -200,6 +200,6 @@ class KitController extends Controller
      */
     private function products(): Collection
     {
-        return Product::query()->notArchived()->orderBy('name')->get(['id', 'name', 'unit']);
+        return Product::query()->notArchived()->where('sellable', true)->orderBy('name')->get(['id', 'name', 'unit']);
     }
 }

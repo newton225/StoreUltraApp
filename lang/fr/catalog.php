@@ -89,6 +89,8 @@ return [
         'form' => [
             'name' => 'Nom',
             'unit' => 'Unité',
+            'sellable' => 'Peut être mis dans un kit',
+            'sellable_help' => 'Décochez pour un produit qui ne se vend jamais seul ni dans un kit : une matière ou un composant, utilisé seulement pour fabriquer d\'autres produits ou acheté pour le stock. Il n\'apparaît alors plus dans la liste des produits d\'un kit.',
             'pack_size' => 'Unités par conditionnement',
             'pack_size_help' => 'Combien d\'unités la boutique vend d\'un coup (1 botte = 10 barres : saisissez 10). Les bons de commande sont faits en conditionnements entiers ; laissez 1 si le produit se vend à l\'unité.',
             'shop' => 'Boutique habituelle',
@@ -111,6 +113,8 @@ return [
         'quantity' => 'Quantité par unité fabriquée',
         'add' => 'Ajouter un composant',
         'remove' => 'Retirer ce composant',
+        'bought_whole' => 'S\'achète tout fait à la boutique',
+        'bought_whole_help' => 'Coché, le produit lui-même figure sur le bon de commande fournisseur, à son propre prix d\'achat et dans sa boutique habituelle ; la composition n\'est alors qu\'une information. Décoché, le produit est fabriqué : ce sont ses composants qui figurent sur le bon.',
         'save' => 'Enregistrer la composition',
         'saved' => 'Composition enregistrée.',
         'is_component' => 'Ce produit entre déjà dans la composition d\'un autre produit : il ne peut pas être lui-même fabriqué à partir d\'autres.',

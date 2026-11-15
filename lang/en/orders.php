@@ -334,6 +334,7 @@ return [
     ],
 
     'items' => [
+        'components' => 'Composition',
         'from_stock' => ':count of them from the stock',
     ],
 

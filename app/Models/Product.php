@@ -21,10 +21,12 @@ use Illuminate\Support\Carbon;
  * @property string $name
  * @property string $unit
  * @property int|null $shop_id
+ * @property bool $bought_whole Whether a product with components is bought ready-made (it then shows itself on the purchase order).
+ * @property bool $sellable Whether the product can be put in a kit (false: only a component or bought for the stock).
  * @property int $pack_size Units sold by the shop in one package (1 when sold one by one).
  * @property Carbon|null $archived_at
  */
-#[Fillable(['name', 'unit', 'shop_id', 'pack_size'])]
+#[Fillable(['name', 'unit', 'shop_id', 'pack_size', 'sellable', 'bought_whole'])]
 class Product extends Model
 {
     use Audited;
@@ -39,7 +41,7 @@ class Product extends Model
      */
     protected function casts(): array
     {
-        return ['archived_at' => 'datetime', 'pack_size' => 'integer'];
+        return ['archived_at' => 'datetime', 'pack_size' => 'integer', 'sellable' => 'boolean', 'bought_whole' => 'boolean'];
     }
 
     /**
@@ -96,11 +98,23 @@ class Product extends Model
     }
 
     /**
-     * Whether the product is made of other products (then it is not bought itself, its components are).
+     * Whether the product is made of other products and not bought ready-made: then it is not bought itself, its
+     * components are. A product with components that is bought whole is bought like any other.
      */
     public function isManufactured(): bool
     {
-        return $this->components->isNotEmpty();
+        return ! $this->bought_whole && $this->components->isNotEmpty();
+    }
+
+    /**
+     * The products that are bought as such: all but those made of components that are not bought whole.
+     *
+     * @param  Builder<Product>  $query
+     * @return Builder<Product>
+     */
+    public function scopeBoughtAsSuch(Builder $query): Builder
+    {
+        return $query->where(fn (Builder $inner) => $inner->where('bought_whole', true)->orWhereDoesntHave('components'));
     }
 
     /**

@@ -7,6 +7,7 @@ import InputError from '@/components/input-error';
 import { SaveBar } from '@/components/save-bar';
 import SelectField from '@/components/select-field';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useTranslation } from '@/hooks/use-translation';
@@ -28,6 +29,8 @@ type Props = {
     options: ComponentOption[];
     /** The product is already a component of another one: it cannot be made of others. */
     isComponent: boolean;
+    /** Bought ready-made from a shop: the product itself, not its components, is on the purchase order. */
+    boughtWhole: boolean;
 };
 
 let nextKey = 0;
@@ -37,6 +40,7 @@ export default function ProductComponents({
     components,
     options,
     isComponent,
+    boughtWhole,
 }: Props) {
     const { t } = useTranslation();
     const [rows, setRows] = useState<Row[]>(() =>
@@ -176,6 +180,29 @@ export default function ProductComponents({
                         ))}
 
                         <InputError message={errors.components} />
+
+                        <div className="flex items-start space-x-3">
+                            <input
+                                type="hidden"
+                                name="bought_whole"
+                                value="0"
+                            />
+                            <Checkbox
+                                id="bought_whole"
+                                name="bought_whole"
+                                value="1"
+                                defaultChecked={boughtWhole}
+                                className="mt-0.5"
+                            />
+                            <div className="grid gap-0.5">
+                                <Label htmlFor="bought_whole">
+                                    {t('catalog.components.bought_whole')}
+                                </Label>
+                                <p className="text-xs text-muted-foreground">
+                                    {t('catalog.components.bought_whole_help')}
+                                </p>
+                            </div>
+                        </div>
 
                         <Button
                             type="button"

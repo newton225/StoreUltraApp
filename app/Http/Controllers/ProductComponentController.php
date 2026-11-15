@@ -16,6 +16,9 @@ class ProductComponentController extends Controller
     public function update(UpdateProductComponentsRequest $request, Product $product): RedirectResponse
     {
         DB::transaction(function () use ($request, $product): void {
+            // Bought ready-made or made of its components: whether the product shows itself on the purchase order.
+            $product->update(['bought_whole' => $request->boolean('bought_whole')]);
+
             // One by one, so that every removal and addition reaches the audit log.
             $product->components()->get()->each->delete();
 

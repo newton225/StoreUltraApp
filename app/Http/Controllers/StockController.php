@@ -29,7 +29,7 @@ class StockController extends Controller
         $search = trim($request->string('search')->toString());
 
         $products = Product::query()
-            ->whereDoesntHave('components')
+            ->boughtAsSuch()
             ->where(fn (Builder $query) => $query->whereNull('archived_at')->orWhereHas('stock', fn (Builder $stock) => $stock->where('quantity_on_hand', '>', 0)))
             ->when($search !== '', fn (Builder $query) => Search::contains($query, 'name', $search))
             ->with('stock')

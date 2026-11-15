@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\Product;
 use App\Models\Shop;
+use App\Models\Zone;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -20,7 +21,8 @@ class StoreRestockPurchaseRequest extends FormRequest
             'shop_id' => ['required', 'integer', Rule::exists(Shop::class, 'id')],
             'lines' => ['required', 'array', 'min:1', 'max:60'],
             'lines.*.product_id' => ['required', 'integer', 'distinct', Rule::exists(Product::class, 'id')->whereNull('archived_at')],
-            'lines.*.packs' => ['required', 'integer', 'min:1', 'max:100000'],
+            'lines.*.quantity' => ['required', 'integer', 'min:1', 'max:1000000'],
+            'zone_id' => ['nullable', 'integer', Rule::exists(Zone::class, 'id')],
         ];
     }
 
@@ -41,7 +43,7 @@ class StoreRestockPurchaseRequest extends FormRequest
             $valid = Product::query()
                 ->whereKey($ids)
                 ->where('shop_id', (int) $this->input('shop_id'))
-                ->whereDoesntHave('components')
+                ->boughtAsSuch()
                 ->count();
 
             if ($valid !== $ids->count()) {

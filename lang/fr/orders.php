@@ -335,6 +335,7 @@ return [
     ],
 
     'items' => [
+        'components' => 'Composition',
         'from_stock' => 'dont :count en stock',
     ],
 

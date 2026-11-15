@@ -27,6 +27,7 @@ type Purchase = {
     week: string;
     status: string;
     kind: string;
+    zone: string | null;
     expected_total: number;
     actual_total: number;
 };
@@ -38,7 +39,12 @@ type Props = {
     purchaseOrders: Paginated;
     week: string;
     weeks: string[];
-    filters: { shop: number | null; status: string | null };
+    filters: {
+        shop: number | null;
+        status: string | null;
+        zone: number | null;
+    };
+    zones: { id: number; name: string }[];
     statuses: string[];
     shops: { id: number; name: string }[];
     pending_lines: number;
@@ -68,6 +74,7 @@ export default function PurchasesIndex({
     week,
     weeks,
     filters,
+    zones,
     statuses,
     shops,
     pending_lines: pendingLines,
@@ -89,6 +96,7 @@ export default function PurchasesIndex({
             week,
             shop: filters.shop === null ? '' : String(filters.shop),
             status: filters.status ?? '',
+            zone: filters.zone === null ? '' : String(filters.zone),
             ...sortQuery(sort),
             ...patch,
         };
@@ -125,16 +133,40 @@ export default function PurchasesIndex({
                     </div>
                 </div>
 
-                <div className="grid w-fit min-w-64 gap-1">
-                    <Label htmlFor="purchases-week">
-                        {t('purchases.generate.week')}
-                    </Label>
-                    <WeekSelect
-                        id="purchases-week"
-                        weeks={weeks}
-                        value={week}
-                        onChange={(value) => apply({ week: value })}
-                    />
+                <div className="flex flex-wrap items-end gap-4">
+                    <div className="grid w-fit min-w-64 gap-1">
+                        <Label htmlFor="purchases-week">
+                            {t('purchases.generate.week')}
+                        </Label>
+                        <WeekSelect
+                            id="purchases-week"
+                            weeks={weeks}
+                            value={week}
+                            onChange={(value) => apply({ week: value })}
+                        />
+                    </div>
+                    <div className="grid w-fit min-w-64 gap-1">
+                        <Label htmlFor="purchases-zone">
+                            {t('purchases.generate.zone')}
+                        </Label>
+                        <SelectField
+                            id="purchases-zone"
+                            searchable
+                            name="zone"
+                            defaultValue={String(filters.zone ?? '')}
+                            onChange={(value) => apply({ zone: value })}
+                            options={[
+                                {
+                                    value: '',
+                                    label: t('purchases.generate.all_zones'),
+                                },
+                                ...zones.map((zone) => ({
+                                    value: String(zone.id),
+                                    label: zone.name,
+                                })),
+                            ]}
+                        />
+                    </div>
                 </div>
 
                 <section className="space-y-3 rounded-lg border border-border p-4">
@@ -169,6 +201,11 @@ export default function PurchasesIndex({
                                         type="hidden"
                                         name="week"
                                         value={week}
+                                    />
+                                    <input
+                                        type="hidden"
+                                        name="zone_id"
+                                        value={filters.zone ?? ''}
                                     />
                                     <InputError message={errors.week} />
                                     <ConfirmAction
@@ -305,6 +342,11 @@ export default function PurchasesIndex({
                                             </td>
                                             <td className="px-4 py-2 font-medium">
                                                 {purchase.shop.name}
+                                                {purchase.zone && (
+                                                    <span className="ml-2 text-xs font-normal text-muted-foreground">
+                                                        · {purchase.zone}
+                                                    </span>
+                                                )}
                                                 {purchase.kind ===
                                                     'restock' && (
                                                     <span className="ml-2 text-xs font-normal text-muted-foreground">

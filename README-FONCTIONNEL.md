@@ -174,6 +174,7 @@ immuables) : à utiliser dans une base réservée aux démonstrations.
 
 ### 5.3 Produits et prix
 
+- **Produit « peut être mis dans un kit »** (coché par défaut) : décoché, le produit est une matière ou un composant, jamais vendu seul ni dans un kit : il n'est plus proposé dans la liste des produits d'un kit, et sert seulement à fabriquer d'autres produits ou à être acheté pour le stock.
 - Un produit : désignation, unité, boutique habituelle, statut actif ou archivé.
 - **Historique des prix** : prix d'achat et prix de vente unitaire (facultatif, car un produit vendu seulement en kit
   n'a que le prix de sa ligne de kit), avec date d'effet. Un prix actuel se déduit de l'historique ; l'ancien reste
@@ -333,6 +334,7 @@ unités. Règles (document de conception `docs/superpowers/specs/2026-11-15-stoc
   conditionnements entiers, sans commande client derrière ; il suit le même circuit (brouillon, envoyé, reçu, payé à la boutique) et
   tout ce qui est reçu entre en stock.
 - **Produits fabriqués** : un produit peut être **composé d'autres produits** (fiche produit > Composition, un seul niveau, quantité
+- **Acheté tout fait ou fabriqué** : sur un produit composé, la case « S'achète tout fait à la boutique » décide de ce qui figure sur le bon de commande fournisseur. Cochée, c'est le produit lui-même (à son prix d'achat et dans sa boutique habituelle) ; la composition n'est qu'une information, et le produit se commande comme un produit simple (achat, stock). Décochée (par défaut), c'est un produit fabriqué : ses composants figurent sur le bon et son prix d'achat est la somme des composants.
   décimale possible). On n'achète pas le produit fabriqué mais ses **composants** ; son prix d'achat est la somme des prix de ses
   composants. Le produit fabriqué est produit à la demande ; la main-d'œuvre n'est pas comptée. Limite connue : dans la synthèse par
   boutique du tableau de bord, les lignes de produits fabriqués restent dans la ligne « — ».
