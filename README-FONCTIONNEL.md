@@ -105,6 +105,21 @@ défaut). Le rythme (hebdomadaire par défaut) et le nombre de kits sont des par
 Chaque changement d'état est enregistré (qui, quand, motif). Un retour en arrière est un événement tracé, jamais
 une modification silencieuse.
 
+**Dettes et nouvelles commandes.** Une TPE qui n'a pas versé son avance ou pas soldé une commande **peut toujours
+passer une nouvelle commande** : rien ne bloque la création (seule la règle « avance reçue » conditionne l'étape « Avance
+reçue » d'une commande, jamais la création d'une autre). L'essentiel est la **trace** de qui doit quoi : la page **Créances
+clients** (menu Paiements) liste, pour chaque TPE, ses commandes non soldées (hors annulées) avec prix net des remises,
+encaissé, avance restante et **reste à payer**, ainsi que le total par TPE et le total général, filtrables par
+sous-préfecture. La fiche d'un client affiche aussi ce qu'il doit encore au total et le reste de chacune de ses commandes ;
+les proformas et factures reprennent ses anciennes dettes (rapprochement avant nouvelle commande). Ces montants ne
+sont visibles que par ceux qui ont le droit « Gérer les paiements ».
+
+**Annulation en groupe.** Sur la liste des commandes, on coche les commandes voulues puis « Annuler la sélection » : un
+**motif commun** et le **mot de passe** de la personne sont demandés. Chaque commande est annulée comme elle le serait une
+à une (même règle, même trace, droit « Annuler »), puis une entrée « étape en groupe » est ajoutée au journal d'audit. Les
+commandes qui ne peuvent plus l'être (livrées, déjà annulées) ou que la personne ne voit pas sont laissées telles quelles et
+comptées dans le message ; elles n'empêchent pas les autres. Une annulation ne se défait pas.
+
 **Remise.** Le prix d'une commande ne se modifie pas, mais le responsable (ou un profil qui a le droit « Accorder des
 remises ») peut lui accorder une **remise** : un montant en FCFA, un **motif obligatoire** et son mot de passe. Elle n'est
 possible **que jusqu'à « Reçue »** (avant la livraison) et ne peut **jamais faire descendre le prix sous ce qui est déjà

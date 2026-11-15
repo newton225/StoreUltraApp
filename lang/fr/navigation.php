@@ -43,6 +43,7 @@ return [
     'deliveries' => 'Livraisons',
     'payments' => 'Paiements',
     'arrears' => 'Avances en retard',
+    'receivables' => 'Créances clients',
     'payment_methods' => 'Modes de paiement',
     'audit' => 'Journal',
     'zones' => 'Sous-préfectures',

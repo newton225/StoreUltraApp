@@ -267,6 +267,18 @@ return [
         'by' => 'par :user',
     ],
 
+    'cancel_batch' => [
+        'open' => 'Annuler la sélection (:count)',
+        'title' => 'Annuler :count commande(s) ?',
+        'help' => 'Chaque commande cochée est annulée avec le même motif, comme si vous l\'annuliez une à une. Celles qui ne peuvent plus l\'être (déjà livrées ou déjà annulées) sont laissées telles quelles. Une annulation ne se défait pas.',
+        'reason' => 'Motif (commun à toutes)',
+        'password' => 'Votre mot de passe',
+        'back' => 'Retour',
+        'confirm' => 'Annuler les commandes',
+        'done' => ':cancelled commande(s) annulée(s).',
+        'done_partial' => ':cancelled commande(s) annulée(s), :skipped laissée(s) telle(s) quelle(s) (ne peuvent plus être annulées).',
+    ],
+
     'discount' => [
         'open' => 'Accorder une remise',
         'title' => 'Accorder une remise',
@@ -359,6 +371,10 @@ return [
             'monthly' => 'Chaque mois',
         ],
         'orders_title' => 'Commandes',
+        'remaining' => 'reste :amount',
+        'settled' => 'soldée',
+        'owed' => 'Ce client doit encore :amount sur l\'ensemble de ses commandes (une dette n\'empêche jamais une nouvelle commande).',
+        'owed_none' => 'Ce client ne doit rien : toutes ses commandes sont soldées.',
     ],
 
     'audit' => [

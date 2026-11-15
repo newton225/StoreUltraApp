@@ -28,12 +28,14 @@ export type ClientOrder = {
     status: string;
     kits_count: number;
     total_sale: number;
+    remaining: number | null;
 };
 
 type Props = {
     clientId: number;
     plans: Plan[];
     orders: ClientOrder[];
+    owed: number | null;
     canManageOrders: boolean;
     planDefaults: {
         kits_per_cycle: number;
@@ -48,6 +50,7 @@ export default function ClientSupply({
     clientId,
     plans,
     orders,
+    owed,
     canManageOrders,
     planDefaults,
     kits,
@@ -168,6 +171,15 @@ export default function ClientSupply({
                 <h2 className="text-base font-semibold">
                     {t('orders.plans.orders_title')}
                 </h2>
+                {owed !== null && (
+                    <p
+                        className={`text-sm ${owed > 0 ? 'font-medium' : 'text-muted-foreground'}`}
+                    >
+                        {owed > 0
+                            ? t('orders.plans.owed', { amount: money(owed) })
+                            : t('orders.plans.owed_none')}
+                    </p>
+                )}
                 {orders.length === 0 ? (
                     <p className="text-sm text-muted-foreground">
                         {t('orders.empty')}
@@ -189,6 +201,27 @@ export default function ClientSupply({
                                     {date(order.delivery_week)} ·{' '}
                                     {order.kits_count} ·{' '}
                                     {money(order.total_sale)}
+                                    {order.remaining !== null &&
+                                        (order.remaining > 0 ? (
+                                            <>
+                                                {' · '}
+                                                <strong className="text-foreground">
+                                                    {t(
+                                                        'orders.plans.remaining',
+                                                        {
+                                                            amount: money(
+                                                                order.remaining,
+                                                            ),
+                                                        },
+                                                    )}
+                                                </strong>
+                                            </>
+                                        ) : (
+                                            <>
+                                                {' · '}
+                                                {t('orders.plans.settled')}
+                                            </>
+                                        ))}
                                 </span>
                                 <StatusBadge
                                     group="orders"

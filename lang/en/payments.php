@@ -107,6 +107,27 @@ return [
         ],
     ],
 
+    'receivables' => [
+        'head' => 'Client receivables',
+        'title' => 'Client receivables',
+        'description' => 'Who owes what: for each small business, the orders not yet settled, what was received and what is left to pay. A debt never prevents creating a new order.',
+        'summary' => ':clients client(s), :orders order(s), left to collect:',
+        'empty' => 'No receivable: every order is settled.',
+        'orders' => ':count order(s)',
+        'paid_of' => ':paid paid out of :total',
+        'owes' => 'owes :amount',
+        'open_client' => 'Open the client page',
+        'columns' => [
+            'order' => 'Order',
+            'week' => 'Week of',
+            'status' => 'Step',
+            'total' => 'Price',
+            'paid' => 'Received',
+            'advance' => 'Advance left',
+            'remaining' => 'Left to pay',
+        ],
+    ],
+
     'methods' => [
         'head' => 'Payment methods',
         'title' => 'Payment methods',

@@ -43,6 +43,7 @@ return [
     'deliveries' => 'Deliveries',
     'payments' => 'Payments',
     'arrears' => 'Late advances',
+    'receivables' => 'Client receivables',
     'payment_methods' => 'Payment methods',
     'audit' => 'Journal',
     'zones' => 'Sub-prefectures',

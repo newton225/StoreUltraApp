@@ -15,6 +15,7 @@ import OrderAdvancePayments from '@/components/order-advance-payments';
 import OrderDocumentsZip, {
     type ArchiveChoices,
 } from '@/components/order-documents-zip';
+import OrderCancelBatch from '@/components/order-cancel-batch';
 import OrderProformaBatch from '@/components/order-proforma-batch';
 import Pagination from '@/components/pagination';
 import SelectField from '@/components/select-field';
@@ -123,6 +124,7 @@ export default function OrdersIndex({
     currentUserId,
 }: Props) {
     const canZip = useCanDo('orders.download_zip');
+    const canCancel = useCanDo('orders.cancel');
     const { t } = useTranslation();
     const { money, date } = useFormat();
     const [search, setSearch] = useState(filters.search);
@@ -323,6 +325,12 @@ export default function OrdersIndex({
                                         {t('orders.archive.nothing')}
                                     </span>
                                 )}
+                            {canCancel && (
+                                <OrderCancelBatch
+                                    orderIds={chosen.map((order) => order.id)}
+                                    onDone={() => setSelected([])}
+                                />
+                            )}
                             <Button
                                 size="sm"
                                 variant="ghost"

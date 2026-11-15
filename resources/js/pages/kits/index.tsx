@@ -165,7 +165,7 @@ export default function KitsIndex({
                                         <td className="px-4 py-2 text-right whitespace-nowrap">
                                             <Button
                                                 asChild
-                                                variant="ghost"
+                                                variant="infoOutline"
                                                 size="sm"
                                             >
                                                 <Link

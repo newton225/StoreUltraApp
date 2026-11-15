@@ -266,6 +266,18 @@ return [
         'by' => 'by :user',
     ],
 
+    'cancel_batch' => [
+        'open' => 'Cancel selection (:count)',
+        'title' => 'Cancel :count order(s)?',
+        'help' => 'Each ticked order is cancelled with the same reason, as if you cancelled them one by one. Those that can no longer be cancelled (already delivered or already cancelled) are left as they are. A cancellation cannot be undone.',
+        'reason' => 'Reason (shared by all)',
+        'password' => 'Your password',
+        'back' => 'Back',
+        'confirm' => 'Cancel the orders',
+        'done' => ':cancelled order(s) cancelled.',
+        'done_partial' => ':cancelled order(s) cancelled, :skipped left as they were (can no longer be cancelled).',
+    ],
+
     'discount' => [
         'open' => 'Grant a discount',
         'title' => 'Grant a discount',
@@ -358,6 +370,10 @@ return [
             'monthly' => 'Every month',
         ],
         'orders_title' => 'Orders',
+        'remaining' => ':amount left',
+        'settled' => 'settled',
+        'owed' => 'This client still owes :amount across all its orders (a debt never prevents a new order).',
+        'owed_none' => 'This client owes nothing: all its orders are settled.',
     ],
 
     'audit' => [

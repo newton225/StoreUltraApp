@@ -37,6 +37,7 @@ type Props = {
     statuses: string[];
     plans: Plan[];
     orders: ClientOrder[];
+    owed: number | null;
     canManageOrders: boolean;
     planDefaults: {
         kits_per_cycle: number;
@@ -53,6 +54,7 @@ export default function ShowClient({
     statuses,
     plans,
     orders,
+    owed,
     canManageOrders,
     planDefaults,
     kits,
@@ -142,6 +144,7 @@ export default function ShowClient({
                     clientId={client.id}
                     plans={plans}
                     orders={orders}
+                    owed={owed}
                     canManageOrders={canManageOrders}
                     planDefaults={planDefaults}
                     kits={kits}

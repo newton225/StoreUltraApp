@@ -714,3 +714,9 @@ Chaque vue prévoit ses états, tous :
   français) : pas de largeur fixe, pas de texte tronqué sans repli.
 - **I18N-16.** Les **libellés paramétrables** saisis par l'administrateur (types de frais, modes de paiement,
   zones) se traduisent par le mécanisme de I18N-11, pas par les fichiers de langue.
+- **I18N-17.** **Tout texte de langue est échappé, toujours.** Dans un fichier de langue entre apostrophes, chaque apostrophe
+  du texte (l'ensemble, n'empêche, d'une...) s'écrit `\'`, chaque barre oblique inverse `\\`, et aucun texte n'est écrit
+  sans que le fichier soit **relu par l'interpréteur** (`php -l lang/*/*.php`) avant de rendre le travail : une seule
+  apostrophe oubliée casse **tous** les écrans. Côté interface, un texte et ses paramètres sont rendus **comme du texte**
+  (jamais comme du HTML : pas de `dangerouslySetInnerHTML` sur une valeur venant d'une langue ou d'un utilisateur), et
+  le texte saisi par un utilisateur n'est jamais collé dans une clé de langue.

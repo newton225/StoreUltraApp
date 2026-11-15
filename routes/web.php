@@ -25,6 +25,7 @@ use App\Http\Controllers\ListExportController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\OrderAdvancePaymentController;
 use App\Http\Controllers\OrderBatchController;
+use App\Http\Controllers\OrderCancellationController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderDiscountController;
 use App\Http\Controllers\OrderDocumentArchiveController;
@@ -86,6 +87,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('can:manage-orders')->group(function () {
         Route::post('orders/advance-payments', [OrderAdvancePaymentController::class, 'store'])->middleware('can:orders.record_payment')->name('orders.advance-payments.store');
         Route::post('orders/proformas', [OrderProformaController::class, 'store'])->middleware('can:orders.batch')->name('orders.proformas.store');
+        Route::post('orders/cancel-batch', [OrderCancellationController::class, 'store'])->middleware(['can:orders.cancel', 'throttle:10,1'])->name('orders.cancel-batch.store');
         Route::post('orders/batch', [OrderBatchController::class, 'store'])->middleware('can:orders.batch')->name('orders.batch.store');
         Route::post('documents/{document}/cancel', [DocumentController::class, 'cancel'])->middleware('can:orders.cancel_documents')->name('documents.cancel');
         Route::patch('invoices/{invoice}/fne', [InvoiceController::class, 'fne'])->middleware('can:orders.fne')->name('invoices.fne');
@@ -97,6 +99,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('can:manage-payments')->group(function () {
         Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
         Route::get('payments/arrears', [PaymentController::class, 'arrears'])->name('payments.arrears');
+        Route::get('payments/receivables', [PaymentController::class, 'receivables'])->name('payments.receivables');
     });
 
     Route::middleware('can:manage-purchases')->group(function () {

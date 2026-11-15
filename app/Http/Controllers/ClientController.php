@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\ClientStatus;
+use App\Enums\OrderStatus;
 use App\Http\Requests\ClientStatusRequest;
 use App\Http\Requests\StoreClientRequest;
 use App\Http\Requests\UpdateClientRequest;
@@ -13,6 +14,7 @@ use App\Models\SupplyPlan;
 use App\Models\User;
 use App\Models\Zone;
 use App\Support\BusinessSettings;
+use App\Support\ClientReceivables;
 use App\Support\ListSort;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -101,9 +103,11 @@ class ClientController extends Controller
     /**
      * Show the fiche of a client.
      */
-    public function show(Request $request, Client $client, BusinessSettings $settings): Response
+    public function show(Request $request, Client $client, BusinessSettings $settings, ClientReceivables $receivables): Response
     {
         Gate::authorize('view', $client);
+
+        $seesPayments = $request->user()->can('manage-payments');
 
         $client->load('zone:id,name', 'creator:id,name', 'members');
 
@@ -138,7 +142,9 @@ class ClientController extends Controller
                 'status' => $order->status->value,
                 'kits_count' => $order->kits_count,
                 'total_sale' => $order->total_sale,
+                'remaining' => $seesPayments && $order->status !== OrderStatus::Cancelled ? max(0, $order->total_sale - $order->netPaid()) : null,
             ])->values(),
+            'owed' => $seesPayments ? $receivables->owedBy($client->id) : null,
             'canChangeStatus' => ! $request->user()->isRestrictedToZones() && $request->user()->can('update', $client),
             'statuses' => array_column(ClientStatus::cases(), 'value'),
             'canManageOrders' => $canManageOrders,

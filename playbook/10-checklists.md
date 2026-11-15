@@ -10,6 +10,7 @@ cochée est un point **supposé faux**.
 - [ ] Les tests du fichier touché et des modules voisins ont tourné ; ce qui n'a pas tourné est écrit (PRI-08).
 - [ ] Formatage et analyse statique **propres** sur les fichiers touchés (CODE-40, CODE-41, CODE-42).
 - [ ] Les **textes** sont dans **toutes** les langues (I18N-04).
+- [ ] Les textes de langue sont **échappés** (apostrophes `\'`) et les fichiers de langue **relus** par `php -l` (I18N-17).
 - [ ] L'écran est vérifié en **thème clair et sombre** et dans les **deux langues** (UI-67, UI-68, I18N-15).
 - [ ] La **documentation** et la **version des textes légaux** avancent avec le comportement (PRIV-03, OPS-05).
 - [ ] Aucun **secret**, fichier d'environnement, dump ni donnée réelle (GIT-03).

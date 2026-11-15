@@ -94,7 +94,7 @@ export default function ShowKit({
                         {current && (
                             <Button
                                 asChild
-                                variant="outline"
+                                variant="infoOutline"
                                 size="sm"
                                 title={t('kits.copy.action_help')}
                             >

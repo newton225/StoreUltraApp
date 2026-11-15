@@ -107,6 +107,27 @@ return [
         ],
     ],
 
+    'receivables' => [
+        'head' => 'Créances clients',
+        'title' => 'Créances clients',
+        'description' => 'Qui doit quoi : pour chaque TPE, les commandes pas encore soldées, ce qui a été encaissé et ce qui reste à payer. Une dette n\'empêche jamais de créer une nouvelle commande.',
+        'summary' => ':clients TPE, :orders commande(s), reste à encaisser :',
+        'empty' => 'Aucune créance : toutes les commandes sont soldées.',
+        'orders' => ':count commande(s)',
+        'paid_of' => ':paid payés sur :total',
+        'owes' => 'doit :amount',
+        'open_client' => 'Ouvrir la fiche du client',
+        'columns' => [
+            'order' => 'Commande',
+            'week' => 'Semaine du',
+            'status' => 'Étape',
+            'total' => 'Prix',
+            'paid' => 'Encaissé',
+            'advance' => 'Avance restante',
+            'remaining' => 'Reste à payer',
+        ],
+    ],
+
     'methods' => [
         'head' => 'Modes de paiement',
         'title' => 'Modes de paiement',

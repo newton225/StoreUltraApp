@@ -3,6 +3,7 @@ import {
     Boxes,
     ClipboardList,
     CreditCard,
+    HandCoins,
     Paperclip,
     Receipt,
     TrendingUp,
@@ -43,6 +44,7 @@ import { index as ordersIndex } from '@/actions/App/Http/Controllers/OrderContro
 import {
     arrears as arrearsIndex,
     index as paymentsIndex,
+    receivables as receivablesIndex,
 } from '@/actions/App/Http/Controllers/PaymentController';
 import { index as paymentMethodsIndex } from '@/actions/App/Http/Controllers/PaymentMethodController';
 import { index as purchasesIndex } from '@/actions/App/Http/Controllers/PurchaseController';
@@ -134,6 +136,11 @@ export function AppSidebar() {
                               title: t('navigation.arrears'),
                               href: arrearsIndex(),
                               icon: CreditCard,
+                          },
+                          {
+                              title: t('navigation.receivables'),
+                              href: receivablesIndex(),
+                              icon: HandCoins,
                           },
                       ]),
                 ...(!canDocuments

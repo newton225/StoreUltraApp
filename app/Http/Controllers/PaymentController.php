@@ -11,6 +11,7 @@ use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Models\Zone;
 use App\Support\AdvanceArrears;
+use App\Support\ClientReceivables;
 use App\Support\ListSort;
 use App\Support\Search;
 use Carbon\CarbonImmutable;
@@ -104,6 +105,26 @@ class PaymentController extends Controller
             'orders' => $arrears->page($zoneId, self::PER_PAGE, $sort['sort'], $sort['direction']),
             'sort' => $sort,
             'total_outstanding' => $arrears->outstanding($zoneId),
+            'zones' => Zone::query()->orderBy('name')->get(['id', 'name']),
+            'filters' => ['zone' => $zoneId],
+        ]);
+    }
+
+    /**
+     * Who owes what: every client with an unpaid amount, order by order, and the grand total.
+     */
+    public function receivables(Request $request, ClientReceivables $receivables): Response
+    {
+        $zoneId = $request->integer('zone') ?: null;
+        $clients = $receivables->clients($request->user(), $zoneId);
+
+        return Inertia::render('payments/receivables', [
+            'clients' => $clients,
+            'totals' => [
+                'clients' => $clients->count(),
+                'orders' => (int) $clients->sum('orders_count'),
+                'remaining' => (int) $clients->sum('remaining'),
+            ],
             'zones' => Zone::query()->orderBy('name')->get(['id', 'name']),
             'filters' => ['zone' => $zoneId],
         ]);
