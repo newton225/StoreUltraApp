@@ -30,7 +30,7 @@ export default function PriceFields({
                     name="purchase_price"
                     type="number"
                     min={0}
-                    step={1}
+                    step="any"
                     required
                 />
                 <InputError message={errors.purchase_price} />
@@ -45,7 +45,7 @@ export default function PriceFields({
                     name="sale_price"
                     type="number"
                     min={0}
-                    step={1}
+                    step="any"
                 />
                 <p className="text-xs text-muted-foreground">
                     {t('catalog.products.form.sale_price_help')}

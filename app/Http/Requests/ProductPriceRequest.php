@@ -2,11 +2,14 @@
 
 namespace App\Http\Requests;
 
+use App\Concerns\RoundsDecimalPrices;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ProductPriceRequest extends FormRequest
 {
+    use RoundsDecimalPrices;
+
     /**
      * Get the validation rules that apply to the request.
      *

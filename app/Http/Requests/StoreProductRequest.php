@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Concerns\RoundsDecimalPrices;
 use App\Models\Product;
 use App\Models\Shop;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -10,6 +11,8 @@ use Illuminate\Validation\Rule;
 
 class StoreProductRequest extends FormRequest
 {
+    use RoundsDecimalPrices;
+
     /**
      * Get the validation rules that apply to the request.
      *
