@@ -105,6 +105,15 @@ défaut). Le rythme (hebdomadaire par défaut) et le nombre de kits sont des par
 Chaque changement d'état est enregistré (qui, quand, motif). Un retour en arrière est un événement tracé, jamais
 une modification silencieuse.
 
+**Remise.** Le prix d'une commande ne se modifie pas, mais le responsable (ou un profil qui a le droit « Accorder des
+remises ») peut lui accorder une **remise** : un montant en FCFA, un **motif obligatoire** et son mot de passe. Elle n'est
+possible **que jusqu'à « Reçue »** (avant la livraison) et ne peut **jamais faire descendre le prix sous ce qui est déjà
+payé** (le reste à encaisser est le plafond). Le total de la commande baisse d'autant (solde, bénéfice, tableau de bord et
+exports suivent) ; l'avance encore due baisse dans la même proportion, une avance déjà encaissée ne bouge pas. Une remise ne
+se corrige pas ni ne se supprime : une erreur se règle en annulant la commande. Elle est écrite au journal d'audit
+(avant/après, motif, auteur), listée sous les lignes de la commande, et les proformas et factures émises ensuite affichent
+une ligne « Remise accordée » avant le net à payer. Un document déjà émis n'est pas modifié : l'annuler et le réémettre.
+
 ## 5. Modules
 
 ### 5.0 Données de base chargées au déploiement
@@ -163,6 +172,9 @@ immuables) : à utiliser dans une base réservée aux démonstrations.
 - Un **kit** est une **composition** : une liste de produits avec leur quantité par kit.
 - Une composition a une **version** : modifier un kit crée une nouvelle version, les commandes en cours gardent
   l'ancienne.
+- Un kit peut être **copié** (bouton « Copier » sur la liste et sur la fiche) : le formulaire de création s'ouvre pré-rempli
+  avec la composition en cours (produits, quantités, prix, mode de prix) et un nom « Copie de … » à changer. Rien n'est
+  enregistré avant la création ; le nouveau kit est indépendant de l'original. Les produits archivés depuis ne sont pas repris.
 - L'application calcule le prix d'achat, le prix de vente et le bénéfice théorique d'un kit à partir des prix en
   vigueur.
 - Le prix de vente peut être **calculé** (somme des produits) ou **fixé** pour le kit : choix du responsable

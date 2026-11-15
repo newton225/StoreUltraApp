@@ -6,16 +6,29 @@ import {
 } from '@/actions/App/Http/Controllers/KitController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
-import type { ProductOption } from '@/components/kit-composition-fields';
+import type {
+    CompositionLine,
+    ProductOption,
+} from '@/components/kit-composition-fields';
 import KitCompositionFields from '@/components/kit-composition-fields';
 import { SaveBar } from '@/components/save-bar';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useTranslation } from '@/hooks/use-translation';
 
-type Props = { products: ProductOption[]; today: string };
+type Copy = {
+    source: string;
+    name_fr: string;
+    name_en: string;
+    mode: string;
+    fixed_price: number | null;
+    lines: CompositionLine[];
+    skipped: number;
+};
 
-export default function CreateKit({ products, today }: Props) {
+type Props = { products: ProductOption[]; today: string; copy: Copy | null };
+
+export default function CreateKit({ products, today, copy }: Props) {
     const { t } = useTranslation();
 
     setLayoutProps({
@@ -32,8 +45,23 @@ export default function CreateKit({ products, today }: Props) {
             <div className="max-w-3xl space-y-6 p-4">
                 <Heading
                     title={t('kits.create.title')}
-                    description={t('kits.create.description')}
+                    description={
+                        copy
+                            ? t('kits.copy.description', {
+                                  name: copy.source,
+                              })
+                            : t('kits.create.description')
+                    }
                 />
+
+                {copy && copy.skipped > 0 && (
+                    <p
+                        role="status"
+                        className="rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-sm"
+                    >
+                        {t('kits.copy.skipped', { count: copy.skipped })}
+                    </p>
+                )}
 
                 <Form
                     setDefaultsOnSuccess
@@ -54,6 +82,7 @@ export default function CreateKit({ products, today }: Props) {
                                         <Input
                                             id="name_fr"
                                             name="name_fr"
+                                            defaultValue={copy?.name_fr}
                                             required
                                         />
                                         <InputError message={errors.name_fr} />
@@ -65,6 +94,7 @@ export default function CreateKit({ products, today }: Props) {
                                         <Input
                                             id="name_en"
                                             name="name_en"
+                                            defaultValue={copy?.name_en}
                                             required
                                         />
                                         <InputError message={errors.name_en} />
@@ -73,9 +103,11 @@ export default function CreateKit({ products, today }: Props) {
 
                                 <KitCompositionFields
                                     products={products}
-                                    initialLines={[]}
-                                    initialMode="lines"
-                                    initialFixedPrice={null}
+                                    initialLines={copy?.lines ?? []}
+                                    initialMode={copy?.mode ?? 'lines'}
+                                    initialFixedPrice={
+                                        copy?.fixed_price ?? null
+                                    }
                                     today={today}
                                     errors={errors}
                                 />

@@ -32,6 +32,14 @@ return [
         'submit' => 'Créer le kit',
     ],
 
+    'copy' => [
+        'action' => 'Copier',
+        'action_help' => 'Crée un nouveau kit à partir de la composition en cours de celui-ci, à ajuster avant d\'enregistrer.',
+        'name' => 'Copie de :name',
+        'description' => 'Composition reprise de « :name » : ajustez-la puis créez le kit. Rien n\'est enregistré avant.',
+        'skipped' => ':count produit(s) archivé(s) n\'ont pas été repris.',
+    ],
+
     'form' => [
         'name_fr' => 'Nom (français)',
         'name_en' => 'Nom (anglais)',

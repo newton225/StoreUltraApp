@@ -13,6 +13,7 @@ use App\Support\BusinessSettings;
 use App\Support\KitPricing;
 use App\Support\KitSummary;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -51,11 +52,14 @@ class KitController extends Controller
     /**
      * Show the form creating a kit with its first version.
      */
-    public function create(): Response
+    public function create(Request $request): Response
     {
+        $products = $this->products();
+
         return Inertia::render('kits/create', [
-            'products' => $this->products(),
+            'products' => $products,
             'today' => today()->toDateString(),
+            'copy' => $this->copyOf($request->integer('from'), $products),
         ]);
     }
 
@@ -144,6 +148,41 @@ class KitController extends Controller
         }
 
         return [...$data, 'purchase' => null, 'margin' => null, 'missing_purchase_prices' => []];
+    }
+
+    /**
+     * What a copy of a kit starts from: its names, and the composition and price mode of its current
+     * version. Nothing is saved: the person adjusts the form, then creates a new kit. Products that were
+     * archived since are left out and counted, so the screen can say so.
+     *
+     * @param  Collection<int, Product>  $products
+     * @return array{source: string, name_fr: string, name_en: string, mode: string, fixed_price: int|null, lines: array<int, array{product_id: int, quantity_per_kit: int, sale_price_per_kit: int|null}>, skipped: int}|null
+     */
+    private function copyOf(int $kitId, Collection $products): ?array
+    {
+        $kit = $kitId > 0 ? Kit::query()->with('currentVersion.items')->find($kitId) : null;
+        $version = $kit?->currentVersion;
+
+        if ($kit === null || $version === null) {
+            return null;
+        }
+
+        $available = $products->pluck('id')->all();
+        $items = $version->items->filter(fn ($item): bool => in_array($item->product_id, $available, true));
+
+        return [
+            'source' => $kit->name,
+            'name_fr' => trans('kits.copy.name', ['name' => $kit->name_fr], 'fr'),
+            'name_en' => trans('kits.copy.name', ['name' => $kit->name_en], 'en'),
+            'mode' => $version->sale_price_mode,
+            'fixed_price' => $version->fixed_sale_price,
+            'lines' => $items->map(fn ($item): array => [
+                'product_id' => $item->product_id,
+                'quantity_per_kit' => $item->quantity_per_kit,
+                'sale_price_per_kit' => $item->sale_price_per_kit,
+            ])->values()->all(),
+            'skipped' => $version->items->count() - $items->count(),
+        ];
     }
 
     private function clientsToPlanFor(BusinessSettings $settings): int

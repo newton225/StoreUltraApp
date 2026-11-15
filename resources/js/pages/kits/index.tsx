@@ -162,7 +162,25 @@ export default function KitsIndex({
                                                 )}
                                             </td>
                                         )}
-                                        <td className="px-4 py-2 text-right">
+                                        <td className="px-4 py-2 text-right whitespace-nowrap">
+                                            <Button
+                                                asChild
+                                                variant="ghost"
+                                                size="sm"
+                                            >
+                                                <Link
+                                                    href={create({
+                                                        query: {
+                                                            from: kit.id,
+                                                        },
+                                                    })}
+                                                    title={t(
+                                                        'kits.copy.action_help',
+                                                    )}
+                                                >
+                                                    {t('kits.copy.action')}
+                                                </Link>
+                                            </Button>
                                             <Button
                                                 asChild
                                                 variant="ghost"

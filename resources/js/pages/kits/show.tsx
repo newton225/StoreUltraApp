@@ -1,5 +1,7 @@
-import { Form, Head, setLayoutProps } from '@inertiajs/react';
+import { Form, Head, Link, setLayoutProps } from '@inertiajs/react';
+import { Copy } from 'lucide-react';
 import {
+    create,
     index,
     show,
     update,
@@ -84,7 +86,27 @@ export default function ShowKit({
 
             <div className="max-w-4xl space-y-10 p-4">
                 <section className="max-w-4xl space-y-6">
-                    <Heading title={kit.name_fr} description={kit.name_en} />
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                        <Heading
+                            title={kit.name_fr}
+                            description={kit.name_en}
+                        />
+                        {current && (
+                            <Button
+                                asChild
+                                variant="outline"
+                                size="sm"
+                                title={t('kits.copy.action_help')}
+                            >
+                                <Link
+                                    href={create({ query: { from: kit.id } })}
+                                >
+                                    <Copy aria-hidden="true" />
+                                    {t('kits.copy.action')}
+                                </Link>
+                            </Button>
+                        )}
+                    </div>
 
                     <Form
                         {...update.form(kit.id)}

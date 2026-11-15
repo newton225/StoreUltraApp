@@ -32,6 +32,14 @@ return [
         'submit' => 'Create kit',
     ],
 
+    'copy' => [
+        'action' => 'Copy',
+        'action_help' => 'Creates a new kit from the current composition of this one, to adjust before saving.',
+        'name' => 'Copy of :name',
+        'description' => 'Composition taken from ":name": adjust it, then create the kit. Nothing is saved before.',
+        'skipped' => ':count archived product(s) were not copied.',
+    ],
+
     'form' => [
         'name_fr' => 'Name (French)',
         'name_en' => 'Name (English)',
