@@ -137,7 +137,7 @@ class KitController extends Controller
      * The price summary of a kit as sent to the screen. What a kit costs and what it earns are the profit:
      * they go only to who may see it (`view-profit`), the others get the sale price.
      *
-     * @return array{purchase: int|null, sale: int|null, margin: int|null, complete: bool, missing_purchase_prices: array<int, int>}
+     * @return array{purchase: int|float|null, sale: int|float|null, margin: int|float|null, complete: bool, missing_purchase_prices: array<int, int>}
      */
     private function summary(KitSummary $summary, bool $seesCosts): array
     {
@@ -156,7 +156,7 @@ class KitController extends Controller
      * archived since are left out and counted, so the screen can say so.
      *
      * @param  Collection<int, Product>  $products
-     * @return array{source: string, name_fr: string, name_en: string, mode: string, fixed_price: int|null, lines: array<int, array{product_id: int, quantity_per_kit: int, sale_price_per_kit: int|null}>, skipped: int}|null
+     * @return array{source: string, name_fr: string, name_en: string, mode: string, fixed_price: int|float|null, lines: array<int, array{product_id: int, quantity_per_kit: int, sale_price_per_kit: int|float|null}>, skipped: int}|null
      */
     private function copyOf(int $kitId, Collection $products): ?array
     {

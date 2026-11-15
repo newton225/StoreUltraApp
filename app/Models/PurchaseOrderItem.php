@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\Amount;
 use Database\Factories\PurchaseOrderItemFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,8 +17,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $product_id
  * @property int $quantity_ordered
  * @property int $quantity_received
- * @property int $unit_price_expected
- * @property int|null $unit_price_actual
+ * @property int|float $unit_price_expected
+ * @property int|float|null $unit_price_actual
  */
 #[Fillable(['purchase_order_id', 'product_id', 'quantity_ordered', 'quantity_received', 'unit_price_expected', 'unit_price_actual'])]
 class PurchaseOrderItem extends Model
@@ -35,8 +36,8 @@ class PurchaseOrderItem extends Model
         return [
             'quantity_ordered' => 'integer',
             'quantity_received' => 'integer',
-            'unit_price_expected' => 'integer',
-            'unit_price_actual' => 'integer',
+            'unit_price_expected' => Amount::class,
+            'unit_price_actual' => Amount::class,
         ];
     }
 
@@ -59,7 +60,7 @@ class PurchaseOrderItem extends Model
     /**
      * The price really paid, or else the expected one.
      */
-    public function effectivePrice(): int
+    public function effectivePrice(): int|float
     {
         return $this->unit_price_actual ?? $this->unit_price_expected;
     }

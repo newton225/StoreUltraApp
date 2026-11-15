@@ -5,7 +5,7 @@ fonctionnel est dans [`README-FONCTIONNEL.md`](README-FONCTIONNEL.md).
 
 Conventions :
 
-- Les **montants** sont des entiers en FCFA (pas de décimale), stockés tels quels.
+- Les **montants** (totaux, paiements, remises) sont des entiers en FCFA. Seuls les **prix unitaires** (prix d'achat et de vente d'un produit, prix de vente d'une ligne ou prix fixe d'un kit, prix d'achat figé sur une ligne de commande, prix d'un bon d'achat) gardent leurs décimales exactement comme saisies (`decimal(14,2)`, 12,5 est conservé) ; tout total calculé à partir d'eux est arrondi au FCFA le plus proche.
 - Les noms de tables sont donnés en anglais (convention du code) ; les libellés affichés sont traduits.
 - Chaque table a un identifiant, des dates de création et de modification. Les tables sensibles ne sont jamais
   supprimées physiquement (archivage ou écriture inverse).

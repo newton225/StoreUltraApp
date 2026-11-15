@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Concerns\RoundsDecimalPrices;
+use App\Concerns\NormalizesDecimalPrices;
 use App\Models\Product;
 use App\Models\Shop;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -11,7 +11,12 @@ use Illuminate\Validation\Rule;
 
 class StoreProductRequest extends FormRequest
 {
-    use RoundsDecimalPrices;
+    use NormalizesDecimalPrices;
+
+    protected function prepareForValidation(): void
+    {
+        $this->normalizePriceFields(['purchase_price', 'sale_price']);
+    }
 
     /**
      * Get the validation rules that apply to the request.
@@ -24,8 +29,8 @@ class StoreProductRequest extends FormRequest
             'name' => ['required', 'string', 'max:255', Rule::unique(Product::class)],
             'unit' => ['required', 'string', 'max:20'],
             'shop_id' => ['nullable', 'integer', Rule::exists(Shop::class, 'id')],
-            'purchase_price' => ['required', 'integer', 'min:0'],
-            'sale_price' => ['nullable', 'integer', 'min:0'],
+            'purchase_price' => ['required', 'numeric', 'decimal:0,2', 'min:0'],
+            'sale_price' => ['nullable', 'numeric', 'decimal:0,2', 'min:0'],
             'effective_from' => ['nullable', 'date'],
         ];
     }

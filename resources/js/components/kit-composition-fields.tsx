@@ -127,7 +127,7 @@ export default function KitCompositionFields({
                         name="fixed_sale_price"
                         type="number"
                         min={0}
-                        step={1}
+                        step="any"
                         defaultValue={initialFixedPrice ?? ''}
                     />
                     <InputError message={errors.fixed_sale_price} />
@@ -216,7 +216,7 @@ export default function KitCompositionFields({
                                 name={`items[${index}][sale_price_per_kit]`}
                                 type="number"
                                 min={0}
-                                step={1}
+                                step="any"
                                 value={row.sale}
                                 onChange={(event) =>
                                     update(row.key, {

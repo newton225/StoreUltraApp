@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\Amount;
 use Database\Factories\OrderItemFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $product_id
  * @property int|null $shop_id
  * @property int $quantity
- * @property int $unit_purchase_price
+ * @property int|float $unit_purchase_price
  * @property int|null $line_sale_total
  */
 #[Fillable(['order_id', 'purchase_order_id', 'product_id', 'shop_id', 'quantity', 'unit_purchase_price', 'line_sale_total'])]
@@ -35,7 +36,7 @@ class OrderItem extends Model
     {
         return [
             'quantity' => 'integer',
-            'unit_purchase_price' => 'integer',
+            'unit_purchase_price' => Amount::class,
             'line_sale_total' => 'integer',
         ];
     }

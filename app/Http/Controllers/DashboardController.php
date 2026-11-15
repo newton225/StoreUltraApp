@@ -51,7 +51,7 @@ class DashboardController extends Controller
             'companyName' => $settings->get('company_name'),
             'filters' => $filters,
             'report' => $dashboard->build($user, $filters),
-            'money' => fn (int $amount): string => MoneyFormatter::format($amount, $locale),
+            'money' => fn (int|float $amount): string => MoneyFormatter::format($amount, $locale),
             'zone' => $filters['zone'] === null ? null : Zone::find($filters['zone'])?->name,
             'kit' => $filters['kit'] === null ? null : Kit::find($filters['kit'])?->name,
             'shop' => $filters['shop'] === null ? null : Shop::find($filters['shop'])?->name,

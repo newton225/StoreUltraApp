@@ -249,7 +249,7 @@ class DocumentIssuer
             'number' => $number,
             'issuedOn' => now()->format('d/m/Y'),
             'company' => $this->company->forDocuments($locale),
-            'money' => fn (int $amount): string => MoneyFormatter::format($amount, $locale),
+            'money' => fn (int|float $amount): string => MoneyFormatter::format($amount, $locale),
             'plain' => fn (int $amount): string => $locale === 'en' ? number_format($amount, 0, '.', ',') : number_format($amount, 0, ',', ' '),
             'inWords' => fn (int $amount): string => AmountInWords::format($amount, $locale),
             'date' => fn (CarbonInterface|string $date): string => Carbon::parse($date)->format('d/m/Y'),

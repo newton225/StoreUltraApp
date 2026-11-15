@@ -20,7 +20,7 @@ class ReceivePurchaseOrder
      * Record the goods received so far (cumulative quantities, and the price really paid when it
      * differs). When everything has arrived, the orders whose shops have all delivered move to received.
      *
-     * @param  array<int, array{id: int, quantity_received: int, unit_price_actual: int|null}>  $lines
+     * @param  array<int, array{id: int, quantity_received: int, unit_price_actual: float|null}>  $lines
      *
      * @throws InvalidPurchaseOperation when nothing can be received on this purchase order
      */
@@ -48,7 +48,7 @@ class ReceivePurchaseOrder
                 default => PurchaseOrderStatus::Sent,
             };
 
-            $actual = $items->sum(fn ($item): int => $item->quantity_received * $item->effectivePrice());
+            $actual = (int) round($items->sum(fn ($item): int|float => $item->quantity_received * $item->effectivePrice()));
 
             $purchase->forceFill(['status' => $status, 'actual_total' => $actual])->save();
 

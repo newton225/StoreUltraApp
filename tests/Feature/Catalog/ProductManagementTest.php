@@ -105,9 +105,21 @@ test('a product is rejected for invalid data', function (array $overrides, strin
     'unknown shop' => [['name' => 'Autre', 'shop_id' => 999], 'shop_id'],
     'missing purchase price' => [['name' => 'Autre', 'purchase_price' => null], 'purchase_price'],
     'negative purchase price' => [['name' => 'Autre', 'purchase_price' => -1], 'purchase_price'],
-    'fractional purchase price' => [['name' => 'Autre', 'purchase_price' => 10.5], 'purchase_price'],
+    'three decimals purchase price' => [['name' => 'Autre', 'purchase_price' => '10.555'], 'purchase_price'],
+    'text purchase price' => [['name' => 'Autre', 'purchase_price' => 'abc'], 'purchase_price'],
     'negative sale price' => [['name' => 'Autre', 'sale_price' => -5], 'sale_price'],
 ]);
+
+test('a price with a decimal part is kept as typed, with a comma or a point', function () {
+    $this->actingAs(User::factory()->create())
+        ->post(route('products.store'), validProductPayload(['name' => 'Clou', 'purchase_price' => '12,5', 'sale_price' => '15.25']))
+        ->assertSessionHasNoErrors();
+
+    $price = Product::where('name', 'Clou')->firstOrFail()->currentPrice;
+
+    expect($price->purchase_price)->toBe(12.5)
+        ->and($price->sale_price)->toBe(15.25);
+});
 
 test('updating a product never touches its price history', function () {
     $shop = Shop::factory()->create();

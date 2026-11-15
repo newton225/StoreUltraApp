@@ -332,6 +332,7 @@ export default function ShowPurchase({ purchase, methods, today }: Props) {
                                                 <Input
                                                     type="number"
                                                     min={0}
+                                                    step="any"
                                                     className="ml-auto w-28"
                                                     value={
                                                         received[item.id].price

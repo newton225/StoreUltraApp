@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\Amount;
 use App\Models\Concerns\Audited;
 use Database\Factories\ProductPriceFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -16,8 +17,8 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property int $product_id
  * @property int|null $shop_id
- * @property int $purchase_price
- * @property int|null $sale_price
+ * @property int|float $purchase_price
+ * @property int|float|null $sale_price
  * @property Carbon $effective_from
  * @property int|null $created_by
  */
@@ -37,8 +38,8 @@ class ProductPrice extends Model
     protected function casts(): array
     {
         return [
-            'purchase_price' => 'integer',
-            'sale_price' => 'integer',
+            'purchase_price' => Amount::class,
+            'sale_price' => Amount::class,
             'effective_from' => 'date',
         ];
     }

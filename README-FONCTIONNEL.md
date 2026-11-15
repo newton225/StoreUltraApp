@@ -34,7 +34,7 @@ L'application doit :
 | **Les clients n'ont pas d'accès** | Le personnel les enregistre au moyen d'un **formulaire client**. |
 | **Traçabilité** | Qui a fait quoi, quand, sur quel objet, est conservé et consultable. |
 | **Deux langues, deux thèmes** | Français et anglais, thème clair, sombre ou système, au choix de chaque utilisateur (`playbook/06`, I18N-13 et UI-67). |
-| **Monnaie** | FCFA, entiers, sans décimale. |
+| **Monnaie** | FCFA. Totaux et paiements en entiers ; les prix unitaires (produits, kits, bons d'achat) acceptent une virgule et sont conservés tels que saisis, les totaux calculés étant arrondis au FCFA. |
 
 ## 3. Acteurs et droits
 

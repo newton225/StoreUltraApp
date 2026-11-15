@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Concerns\NormalizesDecimalPrices;
 use App\Models\PurchaseOrder;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -10,6 +11,27 @@ use Illuminate\Validation\Rule;
 
 class ReceivePurchaseRequest extends FormRequest
 {
+    use NormalizesDecimalPrices;
+
+    protected function prepareForValidation(): void
+    {
+        $items = $this->input('items');
+
+        if (! is_array($items)) {
+            return;
+        }
+
+        foreach ($items as $index => $item) {
+            $price = is_array($item) ? $this->normalizedPrice($item['unit_price_actual'] ?? null) : null;
+
+            if ($price !== null) {
+                $items[$index]['unit_price_actual'] = $price;
+            }
+        }
+
+        $this->merge(['items' => $items]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -43,7 +65,7 @@ class ReceivePurchaseRequest extends FormRequest
                     }
                 },
             ],
-            'items.*.unit_price_actual' => ['nullable', 'integer', 'min:0'],
+            'items.*.unit_price_actual' => ['nullable', 'numeric', 'decimal:0,2', 'min:0'],
         ];
     }
 }

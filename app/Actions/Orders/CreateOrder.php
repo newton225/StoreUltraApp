@@ -65,7 +65,7 @@ class CreateOrder
                     'shop_id' => $item->product->shop_id,
                     'quantity' => $item->quantity_per_kit * $kitsCount,
                     'unit_purchase_price' => $item->product->currentPrice->purchase_price,
-                    'line_sale_total' => $item->sale_price_per_kit === null ? null : $item->sale_price_per_kit * $kitsCount,
+                    'line_sale_total' => $item->sale_price_per_kit === null ? null : (int) round($item->sale_price_per_kit * $kitsCount),
                 ]);
             }
 

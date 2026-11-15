@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\Amount;
 use Database\Factories\KitVersionItemFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $kit_version_id
  * @property int $product_id
  * @property int $quantity_per_kit
- * @property int|null $sale_price_per_kit
+ * @property int|float|null $sale_price_per_kit
  */
 #[Fillable(['kit_version_id', 'product_id', 'quantity_per_kit', 'sale_price_per_kit'])]
 class KitVersionItem extends Model
@@ -32,7 +33,7 @@ class KitVersionItem extends Model
     {
         return [
             'quantity_per_kit' => 'integer',
-            'sale_price_per_kit' => 'integer',
+            'sale_price_per_kit' => Amount::class,
         ];
     }
 

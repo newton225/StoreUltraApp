@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\Amount;
 use Database\Factories\KitVersionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,7 +18,7 @@ use Illuminate\Support\Carbon;
  * @property int $kit_id
  * @property int $version
  * @property string $sale_price_mode lines (sum of the line prices) or fixed
- * @property int|null $fixed_sale_price
+ * @property int|float|null $fixed_sale_price
  * @property Carbon $valid_from
  * @property int|null $created_by
  */
@@ -40,7 +41,7 @@ class KitVersion extends Model
     {
         return [
             'version' => 'integer',
-            'fixed_sale_price' => 'integer',
+            'fixed_sale_price' => Amount::class,
             'valid_from' => 'date',
         ];
     }

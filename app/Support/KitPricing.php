@@ -49,9 +49,13 @@ class KitPricing
             ? $version->fixed_sale_price
             : ($missingLineSale ? null : $lineSales);
 
+        foreach ($byShop as $shopId => $amounts) {
+            $byShop[$shopId] = ['purchase' => KitSummary::tidy($amounts['purchase']), 'sale' => KitSummary::tidy($amounts['sale'])];
+        }
+
         return new KitSummary(
-            purchase: $missingPurchasePrices === [] ? $purchase : null,
-            sale: $sale,
+            purchase: $missingPurchasePrices === [] ? KitSummary::tidy($purchase) : null,
+            sale: $sale === null ? null : KitSummary::tidy($sale),
             missingPurchasePrices: $missingPurchasePrices,
             byShop: $byShop,
         );

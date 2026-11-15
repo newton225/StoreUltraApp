@@ -129,7 +129,7 @@ class PurchaseController extends Controller
                     'shortfall' => $item->quantity_ordered - $item->quantity_received,
                     'unit_price_expected' => $item->unit_price_expected,
                     'unit_price_actual' => $item->unit_price_actual,
-                    'price_variance' => $item->unit_price_actual === null ? 0 : $item->unit_price_actual - $item->unit_price_expected,
+                    'price_variance' => $item->unit_price_actual === null ? 0 : round($item->unit_price_actual - $item->unit_price_expected, 2),
                 ])->values(),
                 'payments' => $purchaseOrder->payments->sortByDesc('id')->map(fn (ShopPayment $payment): array => [
                     'id' => $payment->id,
@@ -176,7 +176,7 @@ class PurchaseController extends Controller
             $lines[] = [
                 'id' => (int) $line['id'],
                 'quantity_received' => (int) $line['quantity_received'],
-                'unit_price_actual' => isset($line['unit_price_actual']) ? (int) $line['unit_price_actual'] : null,
+                'unit_price_actual' => isset($line['unit_price_actual']) ? (float) $line['unit_price_actual'] : null,
             ];
         }
 

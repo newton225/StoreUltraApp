@@ -64,6 +64,8 @@ class GeneratePurchaseOrders
                     $expected += $quantity * $price;
                 }
 
+                $expected = (int) round($expected);
+
                 $purchase->forceFill(['expected_total' => $expected])->save();
 
                 OrderItem::query()->whereIn('id', $shopItems->pluck('id'))->update(['purchase_order_id' => $purchase->id]);

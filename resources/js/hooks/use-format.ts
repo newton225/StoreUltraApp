@@ -7,7 +7,7 @@ export function useFormat() {
     const { t, locale } = useTranslation();
 
     const numberFormat = new Intl.NumberFormat(locale, {
-        maximumFractionDigits: 0,
+        maximumFractionDigits: 2,
     });
     const dateFormat = new Intl.DateTimeFormat(locale, {
         dateStyle: 'medium',

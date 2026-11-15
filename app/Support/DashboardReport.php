@@ -218,7 +218,7 @@ class DashboardReport
 
             foreach ($lines as $line) {
                 $key = $line->shop_id ?? 0;
-                $weights[$key] = ($weights[$key] ?? 0) + $line->quantity * $line->unit_purchase_price;
+                $weights[$key] = (int) round(($weights[$key] ?? 0) + $line->quantity * $line->unit_purchase_price);
                 $rows[$key]['sale'] = ($rows[$key]['sale'] ?? 0) + (int) $line->line_sale_total;
                 $rows[$key]['actual'] = ($rows[$key]['actual'] ?? 0) + $this->profit->actualCost($line);
             }

@@ -114,6 +114,6 @@ class OrderProfit
             }
         }
 
-        return $item->quantity * $unitPrice;
+        return (int) round($item->quantity * $unitPrice);
     }
 }
