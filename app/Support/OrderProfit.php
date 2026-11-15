@@ -40,12 +40,7 @@ class OrderProfit
         $ids = $orders->pluck('id')->all();
         $orders->loadMissing('items.purchaseOrder.items');
 
-        $logistics = ExpenseAllocation::query()
-            ->selectRaw('order_id, sum(amount) as total')
-            ->whereIn('order_id', $ids)
-            ->whereHas('expense', fn ($expenses) => $expenses->whereNull('cancelled_at'))
-            ->groupBy('order_id')
-            ->pluck('total', 'order_id');
+        $logistics = $this->logisticsByOrder($ids);
 
         $collected = Payment::query()
             ->selectRaw("order_id, coalesce(sum(case when kind = 'refund' then -amount else amount end), 0) as total")
@@ -76,6 +71,24 @@ class OrderProfit
         }
 
         return $profits;
+    }
+
+    /**
+     * The logistics costs shared on each order (cancelled costs left out), by order id. An order with none is absent.
+     *
+     * @param  array<int, int>  $orderIds
+     * @return array<int, int>
+     */
+    public function logisticsByOrder(array $orderIds): array
+    {
+        return ExpenseAllocation::query()
+            ->selectRaw('order_id, sum(amount) as total')
+            ->whereIn('order_id', $orderIds)
+            ->whereHas('expense', fn ($expenses) => $expenses->whereNull('cancelled_at'))
+            ->groupBy('order_id')
+            ->pluck('total', 'order_id')
+            ->map(fn (mixed $total): int => (int) $total)
+            ->all();
     }
 
     /**

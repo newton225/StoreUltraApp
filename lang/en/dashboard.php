@@ -85,7 +85,8 @@ return [
         'balance' => 'Balance after advance',
         'theoretical_margin' => 'Theoretical profit',
         'real_margin' => 'Real profit',
-        'margin_help' => 'Theoretical profit: sale price minus the planned purchase price. Real profit: sale price minus what was really paid to the shop (the real price when known, else the planned one), before logistics costs. The Profit page gives the detail with the money collected and logistics.',
+        'margin_after_logistics' => 'Profit after logistics',
+        'margin_help' => 'Theoretical profit: sale price minus the planned purchase price. Real profit: what the clients paid (the advance allocated to the shop) minus the real purchase cost (the price really paid to the shop when known, else the planned one), before logistics costs. Profit after logistics: the same, minus the shop\'s share of the logistics costs (shared like the advance, in proportion to the purchases). Same calculation as the Profit page.',
         'total' => 'Total',
     ],
 

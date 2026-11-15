@@ -35,6 +35,8 @@ type ShopRow = {
     balance: number;
     theoretical_margin?: number;
     real_margin?: number;
+    logistics?: number;
+    margin_after_logistics?: number;
 };
 
 type Report = {
@@ -163,6 +165,8 @@ export default function Dashboard({
             balance: sum.balance + row.balance,
             theoretical: sum.theoretical + (row.theoretical_margin ?? 0),
             real: sum.real + (row.real_margin ?? 0),
+            afterLogistics:
+                sum.afterLogistics + (row.margin_after_logistics ?? 0),
         }),
         {
             purchase: 0,
@@ -171,6 +175,7 @@ export default function Dashboard({
             balance: 0,
             theoretical: 0,
             real: 0,
+            afterLogistics: 0,
         },
     );
 
@@ -450,6 +455,7 @@ export default function Dashboard({
                                                         ? ([
                                                               'theoretical_margin',
                                                               'real_margin',
+                                                              'margin_after_logistics',
                                                           ] as const)
                                                         : []),
                                                 ] as const
@@ -503,6 +509,12 @@ export default function Dashboard({
                                                                     0,
                                                             )}
                                                         </td>
+                                                        <td className="px-3 py-2 text-right">
+                                                            {money(
+                                                                row.margin_after_logistics ??
+                                                                    0,
+                                                            )}
+                                                        </td>
                                                     </>
                                                 )}
                                             </tr>
@@ -535,6 +547,11 @@ export default function Dashboard({
                                                         <td className="px-3 py-2 text-right">
                                                             {money(
                                                                 shopTotals.real,
+                                                            )}
+                                                        </td>
+                                                        <td className="px-3 py-2 text-right">
+                                                            {money(
+                                                                shopTotals.afterLogistics,
                                                             )}
                                                         </td>
                                                     </>

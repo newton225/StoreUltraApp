@@ -5,6 +5,8 @@ use App\Models\Attachment;
 use App\Models\AttachmentType;
 use App\Models\Client;
 use App\Models\Delivery;
+use App\Models\Expense;
+use App\Models\ExpenseAllocation;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
@@ -359,5 +361,25 @@ test('the synthesis by shop gives the theoretical and real profit only to who ma
 
             expect($shops['with_profit'])->toBeFalse();
             expect($shops['summary'][0])->not->toHaveKey('theoretical_margin')->not->toHaveKey('real_margin');
+        });
+});
+
+test('the real profit of the shops adds up to the one of the Profit page, with and after logistics', function () {
+    $order = dashboardOrder('advance_received', paid: 9000);
+    $expense = Expense::factory()->create(['amount' => 3000]);
+    ExpenseAllocation::factory()->create(['expense_id' => $expense->id, 'order_id' => $order->id, 'amount' => 3000]);
+
+    $this->actingAs($this->owner)->get(route('dashboard', ['from' => '2026-07-01', 'to' => '2026-07-31']))
+        ->assertInertia(function (Assert $page) {
+            $report = $page->toArray()['props']['report'];
+            $summary = $report['shops']['summary'];
+
+            expect(array_sum(array_column($summary, 'logistics')))->toBe(3000)
+                ->and(array_sum(array_column($summary, 'real_margin')))->toBe($report['profit']['real_margin'] + 3000)
+                ->and(array_sum(array_column($summary, 'margin_after_logistics')))->toBe($report['profit']['real_margin']);
+
+            foreach ($summary as $row) {
+                expect($row['margin_after_logistics'])->toBe($row['real_margin'] - $row['logistics']);
+            }
         });
 });

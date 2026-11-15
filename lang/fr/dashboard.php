@@ -85,7 +85,8 @@ return [
         'balance' => 'Solde après avance',
         'theoretical_margin' => 'Bénéfice théorique',
         'real_margin' => 'Bénéfice réel',
-        'margin_help' => 'Bénéfice théorique : prix de vente moins le prix d\'achat prévu. Bénéfice réel : prix de vente moins ce qui a réellement été payé à la boutique (prix réel quand il est connu, sinon le prévu), avant frais de logistique. La page Bénéfice donne le détail avec l\'encaissé et la logistique.',
+        'margin_after_logistics' => 'Bénéfice après logistique',
+        'margin_help' => 'Bénéfice théorique : prix de vente moins le prix d\'achat prévu. Bénéfice réel : ce que les clients ont payé (l\'avance affectée à la boutique) moins le coût d\'achat réel (prix réellement payé à la boutique quand il est connu, sinon le prévu), avant frais de logistique. Bénéfice après logistique : le même, moins la part des frais de logistique de la boutique (répartie comme l\'avance, au prorata des achats). Même calcul que la page Bénéfice.',
         'total' => 'Total',
     ],
 

@@ -63,6 +63,7 @@
                 @if ($report['shops']['with_profit'])
                     <th class="num">{{ __('dashboard.shops.theoretical_margin') }}</th>
                     <th class="num">{{ __('dashboard.shops.real_margin') }}</th>
+                    <th class="num">{{ __('dashboard.shops.margin_after_logistics') }}</th>
                 @endif
             </tr>
             @foreach ($report['shops']['summary'] as $row)
@@ -76,6 +77,7 @@
                     @if ($report['shops']['with_profit'])
                         <td class="num">{{ $money($row['theoretical_margin']) }}</td>
                         <td class="num">{{ $money($row['real_margin']) }}</td>
+                        <td class="num">{{ $money($row['margin_after_logistics']) }}</td>
                     @endif
                 </tr>
             @endforeach

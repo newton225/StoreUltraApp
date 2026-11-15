@@ -204,6 +204,7 @@ class DashboardReport
     {
         $ids = $live->pluck('id')->all();
         $paid = $this->paidByOrder($ids);
+        $logistics = $withProfit ? $this->profit->logisticsByOrder($ids) : [];
 
         $items = OrderItem::query()
             ->whereIn('order_id', $ids)
@@ -224,10 +225,12 @@ class DashboardReport
             }
 
             $shares = AdvanceAllocation::split(max(0, $paid[$orderId] ?? 0), $weights);
+            $logisticsShares = AdvanceAllocation::split($logistics[$orderId] ?? 0, $weights);
 
             foreach ($weights as $key => $purchase) {
                 $rows[$key]['purchase'] = ($rows[$key]['purchase'] ?? 0) + $purchase;
                 $rows[$key]['advance'] = ($rows[$key]['advance'] ?? 0) + $shares[$key];
+                $rows[$key]['logistics'] = ($rows[$key]['logistics'] ?? 0) + $logisticsShares[$key];
             }
         }
 
@@ -252,10 +255,14 @@ class DashboardReport
                 'advance' => $row['advance'],
                 'percent' => $purchaseTotal > 0 ? round($row['purchase'] / $purchaseTotal * 100, 1) : 0.0,
                 'balance' => $row['purchase'] - $row['advance'],
-                // The profit of a shop's lines: sale minus what was planned, then minus what was really paid (before logistics).
+                // The profit of a shop's lines, as on the Profit page: theoretical = sale minus the planned purchase;
+                // real = what the clients paid (the advance shared to the shop) minus what the goods really cost,
+                // before logistics; after logistics = the same minus the shop's share of the logistics costs.
                 ...($withProfit ? [
                     'theoretical_margin' => ($row['sale'] ?? 0) - $row['purchase'],
-                    'real_margin' => ($row['sale'] ?? 0) - ($row['actual'] ?? 0),
+                    'real_margin' => $row['advance'] - ($row['actual'] ?? 0),
+                    'logistics' => $row['logistics'],
+                    'margin_after_logistics' => $row['advance'] - ($row['actual'] ?? 0) - $row['logistics'],
                 ] : []),
             ];
         }
