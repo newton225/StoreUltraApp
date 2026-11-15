@@ -12,6 +12,7 @@ use App\Models\Product;
 use App\Support\BusinessSettings;
 use App\Support\KitPricing;
 use App\Support\KitSummary;
+use App\Support\ProductPricing;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -103,7 +104,7 @@ class KitController extends Controller
                     'unit' => $item->product->unit,
                     'quantity_per_kit' => $item->quantity_per_kit,
                     'sale_price_per_kit' => $item->sale_price_per_kit,
-                    'unit_purchase_price' => $seesCosts ? $item->product->currentPrice?->purchase_price : null,
+                    'unit_purchase_price' => $seesCosts ? app(ProductPricing::class)->purchasePrice($item->product) : null,
                 ])->values(),
                 'summary' => $this->summary($pricing->summary($version), $seesCosts),
             ])->values(),

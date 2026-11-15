@@ -89,6 +89,8 @@ return [
         'form' => [
             'name' => 'Name',
             'unit' => 'Unit',
+            'pack_size' => 'Units per package',
+            'pack_size_help' => 'How many units the shop sells at once (1 bundle = 10 bars: enter 10). Purchase orders are made of whole packages; leave 1 when the product is sold one by one.',
             'shop' => 'Usual shop',
             'purchase_price' => 'Purchase price (FCFA)',
             'sale_price' => 'Unit sale price (FCFA, optional)',
@@ -97,6 +99,25 @@ return [
             'effective_from_help' => 'The day these prices start applying to new orders. Later, if a price changes, you add a new price with its date: orders already made keep the old one. Usually: today.',
             'submit' => 'Save',
             'create_submit' => 'Create product',
+        ],
+    ],
+
+    'components' => [
+        'title' => 'Composition',
+        'description' => 'If this product is made from other products, list them here: they are what is bought from the shops, not this product. Its purchase price is then the sum of its components. Leave empty for a product bought as it is.',
+        'empty' => 'Product bought as it is: no components.',
+        'product' => 'Component',
+        'choose' => 'Choose a product',
+        'quantity' => 'Quantity per manufactured unit',
+        'add' => 'Add a component',
+        'remove' => 'Remove this component',
+        'save' => 'Save the composition',
+        'saved' => 'Composition saved.',
+        'is_component' => 'This product already goes into another product\'s composition: it cannot be made from others itself.',
+        'errors' => [
+            'itself' => 'A product cannot be its own component.',
+            'manufactured' => 'A component cannot itself be a manufactured product.',
+            'is_component' => 'This product is already a component of another one: it cannot be manufactured.',
         ],
     ],
 

@@ -306,6 +306,7 @@ return [
         'address' => 'adresse',
         'payment_terms' => 'conditions de paiement',
         'unit' => 'unité',
+        'pack_size' => 'unités par conditionnement',
         'shop_id' => 'boutique',
         'purchase_price' => 'prix d\'achat',
         'sale_price' => 'prix de vente',

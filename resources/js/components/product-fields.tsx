@@ -1,3 +1,4 @@
+import { FieldLabel } from '@/components/field-label';
 import InputError from '@/components/input-error';
 import SelectField from '@/components/select-field';
 import { Input } from '@/components/ui/input';
@@ -11,6 +12,7 @@ export type EditableProduct = {
     name: string;
     unit: string;
     shop_id: number | null;
+    pack_size: number;
     archived_at: string | null;
 };
 
@@ -25,7 +27,7 @@ export default function ProductFields({ product, shops, errors }: Props) {
 
     return (
         <>
-            <div className="grid gap-2 md:col-span-2">
+            <div className="grid gap-2 md:col-span-3">
                 <Label htmlFor="name">{t('catalog.products.form.name')}</Label>
                 <Input
                     id="name"
@@ -36,18 +38,7 @@ export default function ProductFields({ product, shops, errors }: Props) {
                 <InputError message={errors.name} />
             </div>
 
-            <div className="grid gap-2 md:col-span-2">
-                <Label htmlFor="unit">{t('catalog.products.form.unit')}</Label>
-                <Input
-                    id="unit"
-                    name="unit"
-                    defaultValue={product?.unit ?? 'u'}
-                    required
-                />
-                <InputError message={errors.unit} />
-            </div>
-
-            <div className="grid gap-2 md:col-span-2">
+            <div className="grid gap-2 md:col-span-3">
                 <Label htmlFor="shop_id">
                     {t('catalog.products.form.shop')}
                 </Label>
@@ -66,6 +57,36 @@ export default function ProductFields({ product, shops, errors }: Props) {
                     ]}
                 />
                 <InputError message={errors.shop_id} />
+            </div>
+
+            <div className="grid gap-2 md:col-span-3">
+                <Label htmlFor="unit">{t('catalog.products.form.unit')}</Label>
+                <Input
+                    id="unit"
+                    name="unit"
+                    defaultValue={product?.unit ?? 'u'}
+                    required
+                />
+                <InputError message={errors.unit} />
+            </div>
+
+            <div className="grid gap-2 md:col-span-3">
+                <FieldLabel
+                    htmlFor="pack_size"
+                    help={t('catalog.products.form.pack_size_help')}
+                >
+                    {t('catalog.products.form.pack_size')}
+                </FieldLabel>
+                <Input
+                    id="pack_size"
+                    name="pack_size"
+                    type="number"
+                    min={1}
+                    step={1}
+                    defaultValue={product?.pack_size ?? 1}
+                    required
+                />
+                <InputError message={errors.pack_size} />
             </div>
         </>
     );

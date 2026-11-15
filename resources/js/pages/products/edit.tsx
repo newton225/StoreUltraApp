@@ -7,6 +7,11 @@ import {
 import { store as storePrice } from '@/actions/App/Http/Controllers/ProductPriceController';
 import Heading from '@/components/heading';
 import PriceFields from '@/components/price-fields';
+import type {
+    ComponentLine,
+    ComponentOption,
+} from '@/components/product-components';
+import ProductComponents from '@/components/product-components';
 import type { EditableProduct, ShopOption } from '@/components/product-fields';
 import ProductFields from '@/components/product-fields';
 import { Badge } from '@/components/ui/badge';
@@ -26,10 +31,21 @@ type Props = {
     product: EditableProduct;
     shops: ShopOption[];
     prices: Price[];
+    components: ComponentLine[];
+    componentOptions: ComponentOption[];
+    isComponent: boolean;
     today: string;
 };
 
-export default function EditProduct({ product, shops, prices, today }: Props) {
+export default function EditProduct({
+    product,
+    shops,
+    prices,
+    components,
+    componentOptions,
+    isComponent,
+    today,
+}: Props) {
     const { t } = useTranslation();
     const { money, date } = useFormat();
 
@@ -73,6 +89,20 @@ export default function EditProduct({ product, shops, prices, today }: Props) {
                             </>
                         )}
                     </Form>
+                </section>
+
+                <section className="space-y-4">
+                    <Heading
+                        variant="small"
+                        title={t('catalog.components.title')}
+                        description={t('catalog.components.description')}
+                    />
+                    <ProductComponents
+                        productId={product.id}
+                        components={components}
+                        options={componentOptions}
+                        isComponent={isComponent}
+                    />
                 </section>
 
                 <section className="space-y-4">

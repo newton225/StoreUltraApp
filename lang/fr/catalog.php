@@ -89,6 +89,8 @@ return [
         'form' => [
             'name' => 'Nom',
             'unit' => 'Unité',
+            'pack_size' => 'Unités par conditionnement',
+            'pack_size_help' => 'Combien d\'unités la boutique vend d\'un coup (1 botte = 10 barres : saisissez 10). Les bons de commande sont faits en conditionnements entiers ; laissez 1 si le produit se vend à l\'unité.',
             'shop' => 'Boutique habituelle',
             'purchase_price' => 'Prix d\'achat (FCFA)',
             'sale_price' => 'Prix de vente unitaire (FCFA, facultatif)',
@@ -97,6 +99,25 @@ return [
             'effective_from_help' => 'Le jour où ces prix commencent à s’appliquer aux nouvelles commandes. Plus tard, si un prix change, vous ajouterez un nouveau prix avec sa date : les commandes déjà faites gardent l’ancien. En général : aujourd’hui.',
             'submit' => 'Enregistrer',
             'create_submit' => 'Créer le produit',
+        ],
+    ],
+
+    'components' => [
+        'title' => 'Composition',
+        'description' => 'Si ce produit est fabriqué à partir d\'autres produits, indiquez-les ici : ce sont eux que l\'on achète aux boutiques, pas ce produit. Son prix d\'achat est alors la somme de ses composants. Laissez vide pour un produit acheté tel quel.',
+        'empty' => 'Produit acheté tel quel : aucun composant.',
+        'product' => 'Composant',
+        'choose' => 'Choisir un produit',
+        'quantity' => 'Quantité par unité fabriquée',
+        'add' => 'Ajouter un composant',
+        'remove' => 'Retirer ce composant',
+        'save' => 'Enregistrer la composition',
+        'saved' => 'Composition enregistrée.',
+        'is_component' => 'Ce produit entre déjà dans la composition d\'un autre produit : il ne peut pas être lui-même fabriqué à partir d\'autres.',
+        'errors' => [
+            'itself' => 'Un produit ne peut pas être son propre composant.',
+            'manufactured' => 'Un composant ne peut pas être lui-même un produit fabriqué.',
+            'is_component' => 'Ce produit est déjà un composant d\'un autre produit : il ne peut pas être fabriqué.',
         ],
     ],
 

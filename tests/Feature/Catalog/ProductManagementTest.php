@@ -160,3 +160,16 @@ test('a product is archived and restored without losing its history', function (
     expect($product->refresh()->archived_at)->toBeNull();
     expect($product->prices()->count())->toBe(1);
 });
+
+test('the units per package are kept, default to 1 and refuse zero', function () {
+    $this->actingAs(User::factory()->create())
+        ->post(route('products.store'), validProductPayload(['name' => 'Barre', 'pack_size' => 10]))
+        ->assertSessionHasNoErrors();
+
+    $this->post(route('products.store'), validProductPayload(['name' => 'Sac']))->assertSessionHasNoErrors();
+    $this->post(route('products.store'), validProductPayload(['name' => 'Clou', 'pack_size' => 0]))->assertSessionHasErrors('pack_size');
+
+    expect(Product::where('name', 'Barre')->value('pack_size'))->toBe(10)
+        ->and(Product::where('name', 'Sac')->value('pack_size'))->toBe(1)
+        ->and(Product::where('name', 'Clou')->exists())->toBeFalse();
+});

@@ -21,9 +21,10 @@ use Illuminate\Support\Carbon;
  * @property string $name
  * @property string $unit
  * @property int|null $shop_id
+ * @property int $pack_size Units sold by the shop in one package (1 when sold one by one).
  * @property Carbon|null $archived_at
  */
-#[Fillable(['name', 'unit', 'shop_id'])]
+#[Fillable(['name', 'unit', 'shop_id', 'pack_size'])]
 class Product extends Model
 {
     use Audited;
@@ -38,7 +39,7 @@ class Product extends Model
      */
     protected function casts(): array
     {
-        return ['archived_at' => 'datetime'];
+        return ['archived_at' => 'datetime', 'pack_size' => 'integer'];
     }
 
     /**
@@ -72,6 +73,24 @@ class Product extends Model
             ['effective_from' => 'max', 'id' => 'max'],
             fn (Builder $query) => $query->whereDate('effective_from', '<=', today()),
         );
+    }
+
+    /**
+     * What a manufactured product is made of. Empty for a product that is bought as it is.
+     *
+     * @return HasMany<ProductComponent, $this>
+     */
+    public function components(): HasMany
+    {
+        return $this->hasMany(ProductComponent::class)->orderBy('id');
+    }
+
+    /**
+     * Whether the product is made of other products (then it is not bought itself, its components are).
+     */
+    public function isManufactured(): bool
+    {
+        return $this->components->isNotEmpty();
     }
 
     /**

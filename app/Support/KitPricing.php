@@ -11,7 +11,7 @@ class KitPricing
      */
     public function summary(KitVersion $version): KitSummary
     {
-        $version->loadMissing('items.product.currentPrice');
+        $version->loadMissing('items.product.currentPrice', 'items.product.components.component.currentPrice');
 
         $purchase = 0;
         $lineSales = 0;
@@ -21,14 +21,14 @@ class KitPricing
 
         foreach ($version->items as $item) {
             $product = $item->product;
-            $price = $product->currentPrice;
+            $price = app(ProductPricing::class)->purchasePrice($product);
 
             $linePurchase = null;
 
             if ($price === null) {
                 $missingPurchasePrices[] = $product->id;
             } else {
-                $linePurchase = $item->quantity_per_kit * $price->purchase_price;
+                $linePurchase = $item->quantity_per_kit * $price;
                 $purchase += $linePurchase;
             }
 

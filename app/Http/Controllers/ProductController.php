@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Models\Product;
+use App\Models\ProductComponent;
 use App\Models\Shop;
 use App\Support\ListSort;
 use Illuminate\Http\RedirectResponse;
@@ -61,7 +62,7 @@ class ProductController extends Controller
         Gate::authorize('catalog.products');
 
         $product = DB::transaction(function () use ($request): Product {
-            $product = Product::create($request->safe()->only(['name', 'unit', 'shop_id']));
+            $product = Product::create($request->safe()->only(['name', 'unit', 'shop_id', 'pack_size']));
 
             $product->prices()->create([
                 'shop_id' => $product->shop_id,
@@ -85,9 +86,23 @@ class ProductController extends Controller
     public function edit(Product $product): Response
     {
         return Inertia::render('products/edit', [
-            'product' => $product->only(['id', 'name', 'unit', 'shop_id', 'archived_at']),
+            'product' => $product->only(['id', 'name', 'unit', 'shop_id', 'pack_size', 'archived_at']),
             'shops' => $this->shops(),
             'prices' => $product->prices()->get(['id', 'purchase_price', 'sale_price', 'effective_from']),
+            'components' => $product->components()->with('component:id,name,unit')->get()->map(fn (ProductComponent $component): array => [
+                'component_product_id' => $component->component_product_id,
+                'name' => $component->component->name,
+                'unit' => $component->component->unit,
+                'quantity' => $component->quantity,
+            ])->values(),
+            // Only products bought as they are can be components: one level of composition.
+            'componentOptions' => Product::query()
+                ->whereNull('archived_at')
+                ->whereKeyNot($product->id)
+                ->whereDoesntHave('components')
+                ->orderBy('name')
+                ->get(['id', 'name', 'unit']),
+            'isComponent' => ProductComponent::query()->where('component_product_id', $product->id)->exists(),
             'today' => today()->toDateString(),
         ]);
     }

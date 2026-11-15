@@ -33,6 +33,7 @@ use App\Http\Controllers\OrderProformaController;
 use App\Http\Controllers\OrderTransitionController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PaymentMethodController;
+use App\Http\Controllers\ProductComponentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductPriceController;
 use App\Http\Controllers\ProfileController;
@@ -147,6 +148,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('products/{product}/archive', [ProductController::class, 'archive'])->middleware('can:catalog.archive')->name('products.archive');
         Route::patch('products/{product}/restore', [ProductController::class, 'restore'])->middleware('can:catalog.archive')->name('products.restore');
         Route::post('products/{product}/prices', [ProductPriceController::class, 'store'])->middleware('can:catalog.prices')->name('products.prices.store');
+        Route::put('products/{product}/components', [ProductComponentController::class, 'update'])->middleware('can:catalog.products')->name('products.components.update');
     });
 
     Route::middleware('can:manage-settings')->group(function () {

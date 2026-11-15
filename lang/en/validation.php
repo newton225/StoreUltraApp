@@ -248,6 +248,7 @@ return [
         'address' => 'address',
         'payment_terms' => 'payment terms',
         'unit' => 'unit',
+        'pack_size' => 'units per package',
         'shop_id' => 'shop',
         'purchase_price' => 'purchase price',
         'sale_price' => 'sale price',

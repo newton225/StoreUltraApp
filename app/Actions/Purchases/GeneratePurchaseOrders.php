@@ -6,16 +6,20 @@ use App\Enums\OrderStatus;
 use App\Enums\PurchaseOrderStatus;
 use App\Models\AuditLog;
 use App\Models\OrderItem;
+use App\Models\Product;
 use App\Models\PurchaseOrder;
 use App\Models\User;
 use App\Support\DocumentNumbers;
+use App\Support\OrderNeeds;
+use App\Support\PackQuantity;
 use App\Support\WeekCalendar;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class GeneratePurchaseOrders
 {
-    public function __construct(private DocumentNumbers $numbers, private WeekCalendar $calendar) {}
+    public function __construct(private DocumentNumbers $numbers, private WeekCalendar $calendar, private OrderNeeds $needs) {}
 
     /**
      * Group the needs of the week into one purchase order per shop. Only orders whose advance is
@@ -37,10 +41,11 @@ class GeneratePurchaseOrders
                 ->orderBy('id')
                 ->get();
 
-            $unassigned = $items->whereNull('shop_id')->count();
+            $needs = $this->needs->forItems($items);
+            $unassigned = $needs->whereNull('shop_id')->pluck('order_item_id')->unique()->count();
             $created = 0;
 
-            foreach ($items->whereNotNull('shop_id')->groupBy('shop_id') as $shopId => $shopItems) {
+            foreach ($needs->whereNotNull('shop_id')->groupBy('shop_id') as $shopId => $shopNeeds) {
                 $purchase = PurchaseOrder::create([
                     'reference' => $this->numbers->next('purchase_order'),
                     'shop_id' => $shopId,
@@ -51,24 +56,26 @@ class GeneratePurchaseOrders
 
                 $expected = 0;
 
-                foreach ($shopItems->groupBy(fn (OrderItem $item): string => $item->product_id.'|'.$item->unit_purchase_price) as $lines) {
-                    $quantity = (int) $lines->sum('quantity');
-                    $price = $lines->first()->unit_purchase_price;
+                $packSizes = Product::query()->whereIn('id', $shopNeeds->pluck('product_id'))->pluck('pack_size', 'id');
 
-                    $purchase->items()->create([
-                        'product_id' => $lines->first()->product_id,
-                        'quantity_ordered' => $quantity,
-                        'unit_price_expected' => $price,
-                    ]);
+                foreach ($shopNeeds->groupBy('product_id') as $productId => $productNeeds) {
+                    foreach ($this->purchaseLines($productNeeds, (int) ($packSizes[$productId] ?? 1)) as $line) {
+                        $purchase->items()->create([
+                            'product_id' => $productId,
+                            'quantity_ordered' => $line['quantity'],
+                            'unit_price_expected' => $line['price'],
+                        ]);
 
-                    $expected += $quantity * $price;
+                        $expected += $line['quantity'] * $line['price'];
+                    }
                 }
 
                 $expected = (int) round($expected);
 
                 $purchase->forceFill(['expected_total' => $expected])->save();
 
-                OrderItem::query()->whereIn('id', $shopItems->pluck('id'))->update(['purchase_order_id' => $purchase->id]);
+                // A manufactured line whose components come from several shops stays on the first purchase order made for it.
+                OrderItem::query()->whereIn('id', $shopNeeds->pluck('order_item_id')->unique())->whereNull('purchase_order_id')->update(['purchase_order_id' => $purchase->id]);
 
                 AuditLog::record('purchase_order.created', $purchase, [], [
                     'reference' => $purchase->reference,
@@ -82,5 +89,32 @@ class GeneratePurchaseOrders
 
             return ['created' => $created, 'unassigned' => $unassigned];
         });
+    }
+
+    /**
+     * The purchase lines of one product. Sold one by one, a line per price. Sold by package, one line
+     * for the whole need rounded up to whole packages, at the price of the biggest part of the need
+     * (the extra units of the last package are paid at that price).
+     *
+     * @param  Collection<int, array{order_item_id: int, product_id: int, shop_id: int|null, quantity: int, unit_price: int|float}>  $needs  The needs of one product.
+     * @return list<array{quantity: int, price: int|float}>
+     */
+    private function purchaseLines(Collection $needs, int $packSize): array
+    {
+        $byPrice = $needs->groupBy(fn (array $need): string => (string) $need['unit_price']);
+
+        if ($packSize <= 1) {
+            return $byPrice
+                ->map(fn (Collection $lines): array => ['quantity' => (int) $lines->sum('quantity'), 'price' => $lines->first()['unit_price']])
+                ->values()
+                ->all();
+        }
+
+        $biggest = $byPrice->sortByDesc(fn (Collection $lines): int => (int) $lines->sum('quantity'))->first();
+
+        return [[
+            'quantity' => PackQuantity::units((int) $needs->sum('quantity'), $packSize),
+            'price' => $biggest->first()['unit_price'],
+        ]];
     }
 }

@@ -11,6 +11,7 @@ use App\Models\Order;
 use App\Models\SupplyPlan;
 use App\Models\User;
 use App\Support\KitPricing;
+use App\Support\ProductPricing;
 use App\Support\WeekCalendar;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
@@ -64,7 +65,7 @@ class CreateOrder
                     'product_id' => $item->product_id,
                     'shop_id' => $item->product->shop_id,
                     'quantity' => $item->quantity_per_kit * $kitsCount,
-                    'unit_purchase_price' => $item->product->currentPrice->purchase_price,
+                    'unit_purchase_price' => app(ProductPricing::class)->purchasePrice($item->product) ?? 0,
                     'line_sale_total' => $item->sale_price_per_kit === null ? null : (int) round($item->sale_price_per_kit * $kitsCount),
                 ]);
             }

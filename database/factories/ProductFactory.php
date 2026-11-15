@@ -20,6 +20,7 @@ class ProductFactory extends Factory
         return [
             'name' => fake()->unique()->words(3, true),
             'unit' => 'u',
+            'pack_size' => 1,
             'shop_id' => null,
             'archived_at' => null,
         ];

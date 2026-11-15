@@ -1,6 +1,17 @@
 import { useTranslation } from '@/hooks/use-translation';
 
 /**
+ * A number with a wide, non-breaking space between the thousands. French writes it with a narrow one,
+ * which is hard to see on a screen: amounts such as 2 985 900 read as 2985900.
+ */
+function groupedNumber(format: Intl.NumberFormat, amount: number): string {
+    return format
+        .formatToParts(amount)
+        .map((part) => (part.type === 'group' ? '\u00A0' : part.value))
+        .join('');
+}
+
+/**
  * Format amounts and dates in the language chosen in the interface, not the one of the device.
  */
 export function useFormat() {
@@ -16,7 +27,7 @@ export function useFormat() {
 
     return {
         money: (amount: number): string =>
-            `${numberFormat.format(amount)} ${t('catalog.currency')}`,
+            `${locale === 'fr' ? groupedNumber(numberFormat, amount) : numberFormat.format(amount)} ${t('catalog.currency')}`,
         date: (value: string): string => dateFormat.format(new Date(value)),
     };
 }
