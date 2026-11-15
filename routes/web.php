@@ -27,6 +27,7 @@ use App\Http\Controllers\OrderAdvancePaymentController;
 use App\Http\Controllers\OrderBatchController;
 use App\Http\Controllers\OrderCancellationController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\OrderDeliveryBatchController;
 use App\Http\Controllers\OrderDiscountController;
 use App\Http\Controllers\OrderDocumentArchiveController;
 use App\Http\Controllers\OrderProformaController;
@@ -42,6 +43,7 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\Settings\BusinessSettingsController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\ShopPaymentController;
+use App\Http\Controllers\StockController;
 use App\Http\Controllers\SupplyPlanController;
 use App\Http\Controllers\TourController;
 use App\Http\Controllers\UserController;
@@ -88,6 +90,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::middleware('can:manage-orders')->group(function () {
         Route::post('orders/advance-payments', [OrderAdvancePaymentController::class, 'store'])->middleware('can:orders.record_payment')->name('orders.advance-payments.store');
+        Route::post('orders/deliveries-batch', [OrderDeliveryBatchController::class, 'store'])->middleware(['can:orders.record_delivery', 'throttle:10,1'])->name('orders.deliveries-batch.store');
         Route::post('orders/proformas', [OrderProformaController::class, 'store'])->middleware('can:orders.batch')->name('orders.proformas.store');
         Route::post('orders/cancel-batch', [OrderCancellationController::class, 'store'])->middleware(['can:orders.cancel', 'throttle:10,1'])->name('orders.cancel-batch.store');
         Route::post('orders/batch', [OrderBatchController::class, 'store'])->middleware('can:orders.batch')->name('orders.batch.store');
@@ -107,7 +110,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('can:manage-purchases')->group(function () {
         Route::get('purchases', [PurchaseController::class, 'index'])->name('purchases.index');
         Route::post('purchases/generate', [PurchaseController::class, 'generate'])->middleware('can:purchases.generate')->name('purchases.generate');
+        Route::get('purchases/restock', [PurchaseController::class, 'createRestock'])->middleware('can:purchases.generate')->name('purchases.restock.create');
+        Route::post('purchases/restock', [PurchaseController::class, 'storeRestock'])->middleware('can:purchases.generate')->name('purchases.restock.store');
         Route::get('purchases/{purchaseOrder}', [PurchaseController::class, 'show'])->name('purchases.show');
+        Route::get('stock', [StockController::class, 'index'])->name('stock.index');
+        Route::get('stock/{product}', [StockController::class, 'show'])->name('stock.show');
+        Route::post('stock/{product}/adjust', [StockController::class, 'adjust'])->middleware(['can:stock.adjust', 'throttle:20,1'])->name('stock.adjust');
         Route::post('purchases/{purchaseOrder}/send', [PurchaseController::class, 'send'])->middleware('can:purchases.send')->name('purchases.send');
         Route::post('purchases/{purchaseOrder}/receive', [PurchaseController::class, 'receive'])->middleware('can:purchases.receive')->name('purchases.receive');
         Route::post('purchases/{purchaseOrder}/cancel', [PurchaseController::class, 'cancel'])->middleware('can:purchases.cancel')->name('purchases.cancel');

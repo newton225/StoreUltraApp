@@ -11,12 +11,11 @@ import { show as archive } from '@/actions/App/Http/Controllers/OrderDocumentArc
 import GuidedTour, { type TourStep } from '@/components/guided-tour';
 import Heading from '@/components/heading';
 import ExportMenu from '@/components/export-menu';
-import OrderAdvancePayments from '@/components/order-advance-payments';
+import OrderGroupWorkflow from '@/components/order-group-workflow';
 import OrderDocumentsZip, {
     type ArchiveChoices,
 } from '@/components/order-documents-zip';
 import OrderCancelBatch from '@/components/order-cancel-batch';
-import OrderProformaBatch from '@/components/order-proforma-batch';
 import Pagination from '@/components/pagination';
 import SelectField from '@/components/select-field';
 import { Button } from '@/components/ui/button';
@@ -66,6 +65,10 @@ type Props = {
     };
     statuses: string[];
     canCreate: boolean;
+    /** Which group actions the user may use: their panels are shown even when there is nothing to do yet. */
+    batchRights: { proforma: boolean; collect: boolean; deliver: boolean };
+    /** How many orders sit at each step of their life. */
+    statusCounts: Record<string, number>;
     proformaZones: { id: number; name: string; count: number }[];
     archiveChoices: ArchiveChoices;
     weeks: string[];
@@ -86,6 +89,19 @@ type Props = {
         requires_reference: boolean;
     }[];
     collectors: { id: number; name: string }[];
+    deliveryZones: {
+        id: number;
+        name: string;
+        orders: {
+            id: number;
+            client: string;
+            reference: string | null;
+            remaining: number;
+            max_kits: number;
+            receiver: string | null;
+        }[];
+    }[];
+    deliveryAgents: { id: number; name: string }[];
     currentUserId: number;
 };
 
@@ -117,12 +133,16 @@ export default function OrdersIndex({
     filters,
     statuses,
     canCreate,
+    batchRights,
+    statusCounts,
     proformaZones,
     archiveChoices,
     weeks,
     collectZones,
     paymentMethods,
     collectors,
+    deliveryZones,
+    deliveryAgents,
     currentUserId,
 }: Props) {
     const canZip = useCanDo('orders.download_zip');
@@ -186,40 +206,24 @@ export default function OrdersIndex({
                     </div>
                 </div>
 
-                {/* The group actions side by side to spare room; the one that is open takes the whole line. */}
-                <div
-                    className={`grid items-start gap-3 lg:grid-cols-2 ${proformaZones.length > 0 && collectZones.length > 0 ? 'xl:grid-cols-3' : ''}`}
-                    data-tour={
-                        proformaZones.length > 0 || collectZones.length > 0
-                            ? 'batches'
-                            : undefined
-                    }
-                >
-                    {proformaZones.length > 0 && (
-                        <div className="has-[[aria-expanded=true]]:lg:col-span-full">
-                            <OrderProformaBatch zones={proformaZones} />
-                        </div>
-                    )}
-                    {collectZones.length > 0 && (
-                        <div className="has-[[aria-expanded=true]]:lg:col-span-full">
-                            <OrderAdvancePayments
-                                zones={collectZones}
-                                methods={paymentMethods}
-                                collectors={collectors}
-                                currentUserId={currentUserId}
-                            />
-                        </div>
-                    )}
-                    {canZip && (
-                        <div className="has-[[aria-expanded=true]]:lg:col-span-full">
-                            <OrderDocumentsZip
-                                choices={archiveChoices}
-                                week={filters.week}
-                            />
-                        </div>
-                    )}
-                </div>
+                <OrderGroupWorkflow
+                    rights={batchRights}
+                    counts={statusCounts}
+                    proformaZones={proformaZones}
+                    collectZones={collectZones}
+                    paymentMethods={paymentMethods}
+                    collectors={collectors}
+                    currentUserId={currentUserId}
+                    deliveryZones={deliveryZones}
+                    deliveryAgents={deliveryAgents}
+                />
 
+                {canZip && (
+                    <OrderDocumentsZip
+                        choices={archiveChoices}
+                        week={filters.week}
+                    />
+                )}
                 <form
                     data-tour="filters"
                     className="grid items-end justify-start gap-3 sm:grid-cols-[minmax(0,22rem)_12rem_12rem]"

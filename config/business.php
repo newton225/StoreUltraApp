@@ -30,6 +30,8 @@ return [
         'delivery_signature_required' => ['type' => 'boolean', 'default' => false],
         'client_cap' => ['type' => 'integer', 'default' => 0, 'min' => 0],
         'order_lead_days' => ['type' => 'integer', 'default' => 7, 'min' => 0],
+        // Buying from the shops on credit: the purchase orders can be prepared before the client's advance is paid.
+        'purchase_on_credit' => ['type' => 'boolean', 'default' => false],
         // The order of the week for a whole zone: which TPE are left aside. A single order is never blocked by a debt.
         'batch_skip_clients_with_order' => ['type' => 'boolean', 'default' => true],
         'batch_max_unpaid_kits' => ['type' => 'integer', 'default' => 0, 'min' => 0],

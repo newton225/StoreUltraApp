@@ -215,6 +215,7 @@ return [
         'expense_allocation' => 'règle de répartition',
         'attachment_alert_days' => 'délai d\'alerte',
         'blocked_order_days' => 'délai de blocage',
+        'purchase_on_credit' => 'achat à crédit',
         'attachment_type_id' => 'type de document',
         'applies_to' => 'concerne',
         'owner_id' => 'propriétaire',

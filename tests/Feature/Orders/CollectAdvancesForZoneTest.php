@@ -2,6 +2,7 @@
 
 use App\Models\AuditLog;
 use App\Models\Client;
+use App\Models\ClientMember;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
@@ -245,4 +246,18 @@ test('the order list shows how much of the advance was received, never more than
         ->where('orders.data', fn ($rows) => collect($rows)->firstWhere('id', $order->id)['advance_paid'] === 15000
             && collect($rows)->firstWhere('id', $order->id)['advance_due'] === 40000
             && collect($rows)->firstWhere('id', $none->id)['advance_paid'] === 0));
+});
+
+test('the phone of the manager of the client is offered for the payer, else the phone of the client', function () {
+    $withManager = waitingOrder('Fronan');
+    ClientMember::factory()->create(['client_id' => $withManager->client_id, 'role' => ClientMember::ROLE_MANAGER, 'phone' => '0707070707', 'position' => 0]);
+    $alone = waitingOrder('Fronan');
+    $alone->client->update(['phone' => '0101010101']);
+
+    $this->actingAs($this->owner)->get(route('orders.index'))->assertInertia(function (Assert $page) use ($withManager, $alone) {
+        $orders = collect($page->toArray()['props']['collectZones'][0]['orders'])->keyBy('id');
+
+        expect($orders[$withManager->id]['phone'])->toBe('0707070707')
+            ->and($orders[$alone->id]['phone'])->toBe('0101010101');
+    });
 });

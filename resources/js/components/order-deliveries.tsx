@@ -27,6 +27,8 @@ export type OrderDeliveriesData = {
         notes: string | null;
     }[];
     remaining_kits: number;
+    /** How many kits the goods available allow to deliver now (stock and goods received for the order). */
+    max_kits: number;
     can_deliver: boolean;
     signature_required: boolean;
     /** The manager of the client: filled in by default, the person delivering can replace it. */
@@ -55,6 +57,9 @@ export default function OrderDeliveries({
     const [methodId, setMethodId] = useState('');
     const [collect, setCollect] = useState('');
     const [idempotencyKey, setIdempotencyKey] = useState(newIdempotencyKey);
+    const [kitsInput, setKitsInput] = useState<string | null>(null);
+    const kits = kitsInput ?? String(delivery.remaining_kits);
+    const overStock = Number(kits) > delivery.max_kits;
 
     const needsReference =
         collect !== '' &&
@@ -81,7 +86,10 @@ export default function OrderDeliveries({
                     <Form
                         {...store.form(orderId)}
                         options={{ preserveScroll: true }}
-                        onSuccess={() => setIdempotencyKey(newIdempotencyKey())}
+                        onSuccess={() => {
+                            setIdempotencyKey(newIdempotencyKey());
+                            setKitsInput(null);
+                        }}
                         className="space-y-4"
                     >
                         {({ processing, errors: formErrors }) => {
@@ -113,13 +121,27 @@ export default function OrderDeliveries({
                                                 type="number"
                                                 min={1}
                                                 max={delivery.remaining_kits}
-                                                defaultValue={
-                                                    delivery.remaining_kits
+                                                value={kits}
+                                                onChange={(event) =>
+                                                    setKitsInput(
+                                                        event.target.value,
+                                                    )
                                                 }
+                                                aria-invalid={overStock}
                                                 required
                                             />
                                             <InputError
-                                                message={errors.kits_delivered}
+                                                message={
+                                                    errors.kits_delivered ??
+                                                    (overStock
+                                                        ? t(
+                                                              'deliveries.panel.stock_over',
+                                                              {
+                                                                  max: delivery.max_kits,
+                                                              },
+                                                          )
+                                                        : undefined)
+                                                }
                                             />
                                         </div>
                                         <div className="grid gap-2">
@@ -347,7 +369,7 @@ export default function OrderDeliveries({
                                         description={t(
                                             'deliveries.panel.confirm_body',
                                         )}
-                                        disabled={processing}
+                                        disabled={processing || overStock}
                                     />
                                 </>
                             );

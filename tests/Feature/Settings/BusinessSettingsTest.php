@@ -17,6 +17,7 @@ function validSettingsPayload(array $overrides = []): array
         'order_lead_days' => 7,
         'batch_skip_clients_with_order' => true,
         'batch_max_unpaid_kits' => 0,
+        'purchase_on_credit' => false,
         'invoice_period' => 'monthly',
         'week_starts_on' => 'monday',
         'document_prefix_receipt' => 'REC',

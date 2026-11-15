@@ -10,6 +10,7 @@ return [
     'errors' => [
         'status' => 'This order cannot be delivered now: its goods must have been received.',
         'kits' => 'The number of kits is more than what is left to deliver.',
+        'stock' => 'Not enough stock to deliver these kits. Missing: :products.',
         'signature' => 'The signature is not a valid image.',
     ],
 
@@ -43,6 +44,7 @@ return [
     ],
 
     'panel' => [
+        'stock_over' => 'Not enough stock: at most :max kit(s) can be delivered with the goods available.',
         'kits_help' => 'Number of kits handed over this time. A delivery can be partial: the rest is delivered later.',
         'collect_amount_help' => 'The balance is what the client pays at delivery: the sale price minus the advance already paid.',
         'title' => 'Deliveries',

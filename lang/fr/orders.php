@@ -10,6 +10,16 @@ return [
     'empty' => 'Aucune commande trouvée',
     'created' => 'Commande créée.',
     'status_updated' => 'Statut mis à jour.',
+    'group' => [
+        'title' => 'Actions groupées par étape',
+        'help' => 'Choisissez ce que vous voulez faire (le nombre est celui des commandes prêtes pour cette action) : elle s\'ouvre en dessous, pour toute une sous-préfecture à la fois.',
+        'steps' => [
+            'draft' => 'Émettre les proformas',
+            'proforma_issued' => 'Encaisser les avances',
+            'advance_received' => 'Livrer les kits',
+        ],
+        'at_step' => 'Commandes à l\'étape « :step » : :count',
+    ],
     'collect' => [
         'open' => 'Encaisser des avances par sous-préfecture',
         'description' => 'Choisissez une sous-préfecture : les commandes qui attendent leur avance sont proposées, avec le reste à encaisser. Cochez celles qui paient, corrigez le montant si un client ne paie qu\'une partie, puis enregistrez tous les paiements d\'un coup. Chaque paiement a son reçu.',
@@ -173,7 +183,7 @@ return [
     'status_help' => [
         'draft' => 'La commande est créée, mais la proforma n’est pas encore émise.',
         'proforma_issued' => 'La proforma est émise : le client peut payer son avance.',
-        'advance_received' => 'L’avance due est payée : la commande peut être passée aux boutiques.',
+        'advance_received' => 'L’avance due est payée : les kits peuvent être livrés. Les achats aux boutiques et le stock se suivent dans les menus Achats et Stock.',
         'ordered' => 'Les bons de commande sont envoyés aux boutiques : on attend les marchandises.',
         'received' => 'Les marchandises sont reçues : les kits sont prêts à être livrés.',
         'delivered' => 'Tous les kits sont livrés. Il peut rester le relicat à encaisser.',
@@ -269,6 +279,31 @@ return [
         'by' => 'par :user',
     ],
 
+    'deliver_batch' => [
+        'open' => 'Livrer des kits par sous-préfecture',
+        'description' => 'Choisissez une sous-préfecture : les commandes dont les marchandises sont reçues sont proposées, avec les kits restant à livrer. Cochez celles que vous livrez, corrigez le nombre de kits pour une livraison partielle et le nom de la personne qui reçoit, puis enregistrez toutes les livraisons d\'un coup. La signature et l\'encaissement du solde se font depuis la commande.',
+        'zone' => 'Sous-préfecture',
+        'choose' => 'Choisir une sous-préfecture',
+        'delivered_on' => 'Date de livraison',
+        'agent' => 'Livreur',
+        'agent_none' => 'Aucun livreur précis',
+        'defaults_help' => 'S\'appliquent à toutes les livraisons du groupe.',
+        'none_available' => 'Aucune commande n\'est prête à être livrée.',
+        'select_all' => 'Tout cocher',
+        'select_none' => 'Tout décocher',
+        'selected' => ':orders commande(s) cochée(s) · :kits kits à livrer',
+        'kits' => 'Kits',
+        'kits_help' => 'Sur :remaining restant(s)',
+        'received_by' => 'Personne qui reçoit',
+        'too_many' => 'Cochez :max commandes au plus à la fois.',
+        'over' => 'Au plus :max kits.',
+        'stock_over' => 'Stock insuffisant : au plus :max kit(s) livrables.',
+        'submit' => 'Enregistrer les livraisons',
+        'confirm_title' => 'Enregistrer ces livraisons ?',
+        'confirm_body' => ':orders livraison(s) pour :kits kits seront enregistrées. Chaque livraison a son numéro et sa trace, et une livraison enregistrée ne se modifie pas.',
+        'done' => '{1} :delivered livraison enregistrée (:kits kits)|[2,*] :delivered livraisons enregistrées (:kits kits)',
+        'none' => 'Aucune livraison enregistrée.',
+    ],
     'cancel_batch' => [
         'open' => 'Annuler la sélection (:count)',
         'title' => 'Annuler :count commande(s) ?',
@@ -297,6 +332,10 @@ return [
             'status' => 'Une remise ne peut plus être accordée une fois les kits livrés.',
             'too_high' => 'La remise dépasse le reste à encaisser (:max).',
         ],
+    ],
+
+    'items' => [
+        'from_stock' => 'dont :count en stock',
     ],
 
     'plans' => [

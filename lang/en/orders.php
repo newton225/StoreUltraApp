@@ -10,6 +10,16 @@ return [
     'empty' => 'No order found',
     'created' => 'Order created.',
     'status_updated' => 'Status updated.',
+    'group' => [
+        'title' => 'Group actions by step',
+        'help' => 'Pick what you want to do (the number is how many orders are ready for it): it opens below, for a whole sub-prefecture at once.',
+        'steps' => [
+            'draft' => 'Issue the proformas',
+            'proforma_issued' => 'Collect the advances',
+            'advance_received' => 'Deliver the kits',
+        ],
+        'at_step' => 'Orders at the step ":step": :count',
+    ],
     'collect' => [
         'open' => 'Collect advances by sub-prefecture',
         'description' => 'Choose a sub-prefecture: the orders waiting for their advance are offered, with what is left to collect. Tick the ones that pay, correct the amount when a client only pays part, then record all the payments at once. Each payment gets its own receipt.',
@@ -173,7 +183,7 @@ return [
     'status_help' => [
         'draft' => 'The order is created, but the proforma is not issued yet.',
         'proforma_issued' => 'The proforma is issued: the client can pay the advance.',
-        'advance_received' => 'The advance due is paid: the order can be placed with the shops.',
+        'advance_received' => 'The advance due is paid: the kits can be delivered. Purchases from the shops and the stock are followed in the Purchases and Stock menus.',
         'ordered' => 'The purchase orders are sent to the shops: the goods are awaited.',
         'received' => 'The goods are received: the kits are ready to be delivered.',
         'delivered' => 'All the kits are delivered. The balance may still be to collect.',
@@ -268,6 +278,31 @@ return [
         'by' => 'by :user',
     ],
 
+    'deliver_batch' => [
+        'open' => 'Deliver kits by sub-prefecture',
+        'description' => 'Choose a sub-prefecture: the orders whose goods are received are offered, with the kits left to deliver. Tick the ones you deliver, change the number of kits for a partial delivery and the name of the person receiving, then record all the deliveries at once. The signature and the collection of the balance are done from the order.',
+        'zone' => 'Sub-prefecture',
+        'choose' => 'Choose a sub-prefecture',
+        'delivered_on' => 'Delivery date',
+        'agent' => 'Delivery person',
+        'agent_none' => 'No particular delivery person',
+        'defaults_help' => 'Apply to every delivery of the group.',
+        'none_available' => 'No order is ready to be delivered.',
+        'select_all' => 'Tick all',
+        'select_none' => 'Untick all',
+        'selected' => ':orders order(s) ticked · :kits kits to deliver',
+        'kits' => 'Kits',
+        'kits_help' => 'Out of :remaining left',
+        'received_by' => 'Person receiving',
+        'too_many' => 'Tick :max orders at most at a time.',
+        'over' => 'At most :max kits.',
+        'stock_over' => 'Not enough stock: at most :max kit(s) can be delivered.',
+        'submit' => 'Record the deliveries',
+        'confirm_title' => 'Record these deliveries?',
+        'confirm_body' => ':orders delivery(ies) for :kits kits will be recorded. Each delivery has its number and its trace, and a recorded delivery cannot be edited.',
+        'done' => '{1} :delivered delivery recorded (:kits kits)|[2,*] :delivered deliveries recorded (:kits kits)',
+        'none' => 'No delivery recorded.',
+    ],
     'cancel_batch' => [
         'open' => 'Cancel selection (:count)',
         'title' => 'Cancel :count order(s)?',
@@ -296,6 +331,10 @@ return [
             'status' => 'A discount can no longer be granted once the kits are delivered.',
             'too_high' => 'The discount is above what is left to collect (:max).',
         ],
+    ],
+
+    'items' => [
+        'from_stock' => ':count of them from the stock',
     ],
 
     'plans' => [

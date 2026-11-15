@@ -3,11 +3,15 @@
 namespace App\Support;
 
 use App\Enums\OrderStatus;
+use App\Enums\PurchaseOrderStatus;
 use App\Models\Client;
 use App\Models\Delivery;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\OrderItemNeed;
 use App\Models\Payment;
+use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderItem;
 use App\Models\Shop;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -27,6 +31,7 @@ class DashboardReport
         private ShopAccounts $shopAccounts,
         private AttachmentAlerts $attachmentAlerts,
         private BusinessSettings $settings,
+        private OrderNeeds $needs,
     ) {}
 
     /**
@@ -139,7 +144,7 @@ class DashboardReport
 
         $byStatus = [];
 
-        foreach (OrderStatus::cases() as $status) {
+        foreach (OrderStatus::workflow() as $status) {
             $byStatus[$status->value] = $orders->where('status', $status)->count();
         }
 
@@ -195,6 +200,38 @@ class DashboardReport
     }
 
     /**
+     * What the purchase orders behind these orders ask of each shop: quantity ordered (whole packages, after the stock) x
+     * expected price, cancelled purchase orders left out. A purchase order is shared by several orders, so it counts
+     * whole even when only some of its orders are in the period or the zone chosen. Shops with none are absent.
+     *
+     * @param  list<int>  $orderIds
+     * @return array<int, int>
+     */
+    private function orderedByShop(array $orderIds): array
+    {
+        $fromLines = OrderItem::query()->whereIn('order_id', $orderIds)->whereNotNull('purchase_order_id')->pluck('purchase_order_id');
+        $fromNeeds = OrderItemNeed::query()
+            ->whereHas('orderItem', fn (Builder $items) => $items->whereIn('order_id', $orderIds))
+            ->whereNotNull('purchase_order_item_id')
+            ->with('purchaseOrderItem:id,purchase_order_id')
+            ->get()
+            ->map(fn (OrderItemNeed $need): ?int => $need->purchaseOrderItem?->purchase_order_id);
+
+        $ordered = [];
+
+        PurchaseOrder::query()
+            ->whereIn('id', $fromLines->merge($fromNeeds)->filter()->unique()->values())
+            ->where('status', '!=', PurchaseOrderStatus::Cancelled->value)
+            ->with('items')
+            ->get()
+            ->each(function (PurchaseOrder $purchase) use (&$ordered): void {
+                $ordered[$purchase->shop_id] = ($ordered[$purchase->shop_id] ?? 0) + $purchase->items->sum(fn (PurchaseOrderItem $item): int|float => $item->quantity_ordered * $item->unit_price_expected);
+            });
+
+        return array_map(fn (int|float $amount): int => (int) round($amount), $ordered);
+    }
+
+    /**
      * The synthesis by shop for the orders of the period, and what is owed to the shops overall.
      *
      * @param  EloquentCollection<int, Order>  $live
@@ -208,8 +245,8 @@ class DashboardReport
 
         $items = OrderItem::query()
             ->whereIn('order_id', $ids)
-            ->with('purchaseOrder.items')
-            ->get(['order_id', 'shop_id', 'product_id', 'purchase_order_id', 'quantity', 'unit_purchase_price', 'line_sale_total'])
+            ->with('purchaseOrder.items', 'needs')
+            ->get(['id', 'order_id', 'shop_id', 'product_id', 'purchase_order_id', 'quantity', 'unit_purchase_price', 'line_sale_total'])
             ->groupBy('order_id');
 
         $rows = [];
@@ -218,10 +255,21 @@ class DashboardReport
             $weights = [];
 
             foreach ($lines as $line) {
-                $key = $line->shop_id ?? 0;
-                $weights[$key] = (int) round(($weights[$key] ?? 0) + $line->quantity * $line->unit_purchase_price);
-                $rows[$key]['sale'] = ($rows[$key]['sale'] ?? 0) + (int) $line->line_sale_total;
-                $rows[$key]['actual'] = ($rows[$key]['actual'] ?? 0) + $this->profit->actualCost($line);
+                // A manufactured line is bought as its components, from their own shops: its sale and its cost are
+                // shared between those shops in proportion to what each component costs. A plain line is one need.
+                $needs = $this->needs->forItems(new EloquentCollection([$line]))->values();
+                $costs = $needs->map(fn (array $need): int|float => $need['quantity'] * $need['unit_price']);
+                $totalCost = $costs->sum();
+                $actual = $this->profit->actualCost($line);
+
+                foreach ($needs as $index => $need) {
+                    $key = $need['shop_id'] ?? 0;
+                    $share = $totalCost > 0 ? $costs[$index] / $totalCost : 1 / $needs->count();
+
+                    $weights[$key] = (int) round(($weights[$key] ?? 0) + $costs[$index]);
+                    $rows[$key]['sale'] = ($rows[$key]['sale'] ?? 0) + (int) round($line->line_sale_total * $share);
+                    $rows[$key]['actual'] = ($rows[$key]['actual'] ?? 0) + (int) round($actual * $share);
+                }
             }
 
             $shares = AdvanceAllocation::split(max(0, $paid[$orderId] ?? 0), $weights);
@@ -235,10 +283,15 @@ class DashboardReport
         }
 
         $names = Shop::query()->pluck('name', 'id');
+
+        // What was really ordered from each shop: the purchase orders behind these orders, in whole packages and after
+        // the stock. A shop with no purchase order yet shows what its lines are planned to cost.
+        $ordered = $this->orderedByShop($ids);
         $purchaseTotal = 0;
 
-        foreach ($rows as $row) {
-            $purchaseTotal += $row['purchase'];
+        foreach ($rows as $key => $row) {
+            $rows[$key]['bought'] = $ordered[$key] ?? $row['purchase'];
+            $purchaseTotal += $rows[$key]['bought'];
         }
 
         $summary = [];
@@ -250,11 +303,11 @@ class DashboardReport
 
             $summary[] = [
                 'shop' => $key === 0 ? '—' : (string) ($names[$key] ?? '—'),
-                'purchase' => $row['purchase'],
+                'purchase' => $row['bought'],
                 'sale' => $row['sale'] ?? 0,
                 'advance' => $row['advance'],
-                'percent' => $purchaseTotal > 0 ? round($row['purchase'] / $purchaseTotal * 100, 1) : 0.0,
-                'balance' => $row['purchase'] - $row['advance'],
+                'percent' => $purchaseTotal > 0 ? round($row['bought'] / $purchaseTotal * 100, 1) : 0.0,
+                'balance' => $row['bought'] - $row['advance'],
                 // The profit of a shop's lines, as on the Profit page: theoretical = sale minus the planned purchase;
                 // real = what the clients paid (the advance shared to the shop) minus what the goods really cost,
                 // before logistics; after logistics = the same minus the shop's share of the logistics costs.

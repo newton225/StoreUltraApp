@@ -1,7 +1,13 @@
 import { ChevronDown } from 'lucide-react';
-import { useId, useState } from 'react';
+import { createContext, useContext, useId, useState } from 'react';
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
+
+/**
+ * Inside a screen that already gives the block its own title and opens it (the group actions of the orders page, one
+ * per step of the life of an order), the folding header is not wanted: the content is shown as it is.
+ */
+export const EmbeddedPanelContext = createContext(false);
 
 /**
  * A block that can be folded up by its title, for a form that sits above a list (playbook UI-106 and
@@ -19,6 +25,11 @@ export default function CollapsiblePanel({
 }) {
     const [open, setOpen] = useState(defaultOpen);
     const contentId = useId();
+    const embedded = useContext(EmbeddedPanelContext);
+
+    if (embedded) {
+        return <div className="fade-in">{children}</div>;
+    }
 
     return (
         <section className="rounded-lg border border-border">

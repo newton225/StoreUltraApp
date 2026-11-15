@@ -111,6 +111,8 @@ return [
         'purchases_cancel_help' => 'Annuler un bon encore au brouillon.',
         'purchases_pay_shop' => 'Payer les boutiques',
         'purchases_pay_shop_help' => 'Enregistrer un paiement ou un remboursement à une boutique.',
+        'stock_adjust' => 'Corriger le stock',
+        'stock_adjust_help' => 'Ajouter ou retirer des unités à la main (casse, perte, inventaire, stock de départ), avec un motif.',
         'cash_record' => 'Enregistrer des mouvements de caisse',
         'cash_record_help' => 'Entrées et sorties d\'argent liquide.',
         'cash_cancel' => 'Annuler un mouvement de caisse',

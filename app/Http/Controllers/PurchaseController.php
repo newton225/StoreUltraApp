@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actions\Purchases\CancelPurchaseOrder;
+use App\Actions\Purchases\CreateRestockPurchaseOrder;
 use App\Actions\Purchases\GeneratePurchaseOrders;
 use App\Actions\Purchases\ReceivePurchaseOrder;
 use App\Actions\Purchases\SendPurchaseOrder;
@@ -11,16 +12,21 @@ use App\Enums\PurchaseOrderStatus;
 use App\Exceptions\InvalidPurchaseOperation;
 use App\Http\Requests\GeneratePurchaseOrdersRequest;
 use App\Http\Requests\ReceivePurchaseRequest;
+use App\Http\Requests\StoreRestockPurchaseRequest;
 use App\Models\Document;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\OrderItemNeed;
 use App\Models\PaymentMethod;
+use App\Models\Product;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
 use App\Models\Shop;
 use App\Models\ShopPayment;
 use App\Support\AdvanceAllocation;
+use App\Support\BusinessSettings;
 use App\Support\ListSort;
+use App\Support\ProductPricing;
 use App\Support\ShopAccounts;
 use App\Support\WeekCalendar;
 use Carbon\CarbonImmutable;
@@ -38,7 +44,7 @@ class PurchaseController extends Controller
     /**
      * List the purchase orders of a week, with how the advances are split and what each shop is owed.
      */
-    public function index(Request $request, WeekCalendar $calendar, ShopAccounts $accounts): Response
+    public function index(Request $request, WeekCalendar $calendar, ShopAccounts $accounts, BusinessSettings $settings): Response
     {
         $week = $calendar->startOf($request->date('week') ?? now());
         $shopId = $request->integer('shop') ?: null;
@@ -59,6 +65,7 @@ class PurchaseController extends Controller
                 'shop' => ['id' => $purchase->shop->id, 'name' => $purchase->shop->name],
                 'week' => $purchase->week->toDateString(),
                 'status' => $purchase->status->value,
+                'kind' => $purchase->kind,
                 'expected_total' => $purchase->expected_total,
                 'actual_total' => $purchase->actual_total,
             ]);
@@ -66,7 +73,7 @@ class PurchaseController extends Controller
         $pending = OrderItem::query()
             ->whereNull('purchase_order_id')
             ->whereHas('order', fn (Builder $orders) => $orders
-                ->where('status', OrderStatus::AdvanceReceived->value)
+                ->whereIn('status', OrderStatus::purchasableValues((bool) $settings->get('purchase_on_credit')))
                 ->whereDate('delivery_week', $week));
 
         return Inertia::render('purchases/index', [
@@ -101,11 +108,62 @@ class PurchaseController extends Controller
     }
 
     /**
+     * The form of a purchase order made to fill the stock: the shop, then the products it sells, in whole packages.
+     */
+    public function createRestock(ProductPricing $pricing): Response
+    {
+        return Inertia::render('purchases/restock', [
+            'shops' => Shop::query()->orderBy('name')->get(['id', 'name'])->map(fn (Shop $shop): array => [
+                'id' => $shop->id,
+                'name' => $shop->name,
+                'products' => Product::query()
+                    ->where('shop_id', $shop->id)
+                    ->whereNull('archived_at')
+                    ->whereDoesntHave('components')
+                    ->with('currentPrice')
+                    ->orderBy('name')
+                    ->get()
+                    ->map(fn (Product $product): array => [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'unit' => $product->unit,
+                        'pack_size' => $product->pack_size,
+                        'price' => $pricing->purchasePrice($product),
+                    ])->values(),
+            ])->values(),
+        ]);
+    }
+
+    /**
+     * Create a purchase order to fill the stock.
+     */
+    public function storeRestock(StoreRestockPurchaseRequest $request, CreateRestockPurchaseOrder $create): RedirectResponse
+    {
+        $purchase = $create->handle(
+            Shop::query()->findOrFail($request->integer('shop_id')),
+            array_values(array_map(fn (array $line): array => ['product_id' => (int) $line['product_id'], 'packs' => (int) $line['packs']], $request->validated('lines'))),
+            $request->user(),
+        );
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('purchases.restock.created', ['reference' => $purchase->reference])]);
+
+        return to_route('purchases.show', $purchase);
+    }
+
+    /**
      * Show a purchase order with its lines, the gaps between ordered and received, and its payments.
      */
     public function show(PurchaseOrder $purchaseOrder): Response
     {
         $purchaseOrder->load('shop:id,name', 'items.product', 'payments.method', 'payments.payer:id,name');
+
+        // For each line: what the customer orders need of it and how much of that the stock already gave.
+        $needs = OrderItemNeed::query()
+            ->whereIn('purchase_order_item_id', $purchaseOrder->items->pluck('id'))
+            ->selectRaw('purchase_order_item_id, sum(quantity) as needed, sum(quantity_from_stock) as from_stock')
+            ->groupBy('purchase_order_item_id')
+            ->get()
+            ->keyBy('purchase_order_item_id');
 
         $status = $purchaseOrder->status;
 
@@ -116,6 +174,7 @@ class PurchaseController extends Controller
                 'shop' => ['id' => $purchaseOrder->shop->id, 'name' => $purchaseOrder->shop->name],
                 'week' => $purchaseOrder->week->toDateString(),
                 'status' => $status->value,
+                'kind' => $purchaseOrder->kind,
                 'sent_at' => $purchaseOrder->sent_at?->toIso8601String(),
                 'expected_total' => $purchaseOrder->expected_total,
                 'actual_total' => $purchaseOrder->actual_total,
@@ -125,6 +184,8 @@ class PurchaseController extends Controller
                     'product_name' => $item->product->name,
                     'unit' => $item->product->unit,
                     'quantity_ordered' => $item->quantity_ordered,
+                    'needed' => $needs->get($item->id)?->needed,
+                    'from_stock' => $needs->get($item->id)?->from_stock,
                     'quantity_received' => $item->quantity_received,
                     'shortfall' => $item->quantity_ordered - $item->quantity_received,
                     'unit_price_expected' => $item->unit_price_expected,

@@ -12,6 +12,28 @@ return [
     'payment_recorded' => 'Payment to the shop recorded.',
     'empty' => 'No purchase order for this week',
 
+    'restock' => [
+        'open' => 'Order for the stock',
+        'title' => 'Order for the stock',
+        'description' => 'Buy products from a shop with no customer order behind it: everything received enters the stock at the price really paid and will serve the next orders. Quantities are entered in whole packages.',
+        'shop' => 'Shop',
+        'choose' => 'Choose a shop',
+        'no_products' => 'This shop has no product to order (manufactured products are not ordered, only their components).',
+        'pack' => ':size :unit per package · :price a unit',
+        'packs' => 'Packages',
+        'units' => ':units :unit',
+        'estimate' => 'Planned total',
+        'submit' => 'Create the purchase order',
+        'confirm_title' => 'Create this purchase order?',
+        'confirm_body' => 'The order is created as a draft: you can then send it to the shop and record the reception, which brings the goods into the stock.',
+        'created' => 'Purchase order :reference created.',
+        'badge' => '· for the stock',
+        'for_stock' => 'For the stock',
+        'errors' => [
+            'products' => 'Each product must belong to the chosen shop, be bought as it is and not be archived.',
+        ],
+    ],
+
     'errors' => [
         'not_draft' => 'Only a draft can be sent.',
         'not_receivable' => 'Goods can only be received on a purchase order that was sent.',
@@ -49,7 +71,7 @@ return [
 
     'generate' => [
         'title' => 'Prepare the purchases of the week',
-        'description' => 'Orders whose advance is paid are grouped by shop: one purchase order per shop, to send in order to buy the products.',
+        'description' => 'Orders whose advance is paid (or whose proforma is issued, if you buy on credit in the Settings) are grouped by shop: one purchase order per shop, to send in order to buy the products.',
         'week' => 'Week of',
         'submit' => 'Prepare the purchase orders',
         'confirm_title' => 'Prepare this week\'s purchase orders?',
@@ -100,6 +122,7 @@ return [
 
     'show' => [
         'week_of' => 'Week of :date',
+        'needs_detail' => 'needed by the orders: :needed, already taken from the stock: :from_stock',
         'orders_count' => ':count order(s) covered',
         'lines' => 'Lines',
         'product' => 'Product',

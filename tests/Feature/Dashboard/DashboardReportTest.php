@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\Purchases\GeneratePurchaseOrders;
 use App\Enums\Permission;
 use App\Models\Attachment;
 use App\Models\AttachmentType;
@@ -10,11 +11,14 @@ use App\Models\ExpenseAllocation;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
+use App\Models\Product;
+use App\Models\ProductComponent;
 use App\Models\PurchaseOrder;
 use App\Models\Shop;
 use App\Models\User;
 use App\Models\Zone;
 use App\Support\BusinessSettings;
+use Illuminate\Support\Carbon;
 use Inertia\Testing\AssertableInertia as Assert;
 
 beforeEach(function () {
@@ -382,4 +386,31 @@ test('the real profit of the shops adds up to the one of the Profit page, with a
                 expect($row['margin_after_logistics'])->toBe($row['real_margin'] - $row['logistics']);
             }
         });
+});
+
+test('the purchase price of a shop is what is really ordered from it, and a manufactured line counts through its components', function () {
+    $ironShop = Shop::factory()->create(['name' => 'Fer']);
+    $paintShop = Shop::factory()->create(['name' => 'Peinture']);
+    $iron = Product::factory()->for($ironShop)->create(['pack_size' => 10]);
+    $paint = Product::factory()->for($paintShop)->create();
+    $panel = Product::factory()->create(['shop_id' => null]);
+    ProductComponent::factory()->create(['product_id' => $panel->id, 'component_product_id' => $iron->id, 'quantity' => 1]);
+    ProductComponent::factory()->create(['product_id' => $panel->id, 'component_product_id' => $paint->id, 'quantity' => 1]);
+    $order = readyOrder('2026-07-13', [[$panel, 5, 1500]]);
+    $order->items()->update(['line_sale_total' => 10000]);
+    $order->forceFill(['total_sale' => 10000])->save();
+
+    $summary = fn () => collect($this->actingAs($this->owner)->get(route('dashboard', ['from' => '2026-07-01', 'to' => '2026-07-31']))
+        ->viewData('page')['props']['report']['shops']['summary'])->keyBy('shop');
+
+    // Planned: the panel is bought as 5 bars and 5 paints, each in its own shop, never on a "—" line.
+    expect($summary()->has('—'))->toBeFalse()
+        ->and($summary()->keys()->sort()->values()->all())->toBe(['Fer', 'Peinture']);
+
+    // Really ordered: the iron comes in packets of 10, so 10 bars are asked of the shop.
+    $order->forceFill(['status' => 'advance_received'])->save();
+    app(GeneratePurchaseOrders::class)->handle(Carbon::parse('2026-07-13'));
+
+    expect($summary()['Fer']['purchase'])->toBe(PurchaseOrder::where('shop_id', $ironShop->id)->first()->expected_total)
+        ->and($summary()['Fer']['sale'] + $summary()['Peinture']['sale'])->toBe(10000);
 });

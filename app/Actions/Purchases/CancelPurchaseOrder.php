@@ -2,6 +2,7 @@
 
 namespace App\Actions\Purchases;
 
+use App\Actions\Stock\ReleaseOrderStock;
 use App\Enums\PurchaseOrderStatus;
 use App\Exceptions\InvalidPurchaseOperation;
 use App\Models\AuditLog;
@@ -11,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 
 class CancelPurchaseOrder
 {
+    public function __construct(private ReleaseOrderStock $stock) {}
+
     /**
      * Cancel a draft: its lines go back to the pool of needs to buy. Once sent, it cannot be cancelled.
      *
@@ -23,6 +26,9 @@ class CancelPurchaseOrder
         }
 
         DB::transaction(function () use ($purchase, $user): void {
+            // What the lines of this order took from the stock goes back, so that the next preparation starts again.
+            $this->stock->forPurchaseOrder($purchase, $user);
+
             $purchase->orderItems()->update(['purchase_order_id' => null]);
             $purchase->forceFill(['status' => PurchaseOrderStatus::Cancelled])->save();
 

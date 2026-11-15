@@ -20,7 +20,7 @@ test('the page lists the orders to deliver and the deliveries made', function ()
     $toDeliver = Order::factory()->create(['status' => 'received', 'kits_count' => 3]);
     $partial = Order::factory()->create(['status' => 'received', 'kits_count' => 3]);
     Delivery::factory()->for($partial)->create(['kits_delivered' => 1]);
-    Order::factory()->create(['status' => 'ordered']);
+    Order::factory()->create(['status' => 'proforma_issued']);
     Order::factory()->create(['status' => 'delivered']);
     $done = Delivery::factory()->create(['kits_delivered' => 3]);
 

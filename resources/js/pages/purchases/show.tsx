@@ -28,6 +28,9 @@ type Item = {
     product_name: string;
     unit: string;
     quantity_ordered: number;
+    /** What the customer orders need of the product, and how much the stock already gave (null: no orders behind). */
+    needed: number | null;
+    from_stock: number | null;
     quantity_received: number;
     shortfall: number;
     unit_price_expected: number;
@@ -41,6 +44,7 @@ type Purchase = {
     shop: { id: number; name: string };
     week: string;
     status: string;
+    kind: string;
     expected_total: number;
     actual_total: number;
     orders_count: number;
@@ -136,9 +140,11 @@ export default function ShowPurchase({ purchase, methods, today }: Props) {
                             status={purchase.status}
                         />
                         <span className="text-muted-foreground">
-                            {t('purchases.show.orders_count', {
-                                count: purchase.orders_count,
-                            })}
+                            {purchase.kind === 'restock'
+                                ? t('purchases.restock.for_stock')
+                                : t('purchases.show.orders_count', {
+                                      count: purchase.orders_count,
+                                  })}
                         </span>
                     </div>
                 </div>
@@ -279,6 +285,19 @@ export default function ShowPurchase({ purchase, methods, today }: Props) {
                                         </td>
                                         <td className="px-4 py-2 text-right">
                                             {item.quantity_ordered} {item.unit}
+                                            {item.needed !== null && (
+                                                <span className="block text-xs font-normal text-muted-foreground">
+                                                    {t(
+                                                        'purchases.show.needs_detail',
+                                                        {
+                                                            needed: item.needed,
+                                                            from_stock:
+                                                                item.from_stock ??
+                                                                0,
+                                                        },
+                                                    )}
+                                                </span>
+                                            )}
                                         </td>
                                         <td className="px-4 py-2 text-right">
                                             {purchase.can_receive ? (

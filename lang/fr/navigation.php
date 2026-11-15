@@ -22,6 +22,7 @@ return [
     'clients' => 'Clients',
     'orders' => 'Commandes',
     'purchases' => 'Achats',
+    'stock' => 'Stock',
     'expenses' => 'Frais de logistique',
     'cash' => 'Caisse',
     'access' => 'Journal d\'accès',

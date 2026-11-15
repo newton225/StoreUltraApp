@@ -68,7 +68,6 @@ class DemoSeeder extends Seeder
             OrderStatus::ProformaIssued,
             OrderStatus::AdvanceReceived,
             OrderStatus::AdvanceReceived,
-            OrderStatus::Ordered,
             OrderStatus::Delivered,
             OrderStatus::Settled,
             OrderStatus::Delivered,

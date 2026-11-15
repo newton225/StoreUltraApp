@@ -4,6 +4,7 @@ namespace App\Actions\Deliveries;
 
 use App\Actions\Orders\TransitionOrder;
 use App\Actions\Payments\RecordPayment;
+use App\Actions\Stock\CheckDeliveryStock;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentKind;
 use App\Exceptions\InvalidDelivery;
@@ -19,7 +20,7 @@ use Throwable;
 
 class RecordDelivery
 {
-    public function __construct(private TransitionOrder $transition, private RecordPayment $recordPayment) {}
+    public function __construct(private TransitionOrder $transition, private RecordPayment $recordPayment, private CheckDeliveryStock $stock) {}
 
     /**
      * Record kits handed over. When every kit has been delivered the order moves to delivered, and
@@ -88,7 +89,7 @@ class RecordDelivery
                 }
             }
 
-            if ($order->status !== OrderStatus::Received) {
+            if (! $order->status->canBeDelivered()) {
                 throw new InvalidDelivery('status', 'deliveries.errors.status');
             }
 
@@ -96,6 +97,15 @@ class RecordDelivery
 
             if ($kits < 1 || $kits > $remaining) {
                 throw new InvalidDelivery('kits_delivered', 'deliveries.errors.kits');
+            }
+
+            // The goods for these kits must be there: taken from the stock, or received for this order.
+            $shortages = $this->stock->shortages($order, $kits, $user);
+
+            if ($shortages !== []) {
+                throw new InvalidDelivery('kits_delivered', 'deliveries.errors.stock', [
+                    'products' => collect($shortages)->map(fn (array $line): string => $line['product'].' (-'.$line['missing'].')')->implode(', '),
+                ]);
             }
 
             $delivery = Delivery::create([

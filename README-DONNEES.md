@@ -129,6 +129,20 @@ relicat à la réception ou à la livraison, jamais au-delà du prix de vente.
 | `purchase_order_items` | Lignes | `purchase_order_id`, `product_id`, `quantity_ordered`, `quantity_received`, `unit_price_expected`, `unit_price_actual` |
 | `shop_payments` | Sommes versées aux boutiques | `shop_id`, `purchase_order_id`, `amount`, `method_id`, `reference`, `paid_at` |
 
+Ajouts du stock : `purchase_orders.kind` (`orders` pour des commandes clients, `restock` pour remplir le stock) ; `products.pack_size`
+(unités par conditionnement, 1 par défaut).
+
+| Table | Rôle | Champs principaux |
+| --- | --- | --- |
+| `product_components` | Composition d'un produit fabriqué (un niveau) | `product_id`, `component_product_id`, `quantity` (décimal 10,3), unique `(product_id, component_product_id)` |
+| `stock_movements` | Registre immuable du stock | `product_id`, `type` (receipt, allocation, release, adjustment), `quantity` (signée), `unit_cost` (décimal 14,2), `order_item_id`, `purchase_order_item_id`, `reason`, `user_id`, `created_at` |
+| `product_stocks` | État du stock par produit (reconstructible depuis le registre) | `product_id` (unique), `quantity_on_hand`, `average_cost` (décimal 14,2) |
+| `order_item_needs` | Besoin d'une ligne de commande, produit par produit, et sa provenance | `order_item_id`, `product_id`, `quantity`, `quantity_from_stock`, `stock_unit_cost`, `quantity_purchased`, `purchase_unit_cost`, `planned_unit_price`, `purchase_order_item_id`, `released_at`, unique `(order_item_id, product_id)` |
+
+Formules : coût moyen après une entrée = `(stock × coût moyen + quantité × coût) / (stock + quantité)`, arrondi à 2 décimales, inchangé par
+une sortie ; coût d'un besoin = `quantity_from_stock × stock_unit_cost + (quantity − quantity_from_stock) × (purchase_unit_cost, sinon
+planned_unit_price)` ; coût d'une ligne = somme de ses besoins, arrondie au FCFA.
+
 ### 2.9 Livraisons et logistique
 
 | Table | Rôle | Champs principaux |

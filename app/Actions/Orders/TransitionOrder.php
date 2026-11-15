@@ -2,6 +2,7 @@
 
 namespace App\Actions\Orders;
 
+use App\Actions\Stock\ReleaseOrderStock;
 use App\Enums\OrderStatus;
 use App\Exceptions\InvalidOrderTransition;
 use App\Models\AuditLog;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 
 class TransitionOrder
 {
-    public function __construct(private BusinessSettings $settings) {}
+    public function __construct(private BusinessSettings $settings, private ReleaseOrderStock $stock) {}
 
     /**
      * Move an order one step along its life, or cancel it, and keep the trace of it. The state is read
@@ -60,6 +61,11 @@ class TransitionOrder
                 ['status' => $to->value],
                 $user,
             );
+
+            // What the order had taken from the stock (or from goods already received for it) goes back, at its cost.
+            if ($to === OrderStatus::Cancelled) {
+                $this->stock->forOrder($current, $user);
+            }
 
             $order->forceFill(['status' => $to])->syncOriginalAttribute('status');
         });

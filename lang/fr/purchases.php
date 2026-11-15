@@ -12,6 +12,28 @@ return [
     'payment_recorded' => 'Paiement à la boutique enregistré.',
     'empty' => 'Aucun bon de commande pour cette semaine',
 
+    'restock' => [
+        'open' => 'Commander pour le stock',
+        'title' => 'Commander pour le stock',
+        'description' => 'Achetez des produits à une boutique sans commande client derrière : tout ce qui est reçu entre en stock, au prix réellement payé, et servira aux prochaines commandes. Les quantités se saisissent en conditionnements entiers.',
+        'shop' => 'Boutique',
+        'choose' => 'Choisir une boutique',
+        'no_products' => 'Cette boutique n\'a aucun produit à commander (les produits fabriqués ne se commandent pas, seuls leurs composants).',
+        'pack' => ':size :unit par conditionnement · :price l\'unité',
+        'packs' => 'Conditionnements',
+        'units' => ':units :unit',
+        'estimate' => 'Total prévu',
+        'submit' => 'Créer le bon de commande',
+        'confirm_title' => 'Créer ce bon de commande ?',
+        'confirm_body' => 'Le bon est créé en brouillon : vous pourrez l\'envoyer à la boutique, puis enregistrer la réception, qui fait entrer les marchandises en stock.',
+        'created' => 'Bon de commande :reference créé.',
+        'badge' => '· pour le stock',
+        'for_stock' => 'Pour le stock',
+        'errors' => [
+            'products' => 'Chaque produit doit appartenir à la boutique choisie, être acheté tel quel et ne pas être archivé.',
+        ],
+    ],
+
     'errors' => [
         'not_draft' => 'Seul un brouillon peut être envoyé.',
         'not_receivable' => 'On ne peut recevoir que sur un bon de commande envoyé.',
@@ -49,7 +71,7 @@ return [
 
     'generate' => [
         'title' => 'Préparer les achats de la semaine',
-        'description' => 'Les commandes dont l\'avance est payée sont regroupées par boutique : un bon de commande par boutique, à envoyer pour acheter les produits.',
+        'description' => 'Les commandes dont l\'avance est payée (ou dont la proforma est émise, si vous achetez à crédit dans les Paramètres) sont regroupées par boutique : un bon de commande par boutique, à envoyer pour acheter les produits.',
         'week' => 'Semaine du',
         'submit' => 'Préparer les bons de commande',
         'confirm_title' => 'Préparer les bons de commande de cette semaine ?',
@@ -100,6 +122,7 @@ return [
 
     'show' => [
         'week_of' => 'Semaine du :date',
+        'needs_detail' => 'besoin des commandes : :needed, déjà pris au stock : :from_stock',
         'orders_count' => ':count commande(s) couverte(s)',
         'lines' => 'Lignes',
         'product' => 'Produit',

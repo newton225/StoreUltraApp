@@ -115,7 +115,7 @@ return [
     |
     */
 
-    'client_translation_groups' => ['common', 'navigation', 'access', 'account', 'users', 'parameters', 'company', 'catalog', 'kits', 'clients', 'orders', 'payments', 'purchases', 'deliveries', 'documents', 'expenses', 'cash', 'exports', 'accesslog', 'health', 'attachments', 'dashboard', 'welcome', 'profiles', 'tours'],
+    'client_translation_groups' => ['common', 'navigation', 'access', 'account', 'users', 'parameters', 'company', 'catalog', 'kits', 'clients', 'orders', 'payments', 'purchases', 'deliveries', 'documents', 'expenses', 'cash', 'exports', 'accesslog', 'health', 'attachments', 'dashboard', 'welcome', 'profiles', 'tours', 'stock'],
 
     /*
     |--------------------------------------------------------------------------

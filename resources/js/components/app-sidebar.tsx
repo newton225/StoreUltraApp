@@ -11,6 +11,7 @@ import {
     FileText,
     Truck,
     ShoppingCart,
+    Warehouse,
     Landmark,
     Wallet,
     Banknote,
@@ -51,6 +52,7 @@ import { index as purchasesIndex } from '@/actions/App/Http/Controllers/Purchase
 import { index as productsIndex } from '@/actions/App/Http/Controllers/ProductController';
 import { index as profilesIndex } from '@/actions/App/Http/Controllers/ProfileController';
 import { index as shopsIndex } from '@/actions/App/Http/Controllers/ShopController';
+import { index as stockIndex } from '@/actions/App/Http/Controllers/StockController';
 import { index as usersIndex } from '@/actions/App/Http/Controllers/UserController';
 import { index as zonesIndex } from '@/actions/App/Http/Controllers/ZoneController';
 import AppLogo from '@/components/app-logo';
@@ -164,6 +166,11 @@ export function AppSidebar() {
                               title: t('navigation.purchases'),
                               href: purchasesIndex(),
                               icon: ShoppingCart,
+                          },
+                          {
+                              title: t('navigation.stock'),
+                              href: stockIndex(),
+                              icon: Warehouse,
                           },
                       ]
                     : []),

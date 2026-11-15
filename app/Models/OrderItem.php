@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * One product of an order, with the prices it had when the order was made.
@@ -55,6 +56,16 @@ class OrderItem extends Model
     public function purchaseOrder(): BelongsTo
     {
         return $this->belongsTo(PurchaseOrder::class);
+    }
+
+    /**
+     * What the line needs to be delivered and where it comes from (empty before the purchases are prepared).
+     *
+     * @return HasMany<OrderItemNeed, $this>
+     */
+    public function needs(): HasMany
+    {
+        return $this->hasMany(OrderItemNeed::class);
     }
 
     /**

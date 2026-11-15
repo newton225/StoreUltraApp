@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\ExpenseAllocation;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\OrderItemNeed;
 use App\Models\Payment;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -38,7 +39,7 @@ class OrderProfit
         }
 
         $ids = $orders->pluck('id')->all();
-        $orders->loadMissing('items.purchaseOrder.items');
+        $orders->loadMissing('items.purchaseOrder.items', 'items.needs');
 
         $logistics = $this->logisticsByOrder($ids);
 
@@ -111,6 +112,14 @@ class OrderProfit
      */
     public function actualCost(OrderItem $item): int
     {
+        // Needs prepared with the purchases: the units taken from the stock cost what they cost there, the others
+        // what was paid for them. The extra units bought to complete a package belong to no order.
+        $item->loadMissing('needs');
+
+        if ($item->needs->isNotEmpty()) {
+            return (int) round($item->needs->sum(fn (OrderItemNeed $need): int|float => $need->cost()));
+        }
+
         $unitPrice = $item->unit_purchase_price;
 
         $purchaseItems = $item->purchase_order_id === null

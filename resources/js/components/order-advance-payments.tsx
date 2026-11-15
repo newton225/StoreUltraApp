@@ -18,6 +18,8 @@ import { useTranslation } from '@/hooks/use-translation';
 type WaitingOrder = {
     id: number;
     client: string;
+    /** The phone of the manager of the client: offered as the phone of the payer. */
+    phone: string | null;
     due: number;
     paid: number;
     outstanding: number;
@@ -113,7 +115,7 @@ export default function OrderAdvancePayments({
         collector: defaultCollector,
         reference: '',
         payer: order.client,
-        phone: '',
+        phone: order.phone ?? '',
         ...edits[order.id],
     });
     const patch = (id: number, change: Partial<Row>): void =>

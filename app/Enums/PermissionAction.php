@@ -40,6 +40,8 @@ enum PermissionAction: string
     case PurchasesCancel = 'purchases.cancel';
     case PurchasesPayShop = 'purchases.pay_shop';
 
+    case StockAdjust = 'stock.adjust';
+
     case CashRecord = 'cash.record';
     case CashCancel = 'cash.cancel';
     case CashClose = 'cash.close';
@@ -66,7 +68,7 @@ enum PermissionAction: string
             str_starts_with($this->value, 'documents.') => Permission::ManageDocuments,
             str_starts_with($this->value, 'clients.') => Permission::ManageClients,
             str_starts_with($this->value, 'orders.') => Permission::ManageOrders,
-            str_starts_with($this->value, 'purchases.') => Permission::ManagePurchases,
+            str_starts_with($this->value, 'purchases.'), str_starts_with($this->value, 'stock.') => Permission::ManagePurchases,
             str_starts_with($this->value, 'cash.') => Permission::ManageCash,
             str_starts_with($this->value, 'expenses.') => Permission::ManageExpenses,
             default => Permission::ManageCatalog,

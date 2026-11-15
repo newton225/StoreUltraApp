@@ -39,23 +39,20 @@ function receivePayload(PurchaseOrder $purchase, array $quantities, array $price
     ];
 }
 
-test('sending a purchase order moves the orders it fully covers to ordered', function () {
+test('sending a purchase order marks it sent and moves no order forward', function () {
     $single = readyOrder($this->week, [[$this->iron, 4, 1000]]);
     $double = readyOrder($this->week, [[$this->iron, 2, 1000], [$this->panel, 2, 2000]]);
     app(GeneratePurchaseOrders::class)->handle(Carbon::parse($this->week));
     $this->actingAs($this->employee);
 
     $this->post(route('purchases.send', purchaseFor($this->shop1)))->assertSessionHasNoErrors();
+    $this->post(route('purchases.send', purchaseFor($this->shop2)))->assertSessionHasNoErrors();
 
     expect(purchaseFor($this->shop1)->status->value)->toBe('sent');
     expect(purchaseFor($this->shop1)->sent_at)->not->toBeNull();
-    expect($single->refresh()->status->value)->toBe('ordered');
+    expect($single->refresh()->status->value)->toBe('advance_received');
     expect($double->refresh()->status->value)->toBe('advance_received');
-
-    $this->post(route('purchases.send', purchaseFor($this->shop2)))->assertSessionHasNoErrors();
-
-    expect($double->refresh()->status->value)->toBe('ordered');
-    expect($double->statusChanges()->sole()->user_id)->toBe($this->employee->id);
+    expect($single->statusChanges()->count())->toBe(0);
 });
 
 test('a purchase order is sent only once', function () {
@@ -81,10 +78,10 @@ test('a partial reception is recorded and the orders keep waiting', function () 
     expect($purchase->status->value)->toBe('partially_received');
     expect($purchase->items->sole()->quantity_received)->toBe(4);
     expect($purchase->actual_total)->toBe(4000);
-    expect($order->refresh()->status->value)->toBe('ordered');
+    expect($order->refresh()->status->value)->toBe('advance_received');
 });
 
-test('the full reception moves the orders to received', function () {
+test('the full reception completes the purchase order and still moves no order', function () {
     $order = readyOrder($this->week, [[$this->iron, 6, 1000]]);
     app(GeneratePurchaseOrders::class)->handle(Carbon::parse($this->week));
     $purchase = purchaseFor($this->shop1);
@@ -95,11 +92,11 @@ test('the full reception moves the orders to received', function () {
     $this->post(route('purchases.receive', $purchase), receivePayload($purchase, [6]))->assertSessionHasNoErrors();
 
     expect($purchase->refresh()->status->value)->toBe('received');
-    expect($order->refresh()->status->value)->toBe('received');
+    expect($order->refresh()->status->value)->toBe('advance_received');
     expect(AuditLog::where('action', 'purchase_order.received')->count())->toBe(2);
 });
 
-test('an order waits for every shop before it is received', function () {
+test('the order keeps its step whatever is received from each shop', function () {
     $order = readyOrder($this->week, [[$this->iron, 2, 1000], [$this->panel, 2, 2000]]);
     app(GeneratePurchaseOrders::class)->handle(Carbon::parse($this->week));
     $this->actingAs($this->employee);
@@ -109,10 +106,10 @@ test('an order waits for every shop before it is received', function () {
     }
 
     $this->post(route('purchases.receive', purchaseFor($this->shop1)), receivePayload(purchaseFor($this->shop1), [2]));
-    expect($order->refresh()->status->value)->toBe('ordered');
+    expect($order->refresh()->status->value)->toBe('advance_received');
 
     $this->post(route('purchases.receive', purchaseFor($this->shop2)), receivePayload(purchaseFor($this->shop2), [2]));
-    expect($order->refresh()->status->value)->toBe('received');
+    expect($order->refresh()->status->value)->toBe('advance_received');
 });
 
 test('the price really paid replaces the expected one in the actual total', function () {
@@ -202,5 +199,5 @@ test('orders of another week are not touched', function () {
     $this->actingAs($this->employee)->post(route('purchases.send', purchaseFor($this->shop1)));
 
     expect($other->refresh()->status->value)->toBe('advance_received');
-    expect(Order::where('status', 'ordered')->count())->toBe(1);
+    expect(Order::where('status', 'ordered')->count())->toBe(0);
 });

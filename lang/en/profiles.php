@@ -111,6 +111,8 @@ return [
         'purchases_cancel_help' => 'Cancel an order still in draft.',
         'purchases_pay_shop' => 'Pay the shops',
         'purchases_pay_shop_help' => 'Record a payment or a refund to a shop.',
+        'stock_adjust' => 'Correct the stock',
+        'stock_adjust_help' => 'Add or remove units by hand (breakage, loss, inventory, opening stock), with a reason.',
         'cash_record' => 'Record cash movements',
         'cash_record_help' => 'Cash coming in and going out.',
         'cash_cancel' => 'Cancel a cash movement',

@@ -86,7 +86,7 @@ return [
         'theoretical_margin' => 'Bénéfice théorique',
         'real_margin' => 'Bénéfice réel',
         'margin_after_logistics' => 'Bénéfice après logistique',
-        'margin_help' => 'Bénéfice théorique : prix de vente moins le prix d\'achat prévu. Bénéfice réel : ce que les clients ont payé (l\'avance affectée à la boutique) moins le coût d\'achat réel (prix réellement payé à la boutique quand il est connu, sinon le prévu), avant frais de logistique. Bénéfice après logistique : le même, moins la part des frais de logistique de la boutique (répartie comme l\'avance, au prorata des achats). Même calcul que la page Bénéfice.',
+        'margin_help' => 'Prix d\'achat : ce qui est réellement commandé à la boutique (quantités des bons de commande, en conditionnements entiers et après le stock, au prix prévu) ; sans bon de commande, ce que ses lignes doivent coûter, les produits fabriqués étant comptés par leurs composants dans la boutique de chacun. Bénéfice théorique : prix de vente moins le prix d\'achat prévu. Bénéfice réel : ce que les clients ont payé (l\'avance affectée à la boutique) moins le coût d\'achat réel (prix réellement payé à la boutique quand il est connu, sinon le prévu), avant frais de logistique. Bénéfice après logistique : le même, moins la part des frais de logistique de la boutique (répartie comme l\'avance, au prorata des achats). Même calcul que la page Bénéfice.',
         'total' => 'Total',
     ],
 

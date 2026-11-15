@@ -230,6 +230,18 @@ export default function ParametersEdit({ values, definitions }: Props) {
                                         <section className={formGrid}>
                                             <h2 className="col-span-full text-base font-semibold">
                                                 {t(
+                                                    'parameters.sections.purchases',
+                                                )}
+                                            </h2>
+                                            {fieldWith(
+                                                'purchase_on_credit',
+                                                'md:col-span-6',
+                                            )}
+                                        </section>
+
+                                        <section className={formGrid}>
+                                            <h2 className="col-span-full text-base font-semibold">
+                                                {t(
                                                     'parameters.sections.numbering',
                                                 )}
                                             </h2>

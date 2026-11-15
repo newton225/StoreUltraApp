@@ -13,6 +13,7 @@ return [
         'batch' => 'Orders for a whole sub-prefecture at once',
         'rhythm' => 'Rhythms and invoicing',
         'alerts' => 'Alerts and cost sharing',
+        'purchases' => 'Purchases from the shops',
         'numbering' => 'Document numbering',
         'advanced' => 'Advanced settings',
         'advanced_help' => 'These values rarely change: they are already set for everyday use.',
@@ -65,6 +66,8 @@ return [
         'expense_allocation' => 'Sharing of logistics costs',
         'attachment_alert_days' => 'Days before an expiry to raise an alert',
         'blocked_order_days' => 'Days late before an alert',
+        'purchase_on_credit' => 'Buy from the shops on credit',
+        'purchase_on_credit_help' => 'When on, purchase orders are prepared as soon as the proforma is issued, without waiting for the client\'s advance: the shop is paid later and what is owed to it shows in "Owed to the shops". When off, only the orders whose advance is paid are bought.',
     ],
 
     'allocations' => [

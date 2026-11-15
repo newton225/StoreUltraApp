@@ -89,7 +89,7 @@ test('only an order whose goods were received can be delivered', function (strin
         ->assertSessionHasErrors('status');
 
     expect(Delivery::count())->toBe(0);
-})->with(['draft', 'proforma_issued', 'advance_received', 'ordered', 'delivered', 'settled', 'closed', 'cancelled']);
+})->with(['draft', 'proforma_issued', 'delivered', 'settled', 'closed', 'cancelled']);
 
 test('a delivery is rejected for invalid data', function (Closure $mutate, string $field) {
     $payload = $mutate(deliveryPayload());

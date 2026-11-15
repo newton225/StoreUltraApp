@@ -94,13 +94,13 @@ défaut). Le rythme (hebdomadaire par défaut) et le nombre de kits sont des par
 | --- | --- | --- |
 | Brouillon | Saisie en cours | Proforma émise |
 | Proforma émise | Devis remis au client | Avance reçue |
-| Avance reçue | Avance encaissée (totale ou partielle selon le paramètre) | Commandée |
-| Commandée | Bon de commande envoyé aux boutiques | Reçue |
-| Reçue | Produits disponibles | Livrée |
+| Avance reçue | Avance encaissée (totale ou partielle selon le paramètre) ; les kits peuvent être livrés | Livrée |
 | Livrée | Kits remis, bon de livraison signé | Soldée |
 | Soldée | Relicat encaissé | Clôturée |
 | Clôturée | Frais saisis, bénéfice réel calculé | (fin) |
 | Annulée | Depuis tout état avant « Livrée » ; l'avance est remboursée ou conservée selon la décision | (fin) |
+
+Les achats aux boutiques et le stock se suivent à part, dans les menus **Achats** et **Stock** : envoyer ou recevoir un bon de commande ne fait plus avancer les commandes (les anciennes étapes « Commandée » et « Reçue » n'existent plus ; les commandes qui s'y trouvaient sont revenues à « Avance reçue »).
 
 Chaque changement d'état est enregistré (qui, quand, motif). Un retour en arrière est un événement tracé, jamais
 une modification silencieuse.
@@ -234,6 +234,19 @@ immuables) : à utiliser dans une base réservée aux démonstrations.
   à la fois. Un montant ne peut pas dépasser le **reste à encaisser** de l'avance de sa ligne : le champ est marqué en rouge avec le maximum
   autorisé, un message le rappelle et le bouton reste inactif tant qu'un montant dépasse ; le serveur refuse aussi ce cas (un montant plus
   élevé s'enregistre depuis la page de la commande). Réservé au bureau.
+- **Actions groupées par étape** : sur la page Commandes, les actions de groupe (proformas, avances, livraisons) sont réunies dans une
+  frise d'étapes, comme celle d'une commande seule : on choisit l'étape où se trouvent les commandes (avec leur nombre) et l'action qui
+  les fait avancer s'ouvre en dessous : « Brouillon » émet les proformas, « Proforma émise » encaisse les avances, « Avance reçue »
+  livre les kits. Les étapes sans action de groupe sont affichées mais ne s'ouvrent pas. Le téléchargement des documents par zone reste
+  à part.
+- **Livrer des kits par sous-préfecture** (même page, étape « Avance reçue », panneau replié, droit « enregistrer les livraisons ») : on choisit la
+  sous-préfecture ; la **date de livraison** et le **livreur** sont communs au groupe. Toutes les commandes dont les marchandises sont
+  reçues et qui ont encore des kits à livrer sont proposées, cochées : **nombre de kits** (tous les kits restants par défaut, à baisser
+  pour une livraison partielle) et **personne qui reçoit** (le responsable du client par défaut, modifiable). Un clic enregistre toutes les
+  livraisons, chacune avec son numéro et sa trace (une ligne `order.batch_step` par commande avec la sous-préfecture et la taille du groupe),
+  comme le formulaire de la commande ; une commande dont tous les kits sont sortis passe d'elle-même à « Livrée ». Une livraison en échec
+  n'arrête pas les autres et est comptée ; renvoyer le même lot ne livre rien deux fois ; 60 livraisons au plus à la fois. La signature et
+  l'encaissement du solde restent sur la page de la commande. Réservé au bureau.
 Les **factures restent générées individuellement**.
 - Total, avance due, avances reçues, relicat dû : toujours visibles.
 
@@ -286,13 +299,48 @@ Les **factures restent générées individuellement**.
 ### 5.7 Achats auprès des boutiques
 
 - **Bon de commande** par boutique, calculé à partir des commandes de la semaine (quantités totales par produit).
+- **Achat à crédit** (réglage « Acheter aux boutiques à crédit », désactivé par défaut) : activé, les bons de commande se préparent dès que la proforma est émise, sans attendre l'avance du client ; la boutique est payée plus tard et la dette apparaît dans « Dû aux boutiques ». Un brouillon n'est jamais acheté.
 - Enregistrement de la réception (complète ou partielle) et des écarts.
 - **Paiements aux boutiques** : les avances clients couvrent une part des achats. La part affectée à chaque boutique
   se calcule au prorata du prix d'achat (méthode du classeur), et le **solde dû** reste visible.
 - Le prix d'achat réel payé peut différer du prix théorique : c'est le réel qui sert au bénéfice réel.
 
+#### Conditionnement, stock et produits fabriqués
+
+Une boutique vend certains produits par **conditionnement** (une botte de 10 barres) alors qu'un kit n'en consomme que quelques
+unités. Règles (document de conception `docs/superpowers/specs/2026-11-15-stock-produits-design.md`) :
+
+- **Conditionnement** : chaque produit a un nombre d'« unités par conditionnement » (1 par défaut : vendu à l'unité). Le prix d'achat
+  reste **par unité**. Le bon de commande est fait en **conditionnements entiers** : 99 barres nécessaires avec une botte de 10 donnent
+  100 barres commandées, payées à la boutique.
+- **Stock** (menu Achats > Stock) : le reliquat (1 barre ici) entre en stock et sert aux commandes suivantes. Chaque produit a sa
+  quantité en stock et son **coût moyen pondéré** (les entrées à des prix différents se mélangent), la valeur du stock, et la liste
+  de ses mouvements (entrée, sortie vers une commande, retour d'une commande annulée, correction à la main). Le stock ne peut jamais
+  être négatif. Une **correction à la main** (stock de départ, inventaire, casse, perte) demande un motif, le mot de passe, le droit
+  « Corriger le stock » ; une entrée demande un coût unitaire, une sortie part au coût moyen courant ; tout est tracé.
+- **Préparer les bons** : pour chaque produit, le stock disponible sert d'abord les commandes, **la plus ancienne en premier**, au coût
+  moyen du moment ; seul ce qui manque est acheté, arrondi au conditionnement. Une boutique qui n'a rien à fournir n'a pas de bon. La
+  fiche du bon montre, par ligne, le besoin des commandes et ce que le stock a déjà donné ; la fiche d'une commande indique « dont N en
+  stock ». Annuler une commande non livrée rend au stock ce qu'elle avait pris, **au coût de sortie** ; annuler un bon brouillon rend
+  ce que ses commandes avaient pris et permet de refaire la préparation.
+- **Coût de revient** (choix « B » du responsable) : le reliquat n'est compté en coût **que dans la commande qui l'utilise**. Le coût
+  d'une ligne = unités prises au stock × leur coût + autres unités × prix réellement payé (sinon prévu). Les unités en trop d'un
+  conditionnement ne sont dans le coût d'aucune commande tant qu'aucune ne les utilise. **Les prix de vente n'en dépendent jamais.**
+- **Réception** : ce qui est reçu entre en stock au prix réel ; sur un bon fait pour des commandes, les besoins sont servis d'abord
+  (la plus ancienne commande en premier) et le surplus reste en stock ; une réception partielle puis cumulée ne compte que la
+  différence. Un bon préparé avant l'arrivée du stock ne touche pas le stock.
+- **Commander pour le stock** (menu Achats) : un bon de réapprovisionnement se fait à la main, boutique par boutique, en
+  conditionnements entiers, sans commande client derrière ; il suit le même circuit (brouillon, envoyé, reçu, payé à la boutique) et
+  tout ce qui est reçu entre en stock.
+- **Produits fabriqués** : un produit peut être **composé d'autres produits** (fiche produit > Composition, un seul niveau, quantité
+  décimale possible). On n'achète pas le produit fabriqué mais ses **composants** ; son prix d'achat est la somme des prix de ses
+  composants. Le produit fabriqué est produit à la demande ; la main-d'œuvre n'est pas comptée. Limite connue : dans la synthèse par
+  boutique du tableau de bord, les lignes de produits fabriqués restent dans la ligne « — ».
+- Une commande entièrement servie par le stock n'a aucun bon à recevoir : elle se fait avancer à la main, comme aujourd'hui.
+
 ### 5.8 Livraisons
 
+- **Le stock est vérifié à la livraison** : on ne livre pas plus de kits que les marchandises disponibles n'en couvrent. Les besoins de la commande sont servis par le stock (pris à la préparation des bons) et par les marchandises reçues pour elle ; une ligne jamais préparée (ni bon ni besoin) est servie sur place par le stock libre, et cette réservation n'est gardée que si la livraison passe. Sinon la livraison est refusée avec le message « Stock insuffisant … Il manque : produit (-quantité) » sous le champ du nombre de kits, qui indique aussi le maximum livrable ; la livraison en masse affiche la même erreur ligne par ligne. Une ligne préparée avant l'arrivée du stock (déjà sur un bon, sans besoin) n'est pas contrôlée.
 - Une livraison par commande et par semaine, avec date prévue, date réelle, agent, état.
 - Sur mobile, l'agent : voit sa liste du jour, confirme la remise, encaisse le relicat, fait **signer le client à
   l'écran** et peut photographier la remise **(à confirmer)**.
@@ -548,7 +596,7 @@ Un paramètre modifié n'altère **jamais** les documents et commandes déjà é
 
 - Accès des clients à l'application.
 - Comptabilité générale complète et déclarations fiscales.
-- Gestion de stock détaillée de plusieurs entrepôts : seule la réception par commande est suivie.
+- Gestion de stock de plusieurs entrepôts, emplacements, lots, péremption, seuils de réapprovisionnement : seul un stock par produit (quantité et coût moyen) est suivi.
 - Paiement en ligne intégré (les paiements mobile money sont **enregistrés**, non initiés par l'application).
 - Application mobile native (l'interface web adaptée au mobile suffit).
 

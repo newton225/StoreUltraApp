@@ -12,7 +12,7 @@ test('an order moves one step at a time along its life', function () {
     $order = Order::factory()->create(['status' => 'draft']);
     $this->actingAs(User::factory()->create());
 
-    foreach (['proforma_issued', 'advance_received', 'ordered', 'received', 'delivered', 'settled', 'closed'] as $status) {
+    foreach (['proforma_issued', 'advance_received', 'delivered', 'settled', 'closed'] as $status) {
         if ($status === 'delivered') {
             Delivery::factory()->for($order)->create(['kits_delivered' => $order->kits_count]);
         }
@@ -55,8 +55,8 @@ test('a step cannot be skipped and an order cannot go backwards', function (stri
     expect($order->refresh()->status->value)->toBe($from);
     expect($order->statusChanges()->count())->toBe(0);
 })->with([
-    'skipping a step' => ['draft', 'ordered'],
-    'going backwards' => ['ordered', 'proforma_issued'],
+    'skipping a step' => ['draft', 'advance_received'],
+    'going backwards' => ['advance_received', 'proforma_issued'],
     'staying where it is' => ['draft', 'draft'],
     'leaving closed' => ['closed', 'draft'],
 ]);
@@ -165,12 +165,12 @@ test('an order without any payment is cancelled without a password', function ()
 });
 
 test('the critical steps asked by hand need the password, and the earlier ones do not', function () {
-    $order = Order::factory()->create(['status' => 'received']);
+    $order = Order::factory()->create(['status' => 'advance_received']);
     Delivery::factory()->for($order)->create(['kits_delivered' => $order->kits_count]);
     $this->actingAs(User::factory()->create());
 
     $this->post(route('orders.transition', $order), ['to' => 'delivered'])->assertSessionHasErrors('password');
-    expect($order->refresh()->status->value)->toBe('received');
+    expect($order->refresh()->status->value)->toBe('advance_received');
 
     $this->post(route('orders.transition', $order), ['to' => 'delivered', 'password' => 'password'])->assertSessionHasNoErrors();
     expect($order->refresh()->status->value)->toBe('delivered');
@@ -180,11 +180,11 @@ test('the critical steps asked by hand need the password, and the earlier ones d
 });
 
 test('an order cannot be marked delivered while kits remain, nor settled while money is still due', function () {
-    $order = Order::factory()->create(['status' => 'received', 'total_sale' => 100000]);
+    $order = Order::factory()->create(['status' => 'advance_received', 'total_sale' => 100000]);
     $this->actingAs(User::factory()->create());
 
     $this->post(route('orders.transition', $order), ['to' => 'delivered', 'password' => 'password'])->assertSessionHasErrors();
-    expect($order->refresh()->status->value)->toBe('received');
+    expect($order->refresh()->status->value)->toBe('advance_received');
 
     Delivery::factory()->for($order)->create(['kits_delivered' => $order->kits_count]);
     $this->post(route('orders.transition', $order), ['to' => 'delivered', 'password' => 'password'])->assertSessionHasNoErrors();
@@ -201,4 +201,11 @@ test('the documents of an order are listed in the order of the process', functio
 
     $this->actingAs(User::factory()->owner()->create())->get(route('orders.show', $order))->assertInertia(fn ($page) => $page
         ->where('documents.targets', fn ($targets) => collect($targets)->pluck('type')->all() === ['proforma', 'receipt', 'delivery_note', 'invoice', 'receipt']));
+});
+
+test('the life of an order no longer goes through the shops: advance received leads to delivered', function () {
+    expect(OrderStatus::AdvanceReceived->next())->toBe(OrderStatus::Delivered)
+        ->and(OrderStatus::workflowValues())->not->toContain('ordered', 'received')
+        ->and(OrderStatus::AdvanceReceived->canBeDelivered())->toBeTrue()
+        ->and(OrderStatus::ProformaIssued->canBeDelivered())->toBeFalse();
 });

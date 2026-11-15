@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\PurchaseOrder;
 use App\Models\Shop;
 use App\Models\User;
+use App\Support\BusinessSettings;
 use Illuminate\Support\Carbon;
 
 beforeEach(function () {
@@ -133,4 +134,22 @@ test('a field agent cannot generate purchase orders', function () {
     $this->actingAs(User::factory()->agent()->create())
         ->post(route('purchases.generate'), ['week' => $this->week])
         ->assertForbidden();
+});
+
+test('orders whose proforma is issued are bought only when buying from the shops on credit', function () {
+    readyOrder($this->week, [[$this->iron, 3, 1000]], 'proforma_issued');
+
+    expect(generateFor($this->week)['created'])->toBe(0);
+
+    app(BusinessSettings::class)->set('purchase_on_credit', true);
+
+    expect(generateFor($this->week)['created'])->toBe(1)
+        ->and(PurchaseOrder::sole()->items()->sole()->quantity_ordered)->toBe(3);
+});
+
+test('a draft order is never bought, even on credit', function () {
+    app(BusinessSettings::class)->set('purchase_on_credit', true);
+    readyOrder($this->week, [[$this->iron, 3, 1000]], 'draft');
+
+    expect(generateFor($this->week)['created'])->toBe(0);
 });

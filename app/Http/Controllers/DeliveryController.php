@@ -39,7 +39,7 @@ class DeliveryController extends Controller
 
         $toDeliver = Order::query()
             ->visibleTo($user)
-            ->where('status', OrderStatus::Received->value)
+            ->whereIn('status', OrderStatus::deliverableValues())
             ->withSum('deliveries as delivered_kits', 'kits_delivered')
             ->with('client.zone')
             ->when($zoneId !== null, fn (Builder $query) => $query->whereHas('client', fn (Builder $clients) => $clients->where('zone_id', $zoneId)))
@@ -120,7 +120,7 @@ class DeliveryController extends Controller
                 idempotencyKey: $request->validated('idempotency_key'),
             );
         } catch (InvalidDelivery $exception) {
-            return back()->withErrors([$exception->field => __($exception->messageKey)])->withInput();
+            return back()->withErrors([$exception->field => __($exception->messageKey, $exception->params)])->withInput();
         } catch (InvalidPayment $exception) {
             $field = $exception->field === 'amount' ? 'collect_amount' : $exception->field;
 

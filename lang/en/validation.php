@@ -259,6 +259,7 @@ return [
         'expense_allocation' => 'sharing rule',
         'attachment_alert_days' => 'alert delay',
         'blocked_order_days' => 'blocked order delay',
+        'purchase_on_credit' => 'purchase on credit',
         'attachment_type_id' => 'kind of document',
         'applies_to' => 'applies to',
         'owner_id' => 'owner',

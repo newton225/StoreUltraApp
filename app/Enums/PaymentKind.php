@@ -24,7 +24,7 @@ enum PaymentKind: string
                 OrderStatus::Ordered,
                 OrderStatus::Received,
             ],
-            self::Balance => [OrderStatus::Received, OrderStatus::Delivered],
+            self::Balance => [OrderStatus::AdvanceReceived, OrderStatus::Ordered, OrderStatus::Received, OrderStatus::Delivered],
             self::Refund => null,
         };
     }

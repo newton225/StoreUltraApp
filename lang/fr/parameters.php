@@ -13,6 +13,7 @@ return [
         'batch' => 'Commandes d\'une sous-préfecture en un coup',
         'rhythm' => 'Rythmes et facturation',
         'alerts' => 'Alertes et répartition',
+        'purchases' => 'Achats aux boutiques',
         'numbering' => 'Numérotation des documents',
         'advanced' => 'Réglages avancés',
         'advanced_help' => 'Ces valeurs changent rarement : elles sont déjà réglées pour un usage courant.',
@@ -65,6 +66,8 @@ return [
         'expense_allocation' => 'Répartition des frais de logistique',
         'attachment_alert_days' => 'Jours avant expiration pour alerter',
         'blocked_order_days' => 'Jours de retard avant alerte',
+        'purchase_on_credit' => 'Acheter aux boutiques à crédit',
+        'purchase_on_credit_help' => 'Si activé, les bons de commande se préparent dès que la proforma est émise, sans attendre l\'avance du client : la boutique est payée plus tard et ce qu\'on lui doit apparaît dans « Dû aux boutiques ». Désactivé, seules les commandes dont l\'avance est payée sont achetées.',
     ],
 
     'allocations' => [

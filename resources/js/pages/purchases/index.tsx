@@ -1,5 +1,6 @@
 import { Form, Head, Link, router, setLayoutProps } from '@inertiajs/react';
 import {
+    createRestock,
     generate,
     index,
     show,
@@ -10,6 +11,7 @@ import InputError from '@/components/input-error';
 import SelectField from '@/components/select-field';
 import ConfirmAction from '@/components/confirm-action';
 import WeekSelect from '@/components/week-select';
+import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useFormat } from '@/hooks/use-format';
 import { useTranslation } from '@/hooks/use-translation';
@@ -24,6 +26,7 @@ type Purchase = {
     shop: { id: number; name: string };
     week: string;
     status: string;
+    kind: string;
     expected_total: number;
     actual_total: number;
 };
@@ -107,10 +110,19 @@ export default function PurchasesIndex({
                         title={t('purchases.title')}
                         description={t('purchases.description')}
                     />
-                    <ExportMenu
-                        view="purchases"
-                        query={{ week, ...filters, ...sortQuery(sort) }}
-                    />
+                    <div className="flex flex-wrap items-center gap-2">
+                        {canGenerate && (
+                            <Button asChild variant="infoOutline">
+                                <Link href={createRestock()}>
+                                    {t('purchases.restock.open')}
+                                </Link>
+                            </Button>
+                        )}
+                        <ExportMenu
+                            view="purchases"
+                            query={{ week, ...filters, ...sortQuery(sort) }}
+                        />
+                    </div>
                 </div>
 
                 <div className="grid w-fit min-w-64 gap-1">
@@ -293,6 +305,14 @@ export default function PurchasesIndex({
                                             </td>
                                             <td className="px-4 py-2 font-medium">
                                                 {purchase.shop.name}
+                                                {purchase.kind ===
+                                                    'restock' && (
+                                                    <span className="ml-2 text-xs font-normal text-muted-foreground">
+                                                        {t(
+                                                            'purchases.restock.badge',
+                                                        )}
+                                                    </span>
+                                                )}
                                             </td>
                                             <td className="px-4 py-2">
                                                 <StatusBadge

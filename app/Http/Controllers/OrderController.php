@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Actions\Orders\CollectAdvancesForZone;
 use App\Actions\Orders\CreateOrder;
 use App\Actions\Orders\CreateOrdersForZone;
+use App\Actions\Orders\DeliverKitsForZone;
 use App\Actions\Orders\IssueProformasForZone;
+use App\Actions\Stock\CheckDeliveryStock;
 use App\Enums\ClientStatus;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentKind;
@@ -13,7 +15,6 @@ use App\Enums\PermissionAction;
 use App\Exceptions\OrderPricesMissing;
 use App\Http\Requests\StoreOrderRequest;
 use App\Models\Client;
-use App\Models\ClientMember;
 use App\Models\Delivery;
 use App\Models\Document;
 use App\Models\ExpenseAllocation;
@@ -24,6 +25,7 @@ use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Models\User;
 use App\Support\BusinessSettings;
+use App\Support\DeliveryReceiver;
 use App\Support\ListSort;
 use App\Support\OrderDocumentArchive;
 use App\Support\OrderProfit;
@@ -43,7 +45,7 @@ class OrderController extends Controller
     /**
      * List the orders the user may see, newest week first.
      */
-    public function index(Request $request, WeekCalendar $calendar, IssueProformasForZone $proformas, OrderDocumentArchive $archive, CollectAdvancesForZone $collect): Response
+    public function index(Request $request, WeekCalendar $calendar, IssueProformasForZone $proformas, OrderDocumentArchive $archive, CollectAdvancesForZone $collect, DeliverKitsForZone $deliver): Response
     {
         $user = $request->user();
         $search = trim($request->string('search')->toString());
@@ -91,11 +93,19 @@ class OrderController extends Controller
                 ...$sort,
             ],
             'weeks' => $calendar->known($user, ...($week === null ? [] : [$week])),
-            'statuses' => array_column(OrderStatus::cases(), 'value'),
+            'statuses' => OrderStatus::workflowValues(),
             'canCreate' => $user->can('create', Order::class) && $user->can('orders.create'),
+            'statusCounts' => Order::query()->visibleTo($user)->selectRaw('status, count(*) as total')->groupBy('status')->pluck('total', 'status')->map(fn (mixed $total): int => (int) $total)->all(),
+            'batchRights' => [
+                'proforma' => $user->can('manage-orders') && $user->can('orders.batch'),
+                'collect' => $user->can('manage-orders') && $user->can('orders.record_payment'),
+                'deliver' => $user->can('manage-orders') && $user->can('orders.record_delivery'),
+            ],
             'proformaZones' => $user->can('manage-orders') && $user->can('orders.batch') ? $proformas->zones($user) : [],
             'archiveChoices' => $archive->choices($user),
             'collectZones' => $user->can('manage-orders') && $user->can('orders.record_payment') ? $collect->zones($user) : [],
+            'deliveryZones' => $user->can('manage-orders') && $user->can('orders.record_delivery') ? $deliver->zones($user) : [],
+            'deliveryAgents' => $user->can('manage-orders') ? User::query()->where('role', 'agent')->where('is_active', true)->orderBy('name')->get(['id', 'name']) : [],
             'collectors' => $user->can('manage-orders') ? User::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']) : [],
             'currentUserId' => $user->id,
             'paymentMethods' => $user->can('manage-orders')
@@ -177,7 +187,7 @@ class OrderController extends Controller
     {
         Gate::authorize('view', $order);
 
-        $order->load('client:id,name,reference', 'kitVersion.kit', 'items.product', 'statusChanges.user:id,name', 'payments.method', 'payments.collector:id,name', 'payments.recorder:id,name', 'deliveries.agent:id,name');
+        $order->load('client:id,name,reference', 'kitVersion.kit', 'items.product', 'items.needs', 'statusChanges.user:id,name', 'payments.method', 'payments.collector:id,name', 'payments.recorder:id,name', 'deliveries.agent:id,name');
 
         $netPaid = $order->netPaid();
         $remainingKits = $order->remainingKits();
@@ -208,6 +218,7 @@ class OrderController extends Controller
                     'quantity' => $item->quantity,
                     ...($seesCosts ? ['unit_purchase_price' => $item->unit_purchase_price] : []),
                     'line_sale_total' => $item->line_sale_total,
+                    'from_stock' => (int) $item->needs->sum('quantity_from_stock'),
                 ])->values(),
                 'discounts' => $order->discounts()->with('user:id,name')->get()->map(fn ($discount): array => [
                     'id' => $discount->id,
@@ -278,10 +289,10 @@ class OrderController extends Controller
                     'notes' => $delivery->notes,
                 ])->values(),
                 'remaining_kits' => $remainingKits,
-                'can_deliver' => $order->status === OrderStatus::Received && $remainingKits > 0 && Gate::allows('orders.record_delivery'),
+                'max_kits' => $order->status->canBeDelivered() && $remainingKits > 0 ? app(CheckDeliveryStock::class)->maxKits($order) : 0,
+                'can_deliver' => $order->status->canBeDelivered() && $remainingKits > 0 && Gate::allows('orders.record_delivery'),
                 'signature_required' => (bool) $settings->get('delivery_signature_required'),
-                'default_receiver' => $order->client?->members()->where('role', ClientMember::ROLE_MANAGER)->value('name')
-                    ?? Client::query()->whereKey($order->client_id)->value('contact_person'),
+                'default_receiver' => DeliveryReceiver::for($order->client_id),
                 'is_agent' => $isAgent,
                 'agents' => $isAgent
                     ? []

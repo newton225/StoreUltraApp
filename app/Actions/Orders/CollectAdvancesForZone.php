@@ -10,6 +10,7 @@ use App\Models\Order;
 use App\Models\PaymentMethod;
 use App\Models\User;
 use App\Models\Zone;
+use App\Support\DeliveryReceiver;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 
@@ -39,7 +40,7 @@ class CollectAdvancesForZone
     /**
      * The zones that have such orders, with those orders and what is still to be collected on each.
      *
-     * @return list<array{id: int, name: string, orders: list<array{id: int, client: string, due: int, paid: int, outstanding: int}>}>
+     * @return list<array{id: int, name: string, orders: list<array{id: int, client: string, phone: string|null, due: int, paid: int, outstanding: int}>}>
      */
     public function zones(User $user): array
     {
@@ -51,6 +52,7 @@ class CollectAdvancesForZone
             $groups[$order->client->zone_id][] = [
                 'id' => $order->id,
                 'client' => $order->client->name,
+                'phone' => DeliveryReceiver::phoneFor($order->client_id),
                 'due' => $order->advance_due,
                 'paid' => $paid,
                 'outstanding' => $order->advance_due - $paid,

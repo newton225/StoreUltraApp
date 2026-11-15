@@ -76,6 +76,16 @@ class Product extends Model
     }
 
     /**
+     * What is in stock for the product (no row until the first movement).
+     *
+     * @return HasOne<ProductStock, $this>
+     */
+    public function stock(): HasOne
+    {
+        return $this->hasOne(ProductStock::class);
+    }
+
+    /**
      * What a manufactured product is made of. Empty for a product that is bought as it is.
      *
      * @return HasMany<ProductComponent, $this>

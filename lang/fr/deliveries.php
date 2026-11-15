@@ -10,6 +10,7 @@ return [
     'errors' => [
         'status' => 'Cette commande ne peut pas être livrée maintenant : ses marchandises doivent être reçues.',
         'kits' => 'Le nombre de kits dépasse ce qui reste à livrer.',
+        'stock' => 'Stock insuffisant pour livrer ces kits. Il manque : :products.',
         'signature' => 'La signature n\'est pas une image valide.',
     ],
 
@@ -43,6 +44,7 @@ return [
     ],
 
     'panel' => [
+        'stock_over' => 'Stock insuffisant : au plus :max kit(s) peuvent être livrés avec les marchandises disponibles.',
         'kits_help' => 'Nombre de kits remis cette fois. Une livraison peut être partielle : le reste se livre plus tard.',
         'collect_amount_help' => 'Le relicat est le solde que le client paie à la livraison : le prix de vente moins l’avance déjà versée.',
         'title' => 'Livraisons',

@@ -42,8 +42,6 @@ const FLOW = [
     'draft',
     'proforma_issued',
     'advance_received',
-    'ordered',
-    'received',
     'delivered',
     'settled',
     'closed',
@@ -73,6 +71,8 @@ type Order = {
         quantity: number;
         unit_purchase_price?: number;
         line_sale_total: number | null;
+        /** Units of the line taken from the stock (all its needs together). */
+        from_stock: number;
     }[];
     history: {
         id: number;
@@ -666,6 +666,16 @@ export default function ShowOrder({
                                                 </td>
                                                 <td className="px-4 py-2 text-right">
                                                     {item.quantity} {item.unit}
+                                                    {item.from_stock > 0 && (
+                                                        <span className="block text-xs font-normal text-muted-foreground">
+                                                            {t(
+                                                                'orders.items.from_stock',
+                                                                {
+                                                                    count: item.from_stock,
+                                                                },
+                                                            )}
+                                                        </span>
+                                                    )}
                                                 </td>
                                                 {profit && (
                                                     <td className="px-4 py-2 text-right">
