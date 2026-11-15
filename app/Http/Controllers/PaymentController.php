@@ -6,6 +6,7 @@ use App\Actions\Payments\RecordPayment;
 use App\Enums\PaymentKind;
 use App\Exceptions\InvalidPayment;
 use App\Http\Requests\StorePaymentRequest;
+use App\Models\AuditLog;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
@@ -14,12 +15,15 @@ use App\Support\AdvanceArrears;
 use App\Support\ClientReceivables;
 use App\Support\ListSort;
 use App\Support\Search;
+use App\Support\UploadedFiles;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PaymentController extends Controller
 {
@@ -151,13 +155,29 @@ class PaymentController extends Controller
                 payerPhone: $request->validated('payer_phone'),
                 // Someone who works in the field always collects for themselves; the office may say who did.
                 collectedBy: $request->user()->isRestrictedToZones() ? null : $request->validated('collected_by'),
+                proof: $request->file('proof'),
             );
         } catch (InvalidPayment $exception) {
-            return back()->withErrors([$exception->field => __($exception->messageKey)])->withInput();
+            return back()->withErrors([$exception->field => __($exception->messageKey, $exception->params)])->withInput();
         }
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('payments.recorded')]);
 
         return to_route('orders.show', $order);
+    }
+
+    /**
+     * Open the proof of a payment (screenshot or PDF). It is private: whoever can see the order can see it,
+     * and every opening is written to the audit log.
+     */
+    public function proof(Payment $payment, UploadedFiles $files): StreamedResponse
+    {
+        Gate::authorize('view', $payment->order);
+
+        abort_if($payment->proof_path === null, 404);
+
+        AuditLog::record('payment.proof_opened', $payment, [], ['receipt_number' => $payment->receipt_number]);
+
+        return $files->response($payment->proof_path);
     }
 }

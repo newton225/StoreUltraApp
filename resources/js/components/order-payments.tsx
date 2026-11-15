@@ -1,6 +1,7 @@
 import { Form, router } from '@inertiajs/react';
+import { Paperclip } from 'lucide-react';
 import { useState } from 'react';
-import { store } from '@/actions/App/Http/Controllers/PaymentController';
+import { proof, store } from '@/actions/App/Http/Controllers/PaymentController';
 import CollapsiblePanel from '@/components/collapsible-panel';
 import InputError from '@/components/input-error';
 import SelectField from '@/components/select-field';
@@ -29,6 +30,7 @@ export type OrderPaymentsData = {
         recorder: string | null;
         reverses_receipt: string | null;
         reversed: boolean;
+        has_proof: boolean;
     }[];
     net_paid: number;
     balance_due: number;
@@ -328,6 +330,28 @@ export default function OrderPayments({ orderId, payments, today }: Props) {
                                         </div>
                                     )}
 
+                                    {kind !== 'refund' && (
+                                        <div className="grid gap-2">
+                                            <FieldLabel
+                                                htmlFor="pay-proof"
+                                                help={t(
+                                                    'payments.panel.proof_help',
+                                                )}
+                                            >
+                                                {t('payments.panel.proof')}
+                                            </FieldLabel>
+                                            <Input
+                                                id="pay-proof"
+                                                name="proof"
+                                                type="file"
+                                                accept=".pdf,.jpg,.jpeg,.png"
+                                            />
+                                            <InputError
+                                                message={errors.proof}
+                                            />
+                                        </div>
+                                    )}
+
                                     <InputError
                                         message={errors.reverses_payment_id}
                                     />
@@ -401,6 +425,23 @@ export default function OrderPayments({ orderId, payments, today }: Props) {
                                     {date(payment.paid_on)} · {payment.method}
                                     {payment.reference &&
                                         ` · ${payment.reference}`}
+                                    {payment.has_proof && (
+                                        <>
+                                            {' · '}
+                                            <a
+                                                href={proof.url(payment.id)}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="inline-flex items-center gap-1 text-info-text underline-offset-4 hover:underline"
+                                            >
+                                                <Paperclip
+                                                    className="size-3.5"
+                                                    aria-hidden="true"
+                                                />
+                                                {t('payments.panel.proof_open')}
+                                            </a>
+                                        </>
+                                    )}
                                 </div>
                                 <div className="text-muted-foreground">
                                     {[

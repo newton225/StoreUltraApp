@@ -71,7 +71,7 @@ export default function ParametersEdit({ values, definitions }: Props) {
                                 return (
                                     <div
                                         key={key}
-                                        className="grid gap-2 self-end pb-2 md:col-span-2"
+                                        className={`grid gap-2 self-end pb-2 ${span}`}
                                     >
                                         <div className="flex items-center space-x-3">
                                             <input
@@ -164,6 +164,18 @@ export default function ParametersEdit({ values, definitions }: Props) {
                                         'advance_required',
                                         'delivery_signature_required',
                                     ].map(field)}
+                                </section>
+
+                                <section className={formGrid}>
+                                    <h2 className="col-span-full text-base font-semibold">
+                                        {t('parameters.sections.batch')}
+                                    </h2>
+                                    {[
+                                        'batch_skip_clients_with_order',
+                                        'batch_max_unpaid_kits',
+                                    ].map((key) =>
+                                        fieldWith(key, 'md:col-span-3'),
+                                    )}
                                 </section>
 
                                 <details

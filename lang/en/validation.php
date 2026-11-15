@@ -224,6 +224,8 @@ return [
         'delivery_frequency' => 'delivery frequency',
         'advance_required' => 'advance required',
         'client_cap' => 'client cap',
+        'batch_skip_clients_with_order' => 'TPE with an order left aside',
+        'batch_max_unpaid_kits' => 'unpaid kits limit',
         'invoice_period' => 'statement period',
         'week_starts_on' => 'first day of the week',
         'company_name' => 'company name',

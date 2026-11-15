@@ -76,6 +76,30 @@ class ClientReceivables
     }
 
     /**
+     * How many kits each of these clients has not finished paying: the kits of its non-cancelled orders
+     * with something left to pay. A client with none is absent from the result.
+     *
+     * @param  list<int>  $clientIds
+     * @return array<int, int>
+     */
+    public function unpaidKits(array $clientIds): array
+    {
+        if ($clientIds === []) {
+            return [];
+        }
+
+        return Order::query()
+            ->whereIn('client_id', $clientIds)
+            ->where('status', '!=', OrderStatus::Cancelled->value)
+            ->whereRaw('total_sale > '.self::NET_PAID)
+            ->groupBy('client_id')
+            ->selectRaw('client_id, sum(kits_count) as kits')
+            ->pluck('kits', 'client_id')
+            ->map(fn (mixed $kits): int => (int) $kits)
+            ->all();
+    }
+
+    /**
      * @return OrderRow
      */
     private function row(Order $order): array

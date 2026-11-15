@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Models\User;
+use App\Rules\SafeUpload;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -53,6 +54,7 @@ class StorePaymentRequest extends FormRequest
             'reverses_payment_id' => ['nullable', 'integer', Rule::exists(Payment::class, 'id')],
             'notes' => ['nullable', 'string', 'max:500'],
             'idempotency_key' => ['nullable', 'string', 'max:64'],
+            'proof' => ['nullable', 'bail', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:4096', new SafeUpload],
         ];
     }
 }

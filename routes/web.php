@@ -80,7 +80,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('deliveries/{delivery}/signature', [DeliveryController::class, 'signature'])->name('deliveries.signature');
     Route::post('orders/{order}/deliveries', [DeliveryController::class, 'store'])->middleware('throttle:uploads')
         ->middleware('can:orders.record_delivery')->name('orders.deliveries.store');
-    Route::post('orders/{order}/payments', [PaymentController::class, 'store'])->middleware('can:orders.record_payment')->name('orders.payments.store');
+    Route::post('orders/{order}/payments', [PaymentController::class, 'store'])->middleware('throttle:uploads')->middleware('can:orders.record_payment')->name('orders.payments.store');
+    Route::get('payments/{payment}/proof', [PaymentController::class, 'proof'])->name('payments.proof');
     Route::post('orders/{order}/transition', [OrderTransitionController::class, 'store'])->name('orders.transition');
     Route::post('orders/{order}/discount', [OrderDiscountController::class, 'store'])->middleware(['can:orders.discount', 'throttle:20,1'])->name('orders.discount.store');
 

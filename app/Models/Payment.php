@@ -30,8 +30,11 @@ use Illuminate\Support\Carbon;
  * @property int|null $reverses_payment_id
  * @property string|null $notes
  * @property string|null $idempotency_key
+ * @property string|null $proof_path
+ * @property string|null $proof_hash
+ * @property string|null $reference_key
  */
-#[Fillable(['receipt_number', 'order_id', 'kind', 'amount', 'payment_method_id', 'reference', 'payer_name', 'payer_phone', 'paid_on', 'collected_by', 'recorded_by', 'reverses_payment_id', 'notes', 'idempotency_key'])]
+#[Fillable(['receipt_number', 'order_id', 'kind', 'amount', 'payment_method_id', 'reference', 'payer_name', 'payer_phone', 'paid_on', 'collected_by', 'recorded_by', 'reverses_payment_id', 'notes', 'idempotency_key', 'proof_path', 'proof_hash', 'reference_key'])]
 class Payment extends Model
 {
     /** @use HasFactory<PaymentFactory> */
@@ -44,6 +47,17 @@ class Payment extends Model
     {
         static::updating(fn (): bool => false);
         static::deleting(fn (): bool => false);
+    }
+
+    /**
+     * A transaction reference the way two people would write it differently: letters and digits only, upper case.
+     * "mp240101.1234" and "MP240101 1234" are the same reference. Null when nothing is left.
+     */
+    public static function referenceKey(?string $reference): ?string
+    {
+        $key = strtoupper((string) preg_replace('/[^A-Za-z0-9]/', '', (string) $reference));
+
+        return $key === '' ? null : substr($key, 0, 100);
     }
 
     /**

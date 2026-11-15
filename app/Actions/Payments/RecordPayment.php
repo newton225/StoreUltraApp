@@ -12,12 +12,17 @@ use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Models\User;
 use App\Support\DocumentNumbers;
+use App\Support\UploadedFiles;
 use Carbon\CarbonInterface;
+use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class RecordPayment
 {
-    public function __construct(private DocumentNumbers $numbers, private TransitionOrder $transition) {}
+    public function __construct(private DocumentNumbers $numbers, private TransitionOrder $transition, private UploadedFiles $uploads) {}
 
     /**
      * Record money received (an advance or the balance) or given back, issue its receipt number,
@@ -26,7 +31,11 @@ class RecordPayment
      * Sending the same idempotency key again for the same order gives back the payment already
      * recorded instead of a second one: a double click or a replayed request takes the money once.
      *
-     * @throws InvalidPayment when the payment is not allowed in the state of the order
+     * A proof (screenshot or PDF) can go with it. The same transaction reference for the same method of
+     * payment, or the same proof file, is refused when another payment already holds it: money counted
+     * twice. The refusal is written to the audit log.
+     *
+     * @throws InvalidPayment when the payment is not allowed in the state of the order, or is a duplicate
      */
     public function handle(
         Order $order,
@@ -42,8 +51,86 @@ class RecordPayment
         ?string $payerName = null,
         ?string $payerPhone = null,
         ?int $collectedBy = null,
+        ?UploadedFile $proof = null,
     ): Payment {
-        return DB::transaction(function () use ($order, $kind, $amount, $method, $reference, $paidOn, $user, $reverses, $notes, $idempotencyKey, $payerName, $payerPhone, $collectedBy): Payment {
+        $proofPath = $proof === null ? null : $this->uploads->store($proof, 'payments');
+        $proofHash = $proofPath === null ? null : hash_file('sha256', Storage::disk('local')->path($proofPath));
+
+        try {
+            $payment = $this->record($order, $kind, $amount, $method, $reference, $paidOn, $user, $reverses, $notes, $idempotencyKey, $payerName, $payerPhone, $collectedBy, $proofPath, $proofHash ?: null);
+        } catch (Throwable $exception) {
+            if ($proofPath !== null) {
+                Storage::disk('local')->delete($proofPath);
+            }
+
+            // Two identical submissions at once: the unique index stopped the second one.
+            if ($exception instanceof UniqueConstraintViolationException) {
+                $exception = $this->duplicateOf($kind, $method, $reference, $proofHash ?: null) ?? $exception;
+            }
+
+            if ($exception instanceof InvalidPayment && isset($exception->params['receipt'])) {
+                AuditLog::record('payment.duplicate_refused', $order, [], [
+                    'field' => $exception->field,
+                    'existing_receipt' => $exception->params['receipt'],
+                    'amount' => $amount,
+                    'method' => $method->code,
+                ], $user);
+            }
+
+            throw $exception;
+        }
+
+        // A replayed request gives back the payment already recorded: the file just stored is not needed.
+        if ($proofPath !== null && $payment->proof_path !== $proofPath) {
+            Storage::disk('local')->delete($proofPath);
+        }
+
+        return $payment;
+    }
+
+    /**
+     * The payment that already holds this transaction reference or this proof, as the refusal to give.
+     */
+    private function duplicateOf(PaymentKind $kind, PaymentMethod $method, ?string $reference, ?string $proofHash): ?InvalidPayment
+    {
+        $key = $kind === PaymentKind::Refund ? null : Payment::referenceKey($reference);
+
+        $byReference = $key === null ? null : Payment::query()->with('order')
+            ->where('payment_method_id', $method->id)->where('reference_key', $key)->first();
+
+        if ($byReference !== null) {
+            return new InvalidPayment('reference', 'payments.errors.reference_duplicate', [
+                'receipt' => (string) $byReference->receipt_number,
+                'order' => (string) $byReference->order->reference,
+            ]);
+        }
+
+        $byProof = $proofHash === null ? null : Payment::query()->with('order')->where('proof_hash', $proofHash)->first();
+
+        return $byProof === null ? null : new InvalidPayment('proof', 'payments.errors.proof_duplicate', [
+            'receipt' => (string) $byProof->receipt_number,
+            'order' => (string) $byProof->order->reference,
+        ]);
+    }
+
+    private function record(
+        Order $order,
+        PaymentKind $kind,
+        int $amount,
+        PaymentMethod $method,
+        ?string $reference,
+        CarbonInterface $paidOn,
+        ?User $user = null,
+        ?Payment $reverses = null,
+        ?string $notes = null,
+        ?string $idempotencyKey = null,
+        ?string $payerName = null,
+        ?string $payerPhone = null,
+        ?int $collectedBy = null,
+        ?string $proofPath = null,
+        ?string $proofHash = null,
+    ): Payment {
+        return DB::transaction(function () use ($order, $kind, $amount, $method, $reference, $paidOn, $user, $reverses, $notes, $idempotencyKey, $payerName, $payerPhone, $collectedBy, $proofPath, $proofHash): Payment {
             $order = Order::query()->whereKey($order->id)->lockForUpdate()->firstOrFail();
             $netPaid = $order->netPaid();
 
@@ -65,6 +152,12 @@ class RecordPayment
                 $this->checkIncoming($order, $kind, $amount, $netPaid);
             }
 
+            $duplicate = $this->duplicateOf($kind, $method, $reference, $proofHash);
+
+            if ($duplicate !== null) {
+                throw $duplicate;
+            }
+
             $payment = Payment::create([
                 'receipt_number' => $this->numbers->next('receipt'),
                 'order_id' => $order->id,
@@ -72,6 +165,9 @@ class RecordPayment
                 'amount' => $amount,
                 'payment_method_id' => $method->id,
                 'reference' => $reference,
+                'reference_key' => $kind === PaymentKind::Refund ? null : Payment::referenceKey($reference),
+                'proof_path' => $proofPath,
+                'proof_hash' => $proofHash,
                 'payer_name' => $payerName,
                 'payer_phone' => $payerPhone,
                 'paid_on' => $paidOn->toDateString(),
@@ -89,6 +185,7 @@ class RecordPayment
                 'amount' => $amount,
                 'method' => $method->code,
                 'payer_name' => $payerName,
+                'has_proof' => $proofPath !== null,
                 'collected_by' => $payment->collected_by,
                 'reverses_payment_id' => $reverses?->id,
             ], $user);

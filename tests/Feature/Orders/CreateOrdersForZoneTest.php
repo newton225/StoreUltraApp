@@ -12,6 +12,7 @@ use App\Models\Order;
 use App\Models\Profile;
 use App\Models\User;
 use App\Models\Zone;
+use App\Support\BusinessSettings;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Support\SessionKey;
 
@@ -164,7 +165,7 @@ test('the creation page lists the zones of the active TPE and the TPE of the cho
         ->assertInertia(fn ($page) => $page
             ->where('zones', fn ($list) => collect($list)->pluck('name')->sort()->values()->all() === ['Fronan', 'Katiola'])
             ->has('candidates', 2)
-            ->where('candidates', fn ($list) => collect($list)->firstWhere('id', $a->id)['already'] === true && collect($list)->firstWhere('id', $b->id)['already'] === false));
+            ->where('candidates', fn ($list) => collect($list)->firstWhere('id', $a->id)['reason'] === 'already' && collect($list)->firstWhere('id', $b->id)['reason'] === null));
 });
 
 test('a user who cannot manage orders cannot create the batch', function () {
@@ -183,4 +184,41 @@ test('the final message only names what is not zero', function () {
     $toast = session(SessionKey::FLASH_DATA)['toast'];
 
     expect($toast['message'])->toBe('1 commande créée · 1 proforma émise · 1 TPE ignoré (a déjà une commande cette semaine)')->and($toast['type'])->toBe('success');
+});
+
+test('a TPE with an order that week is created again when the setting no longer leaves it aside', function () {
+    app(BusinessSettings::class)->set('batch_skip_clients_with_order', false);
+    $has = tpeIn('Fronan');
+    Order::factory()->for($has)->create(['delivery_week' => $this->week->toDateString(), 'status' => 'draft']);
+
+    $this->actingAs($this->owner)->post(route('orders.batch.store'), batchPayload([$has]))->assertSessionHasNoErrors();
+
+    expect(Order::where('client_id', $has->id)->count())->toBe(2);
+});
+
+test('a TPE that reaches the unpaid kits limit is left aside, listed with the reason, and not created', function () {
+    app(BusinessSettings::class)->set('batch_max_unpaid_kits', 5);
+    $owing = tpeIn('Fronan');
+    $fine = tpeIn('Fronan');
+    Order::factory()->for($owing)->create(['delivery_week' => $this->week->subWeek()->toDateString(), 'status' => 'delivered', 'kits_count' => 5, 'total_sale' => 100000]);
+    Order::factory()->for($fine)->create(['delivery_week' => $this->week->subWeek()->toDateString(), 'status' => 'delivered', 'kits_count' => 4, 'total_sale' => 100000]);
+
+    $this->actingAs($this->owner)->get(route('orders.create', ['mode' => 'zone', 'zone' => zoneNamed('Fronan')->id, 'batch_week' => $this->week->toDateString()]))
+        ->assertInertia(fn ($page) => $page
+            ->where('candidates', fn ($list) => collect($list)->firstWhere('id', $owing->id)['reason'] === 'unpaid'
+                && collect($list)->firstWhere('id', $owing->id)['unpaid_kits'] === 5
+                && collect($list)->firstWhere('id', $fine->id)['reason'] === null));
+
+    $this->actingAs($this->owner)->post(route('orders.batch.store'), batchPayload([$owing, $fine]))->assertSessionHasNoErrors();
+
+    expect(Order::where('client_id', $owing->id)->count())->toBe(1)->and(Order::where('client_id', $fine->id)->count())->toBe(2);
+});
+
+test('no unpaid kits limit by default', function () {
+    $owing = tpeIn('Fronan');
+    Order::factory()->for($owing)->create(['delivery_week' => $this->week->subWeek()->toDateString(), 'status' => 'delivered', 'kits_count' => 50, 'total_sale' => 100000]);
+
+    $this->actingAs($this->owner)->post(route('orders.batch.store'), batchPayload([$owing]))->assertSessionHasNoErrors();
+
+    expect(Order::where('client_id', $owing->id)->count())->toBe(2);
 });

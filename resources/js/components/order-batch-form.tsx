@@ -17,7 +17,8 @@ export type Candidate = {
     id: number;
     name: string;
     reference: string | null;
-    already: boolean;
+    reason: 'already' | 'unpaid' | null;
+    unpaid_kits: number;
 };
 
 type Props = {
@@ -79,7 +80,7 @@ export default function OrderBatchForm({
         );
     };
 
-    const free = candidates.filter((candidate) => !candidate.already);
+    const free = candidates.filter((candidate) => candidate.reason === null);
     const picked = free.filter((candidate) => !unticked.includes(candidate.id));
     const kit = kits.find((item) => String(item.id) === kitId);
 
@@ -313,14 +314,14 @@ export default function OrderBatchForm({
                             {candidates.map((candidate) => (
                                 <li key={candidate.id}>
                                     <label
-                                        className={`flex items-center gap-3 px-4 py-2 ${candidate.already ? 'text-muted-foreground' : 'cursor-pointer'}`}
+                                        className={`flex items-center gap-3 px-4 py-2 ${candidate.reason !== null ? 'text-muted-foreground' : 'cursor-pointer'}`}
                                     >
                                         <Checkbox
                                             checked={
-                                                !candidate.already &&
+                                                candidate.reason === null &&
                                                 !unticked.includes(candidate.id)
                                             }
-                                            disabled={candidate.already}
+                                            disabled={candidate.reason !== null}
                                             onCheckedChange={(checked) =>
                                                 toggle(
                                                     candidate.id,
@@ -339,9 +340,13 @@ export default function OrderBatchForm({
                                                 </span>
                                             )}
                                         </span>
-                                        {candidate.already && (
+                                        {candidate.reason !== null && (
                                             <span className="text-xs">
-                                                {t('orders.batch.already')}
+                                                {candidate.reason === 'already'
+                                                    ? t('orders.batch.already')
+                                                    : t('orders.batch.unpaid', {
+                                                          count: candidate.unpaid_kits,
+                                                      })}
                                             </span>
                                         )}
                                     </label>

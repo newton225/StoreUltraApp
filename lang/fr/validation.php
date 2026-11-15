@@ -191,6 +191,8 @@ return [
         'delivery_frequency' => 'rythme des livraisons',
         'advance_required' => 'avance obligatoire',
         'client_cap' => 'plafond de clients',
+        'batch_skip_clients_with_order' => 'TPE déjà commandées laissées de côté',
+        'batch_max_unpaid_kits' => 'limite de kits non soldés',
         'invoice_period' => 'période du bordereau',
         'week_starts_on' => 'premier jour de la semaine',
         'company_name' => 'nom de l\'entreprise',

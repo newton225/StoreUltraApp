@@ -10,6 +10,7 @@ return [
 
     'sections' => [
         'supply' => 'Fourniture',
+        'batch' => 'Commandes d\'une sous-préfecture en un coup',
         'rhythm' => 'Rythmes et facturation',
         'alerts' => 'Alertes et répartition',
         'numbering' => 'Numérotation des documents',
@@ -43,6 +44,10 @@ return [
         'advance_required' => 'Avance obligatoire avant la livraison',
         'delivery_signature_required' => 'Signature obligatoire à la livraison',
         'client_cap' => 'Plafond de clients (0 = aucune limite)',
+        'batch_skip_clients_with_order' => 'Laisser de côté les TPE qui ont déjà une commande cette semaine',
+        'batch_skip_clients_with_order_help' => 'Quand vous créez les commandes de toute une sous-préfecture, les TPE qui ont déjà une commande (non annulée) pour la semaine choisie sont décochés et ne sont pas recréés. Décoché : une TPE peut avoir plusieurs commandes la même semaine, et relancer la création en double les commandes.',
+        'batch_max_unpaid_kits' => 'Limite de kits non soldés par TPE (0 = aucune limite)',
+        'batch_max_unpaid_kits_help' => 'Quand vous créez les commandes de toute une sous-préfecture, une TPE dont le nombre de kits non soldés (commandes non annulées dont il reste quelque chose à payer) atteint cette limite est laissée de côté. Exemple : avec 6, une TPE qui doit encore 6 kits n\'est pas incluse. Cela ne concerne que la création en groupe : une commande créée pour un seul client n\'est jamais bloquée.',
         'order_lead_days' => 'Jours d\'avance pour créer les commandes',
         'order_lead_days_help' => 'Les commandes sont créées ce nombre de jours avant leur semaine',
         'client_cap_help' => 'Par défaut, le nombre de clients n\'est pas limité (0). Si vous fixez un plafond, un avertissement s\'affiche au-delà, rien n\'est bloqué',

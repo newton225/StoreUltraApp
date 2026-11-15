@@ -15,6 +15,8 @@ return [
         'refund_too_high' => 'A refund cannot be more than what was paid.',
         'reversal_invalid' => 'This payment cannot be reversed.',
         'reversal_amount' => 'A reversal must cancel the whole payment.',
+        'reference_duplicate' => 'This reference is already recorded on receipt :receipt (order :order): the same payment cannot be counted twice.',
+        'proof_duplicate' => 'This proof (screenshot or PDF) is already attached to receipt :receipt (order :order): the same payment cannot be counted twice.',
     ],
 
     'kinds' => [
@@ -53,7 +55,10 @@ return [
 
     'panel' => [
         'kind_help' => 'Advance: paid before delivery. Balance: what is paid at delivery. Refund: money given back to the client.',
-        'reference_help' => 'Number of the transaction (mobile money, cheque, transfer…) to find this payment again.',
+        'reference_help' => 'Number of the transaction (mobile money, cheque, transfer…) to find this payment again. The same reference can be used only once for a given method of payment.',
+        'proof' => 'Proof of payment (screenshot or PDF, optional)',
+        'proof_help' => 'Screenshot of the transfer, photo of the receipt or PDF. The same proof can be attached to one payment only.',
+        'proof_open' => 'View the proof',
         'title' => 'Payments',
         'paid' => 'Paid',
         'to_pay' => 'Left to pay',

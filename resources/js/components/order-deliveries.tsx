@@ -29,6 +29,8 @@ export type OrderDeliveriesData = {
     remaining_kits: number;
     can_deliver: boolean;
     signature_required: boolean;
+    /** The manager of the client: filled in by default, the person delivering can replace it. */
+    default_receiver: string | null;
     is_agent: boolean;
     agents: { id: number; name: string }[];
 };
@@ -150,6 +152,10 @@ export default function OrderDeliveries({
                                             <Input
                                                 id="received_by"
                                                 name="received_by"
+                                                defaultValue={
+                                                    delivery.default_receiver ??
+                                                    ''
+                                                }
                                                 required
                                             />
                                             <InputError

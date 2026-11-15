@@ -13,6 +13,8 @@ use App\Models\Kit;
 use App\Models\Order;
 use App\Models\User;
 use App\Models\Zone;
+use App\Support\BusinessSettings;
+use App\Support\ClientReceivables;
 use App\Support\WeekCalendar;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
@@ -22,9 +24,9 @@ use Illuminate\Support\Facades\DB;
 /**
  * Creates, in one go, the order of a week for the small businesses (TPE) of a zone (sub-prefecture), as the form
  * of a single order does one by one: same kit rules, same frozen prices, same trace. Only active clients the user
- * may see are concerned, and the server rechecks every one of them. A TPE that already has an order for that week
- * is left alone, so running it again creates nothing; a failure on one TPE does not stop the others. The
- * proformas can be issued at the same time.
+ * may see are concerned, and the server rechecks every one of them. Two settings decide who is left aside: a TPE
+ * that already has an order for that week (so running it again creates nothing), and a TPE whose unpaid kits reach
+ * the limit; a failure on one TPE does not stop the others. The proformas can be issued at the same time.
  */
 class CreateOrdersForZone
 {
@@ -32,27 +34,47 @@ class CreateOrdersForZone
         private readonly CreateOrder $createOrder,
         private readonly IssueProformasForZone $proformas,
         private readonly WeekCalendar $calendar,
+        private readonly BusinessSettings $settings,
+        private readonly ClientReceivables $receivables,
     ) {}
 
     /**
-     * The active TPE of a zone the user may see, with whether each already has an order for the week.
+     * The active TPE of a zone the user may see, with the reason each one is left aside, if it is:
+     * `already` (an order for the week, when the setting asks for it) or `unpaid` (too many unpaid kits).
      *
-     * @return Collection<int, array{id: int, name: string, reference: string|null, already: bool}>
+     * @return Collection<int, array{id: int, name: string, reference: string|null, reason: 'already'|'unpaid'|null, unpaid_kits: int}>
      */
     public function candidates(int $zoneId, ?CarbonInterface $week, User $user): Collection
     {
         $start = $week === null ? null : $this->calendar->startOf($week);
+        $clients = $this->eligible($zoneId, $user)->orderBy('name')->get(['id', 'name', 'reference']);
+        $unpaid = $this->receivables->unpaidKits($clients->pluck('id')->map(fn (mixed $id): int => (int) $id)->values()->all());
 
-        return $this->eligible($zoneId, $user)
-            ->orderBy('name')
-            ->get(['id', 'name', 'reference'])
+        return $clients
             ->map(fn (Client $client): array => [
                 'id' => $client->id,
                 'name' => $client->name,
                 'reference' => $client->reference,
-                'already' => $start !== null && $this->hasOrderFor($client->id, $start),
+                'reason' => $this->reasonToLeaveAside($client->id, $start, $unpaid[$client->id] ?? 0),
+                'unpaid_kits' => $unpaid[$client->id] ?? 0,
             ])
             ->values();
+    }
+
+    /**
+     * Why a TPE is not given the order of the week, according to the settings; null when it is.
+     *
+     * @return 'already'|'unpaid'|null
+     */
+    private function reasonToLeaveAside(int $clientId, ?CarbonInterface $weekStart, int $unpaidKits): ?string
+    {
+        if ($weekStart !== null && $this->settings->get('batch_skip_clients_with_order') && $this->hasOrderFor($clientId, $weekStart)) {
+            return 'already';
+        }
+
+        $limit = (int) $this->settings->get('batch_max_unpaid_kits');
+
+        return $limit > 0 && $unpaidKits >= $limit ? 'unpaid' : null;
     }
 
     /**
@@ -99,7 +121,7 @@ class CreateOrdersForZone
                     // The client row is locked so that two requests at once cannot both create the order of the week.
                     Client::query()->whereKey($client->id)->lockForUpdate()->first();
 
-                    if ($this->hasOrderFor($client->id, $start)) {
+                    if ($this->reasonToLeaveAside($client->id, $start, $this->receivables->unpaidKits([$client->id])[$client->id] ?? 0) !== null) {
                         return null;
                     }
 

@@ -10,6 +10,7 @@ return [
 
     'sections' => [
         'supply' => 'Supply',
+        'batch' => 'Orders for a whole sub-prefecture at once',
         'rhythm' => 'Rhythms and invoicing',
         'alerts' => 'Alerts and cost sharing',
         'numbering' => 'Document numbering',
@@ -43,6 +44,10 @@ return [
         'advance_required' => 'Advance required before delivery',
         'delivery_signature_required' => 'Signature required at delivery',
         'client_cap' => 'Client cap (0 = no limit)',
+        'batch_skip_clients_with_order' => 'Leave aside the TPE that already have an order this week',
+        'batch_skip_clients_with_order_help' => 'When you create the orders of a whole sub-prefecture, the TPE that already have an order (not cancelled) for the chosen week are unticked and not created again. Unticked: a TPE can have several orders in the same week, and running the creation again duplicates the orders.',
+        'batch_max_unpaid_kits' => 'Limit of unpaid kits per TPE (0 = no limit)',
+        'batch_max_unpaid_kits_help' => 'When you create the orders of a whole sub-prefecture, a TPE whose number of unpaid kits (kits of non-cancelled orders with something left to pay) reaches this limit is left aside. Example: with 6, a TPE that still owes 6 kits is not included. This only applies to the group creation: an order created for a single client is never blocked.',
         'order_lead_days' => 'Days ahead for creating orders',
         'order_lead_days_help' => 'Orders are created this many days before their week',
         'client_cap_help' => 'By default the number of clients is not limited (0). If you set a cap, a warning is shown beyond it, nothing is blocked',

@@ -15,6 +15,8 @@ return [
         'refund_too_high' => 'Un remboursement ne peut pas dépasser ce qui a été payé.',
         'reversal_invalid' => 'Ce paiement ne peut pas être annulé.',
         'reversal_amount' => 'Une annulation doit porter sur la totalité du paiement.',
+        'reference_duplicate' => 'Cette référence est déjà enregistrée sur le reçu :receipt (commande :order) : le même paiement ne peut pas être compté deux fois.',
+        'proof_duplicate' => 'Cette preuve (capture ou PDF) est déjà associée au reçu :receipt (commande :order) : le même paiement ne peut pas être compté deux fois.',
     ],
 
     'kinds' => [
@@ -53,7 +55,10 @@ return [
 
     'panel' => [
         'kind_help' => 'Avance : versée avant la livraison. Relicat : solde payé à la livraison. Remboursement : argent rendu au client.',
-        'reference_help' => 'Numéro de la transaction (Mobile Money, chèque, virement…) pour retrouver ce paiement.',
+        'reference_help' => 'Numéro de la transaction (Mobile Money, chèque, virement…) pour retrouver ce paiement. Une même référence ne peut servir qu\'une fois pour un même mode de paiement.',
+        'proof' => 'Preuve de paiement (capture ou PDF, facultatif)',
+        'proof_help' => 'Capture d\'écran du transfert, photo du reçu ou PDF. Une même preuve ne peut être associée qu\'à un seul paiement.',
+        'proof_open' => 'Voir la preuve',
         'title' => 'Paiements',
         'paid' => 'Payé',
         'to_pay' => 'Reste à payer',

@@ -105,14 +105,12 @@ test('a delivery is rejected for invalid data', function (Closure $mutate, strin
     'missing date' => [fn (array $p) => [...$p, 'delivered_on' => ''], 'delivered_on'],
     'future date' => [fn (array $p) => [...$p, 'delivered_on' => today()->addDay()->toDateString()], 'delivered_on'],
     'nobody received' => [fn (array $p) => [...$p, 'received_by' => ''], 'received_by'],
-    'no signature' => [fn (array $p) => [...$p, 'signature' => null], 'signature'],
     'not an image' => [fn (array $p) => [...$p, 'signature' => 'hello'], 'signature'],
     'not a png' => [fn (array $p) => [...$p, 'signature' => 'data:image/png;base64,'.base64_encode('not really an image')], 'signature'],
     'too heavy' => [fn (array $p) => [...$p, 'signature' => 'data:image/png;base64,'.str_repeat('A', 800000)], 'signature'],
 ]);
 
-test('the signature is optional when the setting says so', function () {
-    app(BusinessSettings::class)->set('delivery_signature_required', false);
+test('the signature is optional by default', function () {
     $order = deliverableOrder();
 
     $this->actingAs($this->employee)
@@ -345,4 +343,14 @@ test('a signed delivery keeps its signature file next to its row', function () {
     expect($delivery->refresh()->signature_path)->toBe("signatures/delivery-{$delivery->id}.png");
     Storage::disk('local')->assertExists($delivery->signature_path);
     expect($delivery->signed_at)->not->toBeNull();
+});
+
+test('the signature is required when the setting says so', function () {
+    app(BusinessSettings::class)->set('delivery_signature_required', true);
+
+    $this->actingAs($this->employee)
+        ->post(route('orders.deliveries.store', deliverableOrder()), deliveryPayload(['signature' => null]))
+        ->assertSessionHasErrors('signature');
+
+    expect(Delivery::count())->toBe(0);
 });

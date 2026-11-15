@@ -40,6 +40,8 @@ type ListedOrder = {
     total_sale: number;
     advance_due: number;
     advance_paid: number;
+    /** What is still to pay on the order, advance and balance together. */
+    remaining: number;
     proforma_document: number | null;
     invoice_document: number | null;
 };
@@ -491,6 +493,18 @@ export default function OrdersIndex({
                                                     )}
                                                 </span>
                                             )}
+                                            {order.remaining > 0 && (
+                                                <div className="text-xs text-muted-foreground">
+                                                    {t(
+                                                        'orders.advance_cell.remaining',
+                                                        {
+                                                            amount: money(
+                                                                order.remaining,
+                                                            ),
+                                                        },
+                                                    )}
+                                                </div>
+                                            )}
                                         </td>
                                         <td className="px-4 py-2">
                                             <StatusBadge
@@ -518,6 +532,7 @@ export default function OrdersIndex({
                                                             asChild
                                                             variant="outline"
                                                             size="sm"
+                                                            className="h-7 gap-1 px-2 text-xs [&_svg:not([class*='size-'])]:size-3.5"
                                                         >
                                                             <a
                                                                 href={download.url(

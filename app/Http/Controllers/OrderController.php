@@ -13,6 +13,7 @@ use App\Enums\PermissionAction;
 use App\Exceptions\OrderPricesMissing;
 use App\Http\Requests\StoreOrderRequest;
 use App\Models\Client;
+use App\Models\ClientMember;
 use App\Models\Delivery;
 use App\Models\Document;
 use App\Models\ExpenseAllocation;
@@ -76,6 +77,7 @@ class OrderController extends Controller
             ...$this->listed($order),
             'advance_due' => $order->advance_due,
             'advance_paid' => min((int) $paid->get($order->id, 0), $order->advance_due),
+            'remaining' => $order->status === OrderStatus::Cancelled ? 0 : max(0, $order->total_sale - (int) $paid->get($order->id, 0)),
             'proforma_document' => $documents['proforma'][$order->id] ?? null,
             'invoice_document' => $documents['invoice'][$order->id] ?? null,
         ]);
@@ -247,6 +249,7 @@ class OrderController extends Controller
                         ? null
                         : $order->payments->firstWhere('id', $payment->reverses_payment_id)?->receipt_number,
                     'reversed' => in_array($payment->id, $reversedIds, true),
+                    'has_proof' => $payment->proof_path !== null,
                 ])->values(),
                 'net_paid' => $netPaid,
                 'balance_due' => max(0, $order->total_sale - $netPaid),
@@ -277,6 +280,8 @@ class OrderController extends Controller
                 'remaining_kits' => $remainingKits,
                 'can_deliver' => $order->status === OrderStatus::Received && $remainingKits > 0 && Gate::allows('orders.record_delivery'),
                 'signature_required' => (bool) $settings->get('delivery_signature_required'),
+                'default_receiver' => $order->client?->members()->where('role', ClientMember::ROLE_MANAGER)->value('name')
+                    ?? Client::query()->whereKey($order->client_id)->value('contact_person'),
                 'is_agent' => $isAgent,
                 'agents' => $isAgent
                     ? []

@@ -212,11 +212,11 @@ immuables) : à utiliser dans une base réservée aux démonstrations.
 - Modifier la livraison automatique ne change que les **commandes à venir**.
 - **Création en lot par sous-préfecture** (écran « Nouvelle commande », onglet **Toute une sous-préfecture**) : on choisit la sous-préfecture (le nombre de
   TPE actifs est indiqué), le kit, le nombre de kits, la semaine de livraison et l'avance, comme pour une commande seule. L'écran liste
-  les **TPE actifs** de la sous-préfecture, tous cochés ; ceux qui ont déjà une commande cette semaine-là sont affichés, grisés, non cochables.
+  les **TPE actifs** de la sous-préfecture, tous cochés ; ceux qui sont écartés sont affichés, grisés, non cochables, avec la raison. Deux **paramètres** règlent qui est écarté : (1) « Laisser de côté les TPE qui ont déjà une commande cette semaine » (activé par défaut ; désactivé, une TPE peut avoir plusieurs commandes la même semaine et relancer la création double les commandes) ; (2) « Limite de kits non soldés par TPE » (0 = aucune limite, par défaut) : une TPE dont les kits non soldés (commandes non annulées dont il reste quelque chose à payer) atteignent la limite est écartée. Cette limite ne concerne que la création en lot : une commande créée pour un seul client n'est jamais bloquée par une dette.
   Une case **« Émettre aussi les proformas »** (cochée par défaut) fait passer chaque commande à « Proforma émis » avec son document.
   Une phrase résume ce qui va se passer, la confirmation annonce le nombre, et le message final ne nomme que ce qui n'est pas zéro
   (« 4 commandes créées · 4 proformas émises »). Chaque commande est créée avec les prix du jour figés, comme une commande seule, et tracée
-  (une ligne d'audit par commande, avec la sous-préfecture et la taille du groupe (la localité, ou village, reste un simple champ de la fiche client, non utilisé pour grouper)). Relancer ne crée rien de plus (une commande non annulée
+  (une ligne d'audit par commande, avec la sous-préfecture et la taille du groupe (la localité, ou village, reste un simple champ de la fiche client, non utilisé pour grouper)). Avec le réglage par défaut, relancer ne crée rien de plus (une commande non annulée
   de la semaine suffit à ignorer le TPE) ; une erreur sur un TPE n'arrête pas les autres ; 60 TPE au plus à la fois. Seuls les clients
   actifs que l'utilisateur a le droit de voir sont concernés, et le serveur revérifie chacun. Le panneau « Proformas par sous-préfecture » de la
   page Commandes reste utile pour émettre plus tard les proformas de brouillons déjà créés.
@@ -249,6 +249,12 @@ Les **factures restent générées individuellement**.
   représentant, avec son téléphone), **qui a encaissé** (la personne de l'équipe qui a reçu l'argent, par défaut
   celle qui est connectée ; l'agent de terrain encaisse toujours pour lui-même) et **qui l'a enregistré** dans
   l'application (toujours le compte connecté). Les trois figurent dans l'onglet Paiements, et sur le reçu.
+- Une **preuve de paiement** (capture d'écran, photo du reçu ou PDF, facultative) peut être jointe à un paiement ; elle est
+  stockée en privé, ouverte par un lien tracé dans le journal d'audit, visible par qui peut voir la commande. **Doublons
+  refusés** : une même **référence de transaction** (comparée sans espaces, signes ni majuscules) ne peut servir qu'une fois
+  pour un même mode de paiement, et un même **fichier de preuve** (empreinte du fichier) ne peut être associé qu'à un seul
+  paiement, toutes commandes confondues. Le message nomme le reçu et la commande qui la détiennent, et le refus est tracé
+  (`payment.duplicate_refused`). L'annulation d'un paiement reprend sa référence sans être un doublon.
 - Un versement ne se supprime pas : une erreur se corrige par une **écriture inverse** tracée.
 - Retard : tableau des avances en retard par client et par sous-préfecture.
 
@@ -475,7 +481,7 @@ Règles communes :
 - **Numérotation** : préfixe, année et séquence sans trou, par exemple `PRO-2026-0001`. Préfixe, format et
   remise à zéro annuelle sont paramétrables. Un numéro n'est jamais réutilisé.
 - Un document **émis** n'est plus modifiable : on l'**annule** et on en émet un nouveau, avec renvoi.
-- La **signature** est capturée à l'écran (mobile ou tablette) et intégrée au PDF, avec date, heure et agent.
+- La **signature** est capturée à l’écran (mobile ou tablette) et intégrée au PDF, avec date, heure et agent. Elle est **facultative par défaut** ; le réglage « Signature obligatoire à la livraison » (Paramètres) la rend obligatoire.
 - Un modèle de document existant (logo, mentions légales) sera repris tel quel s'il est fourni.
 
 ## 7. Paramètres

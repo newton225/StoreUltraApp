@@ -26,6 +26,7 @@ class SecurityHeaders
         'deliveries.signature',
         'documents.download',
         'expenses.proof',
+        'payments.proof',
         'exports.show',
         'invitation.show',
         'list-exports.show',
